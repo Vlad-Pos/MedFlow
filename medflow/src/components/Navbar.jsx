@@ -29,7 +29,7 @@ export default function Navbar() {
     <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 text-lg font-semibold">
-          <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#9e85b0' }} />
+          <img src="/src/assets/medflow-logo.svg" alt="MedFlow" className="h-6 w-6" />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">

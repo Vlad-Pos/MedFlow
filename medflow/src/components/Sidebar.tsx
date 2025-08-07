@@ -4,7 +4,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="mb-4 flex items-center gap-2 px-2">
-        <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#9e85b0' }} />
+        <img src="/src/assets/medflow-logo.svg" alt="MedFlow" className="h-6 w-6" />
         <span className="text-lg font-semibold">MedFlow</span>
       </div>
       <nav className="flex flex-col gap-1">

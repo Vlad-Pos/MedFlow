@@ -7,6 +7,7 @@ import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestor
 import { db } from '../services/firebase'
 import { useAuth } from '../providers/AuthProvider'
 import { Link, useNavigate } from 'react-router-dom'
+import EventCard from '../components/EventCard'
 
 const locales = { 'ro': ro }
 const localizer = dateFnsLocalizer({
@@ -19,7 +20,10 @@ const localizer = dateFnsLocalizer({
 
 interface CalendarEvent extends Event {
   id: string
+  start: Date
+  end: Date
   status: 'scheduled' | 'completed' | 'no_show'
+  patientName: string
 }
 
 export default function Dashboard() {
@@ -43,12 +47,14 @@ export default function Dashboard() {
     const unsub = onSnapshot(q, (snap) => {
       const rows: CalendarEvent[] = snap.docs.map((d) => {
         const data = d.data() as any
+        const dt = new Date(data.dateTime?.toDate?.() || data.dateTime)
         return {
           id: d.id,
-          title: `${data.patientName} (${data.status === 'scheduled' ? 'Programat' : data.status === 'completed' ? 'Finalizat' : 'Nu s-a prezentat'})`,
-          start: new Date(data.dateTime?.toDate?.() || data.dateTime),
-          end: new Date(new Date(data.dateTime?.toDate?.() || data.dateTime).getTime() + 30 * 60000),
+          title: data.patientName,
+          start: dt,
+          end: new Date(dt.getTime() + 30 * 60000),
           status: data.status,
+          patientName: data.patientName,
           allDay: false,
         }
       })
@@ -57,18 +63,20 @@ export default function Dashboard() {
     return () => unsub()
   }, [user])
 
-  const eventPropGetter = useMemo(() => (event: CalendarEvent) => {
-    let style = {}
-    if (event.status === 'scheduled') style = { backgroundColor: '#3B82F6', color: 'white', borderRadius: 8, padding: 4 }
-    if (event.status === 'completed') style = { backgroundColor: '#10B981', color: 'white', borderRadius: 8, padding: 4 }
-    if (event.status === 'no_show') style = { backgroundColor: '#EF4444', color: 'white', borderRadius: 8, padding: 4 }
-    return { style }
+  const eventPropGetter = useMemo(() => (_event: CalendarEvent) => {
+    return { style: { background: 'transparent', border: 'none', padding: 0 } }
   }, [])
 
-  async function handleSelectEvent(e: CalendarEvent) {
-    navigate(`/appointments?edit=${e.id}`)
+  function components() {
+    return {
+      event: ({ event }: { event: CalendarEvent }) => {
+        const time = `${event.start.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} - ${event.end.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })}`
+        return <EventCard title={event.patientName} status={event.status} time={time} />
+      }
+    }
   }
 
+  function handleSelectEvent(e: CalendarEvent) { navigate(`/appointments?edit=${e.id}`) }
   function handleSelectSlot(slot: any) {
     const start = slot.start as Date
     const iso = new Date(start.getTime() - start.getTimezoneOffset()*60000).toISOString().slice(0,16)
@@ -78,7 +86,7 @@ export default function Dashboard() {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Program săptămânal</h2>
+        <h2 className="text-2xl font-semibold text-gray-100">Program săptămânal</h2>
         <Link className="btn-primary" to="/appointments">Gestionează programările</Link>
       </div>
       <div className="card">
@@ -96,6 +104,7 @@ export default function Dashboard() {
           onSelectSlot={handleSelectSlot}
           style={{ height: 600 }}
           eventPropGetter={eventPropGetter}
+          components={components()}
           messages={{
             next: 'Următor', previous: 'Anterior', today: 'Azi', month: 'Lună', week: 'Săptămână', day: 'Zi', agenda: 'Agendă'
           }}
