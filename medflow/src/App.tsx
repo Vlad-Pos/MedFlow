@@ -1,14 +1,14 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Landing from './pages/Landing'
-import SignIn from './pages/auth/SignIn'
-import SignUp from './pages/auth/SignUp'
-import ResetPassword from './pages/auth/ResetPassword'
+import SignIn from './auth/SignIn'
+import SignUp from './auth/SignUp'
+import ResetPassword from './auth/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Appointments from './pages/Appointments'
 import Profile from './pages/Profile'
 import ChatbotPlaceholder from './components/ChatbotPlaceholder'
-import PrivateRoute from './routes/PrivateRoute'
+import ProtectedRoute from './auth/ProtectedRoute'
 
 function App() {
   return (
@@ -21,7 +21,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/reset" element={<ResetPassword />} />
 
-          <Route element={<PrivateRoute />}> 
+          <Route element={<ProtectedRoute />}> 
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/profile" element={<Profile />} />
