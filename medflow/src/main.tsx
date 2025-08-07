@@ -5,12 +5,15 @@ import './index.css'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import App from './App'
 import { AuthProvider } from './providers/AuthProvider'
+import { ToastProvider } from './components/ToastProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

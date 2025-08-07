@@ -98,9 +98,9 @@ export default function Appointments() {
                 <DocumentUpload appointmentId={selectedId} />
                 <div className="mt-3 space-y-2">
                   {(docs[selectedId] || []).map(d => (
-                    <div key={d.id} className="flex items-center justify-between rounded border border-gray-200 p-2 text-sm dark:border-gray-800">
-                      <a href={d.fileUrl} target="_blank" className="link">{d.fileName}</a>
-                      <span className="text-xs text-gray-500">{new Date(d.createdAt?.toDate?.() || d.createdAt).toLocaleString('ro-RO')}</span>
+                    <div key={d.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-2 text-sm text-gray-100">
+                      <a href={(d as any).fileURL || (d as any).fileUrl} target="_blank" className="hover:underline">{(d as any).fileName}</a>
+                      <span className="text-xs text-gray-300">{new Date((d as any).uploadedAt?.toDate?.() || (d as any).createdAt || Date.now()).toLocaleString('ro-RO')}</span>
                     </div>
                   ))}
                   {(docs[selectedId]?.length || 0) === 0 && <div className="text-sm text-gray-500">Nu există documente încărcate.</div>}

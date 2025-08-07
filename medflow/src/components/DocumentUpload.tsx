@@ -1,26 +1,61 @@
-import { useState } from 'react'
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { useEffect, useState } from 'react'
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage, db } from '../services/firebase'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
-import LoadingSpinner from './LoadingSpinner'
+import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore'
 import { useAuth } from '../providers/AuthProvider'
+import ConfirmModal from './ConfirmModal'
+import { useToast } from './ToastProvider'
+
+interface DocMeta { id: string; fileName: string; fileType: string; fileURL: string; uploadedBy: string; uploadedAt?: any; storagePath?: string }
 
 export default function DocumentUpload({ appointmentId }: { appointmentId: string }) {
   const { user } = useAuth()
+  const { showToast } = useToast()
   const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [docs, setDocs] = useState<DocMeta[]>([])
+  const [toDelete, setToDelete] = useState<DocMeta | null>(null)
+
+  useEffect(() => {
+    const q = query(collection(db, 'documents'), where('appointmentId', '==', appointmentId), orderBy('uploadedAt', 'desc'))
+    const unsub = onSnapshot(q, (snap) => {
+      const d = snap.docs.map(dd => ({ id: dd.id, ...(dd.data() as any) })) as DocMeta[]
+      setDocs(d)
+    })
+    return () => unsub()
+  }, [appointmentId])
+
+  async function handleDelete(meta: DocMeta) {
+    try {
+      await deleteDoc(doc(db, 'documents', meta.id))
+      if (meta.storagePath) {
+        await deleteObject(ref(storage, meta.storagePath))
+      }
+      showToast('Document șters.', 'success')
+    } catch {
+      showToast('Ștergerea a eșuat.', 'error')
+    } finally {
+      setToDelete(null)
+    }
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file || !user) return
-    if (!['application/pdf', 'image/jpeg', 'image/jpg', 'image/pjpeg'].includes(file.type)) {
+
+    // Validate type
+    const allowed = ['application/pdf', 'image/jpeg']
+    if (!allowed.includes(file.type)) {
       setError('Doar PDF sau JPEG sunt permise.')
       return
     }
-    setError(null)
-    setSuccess(null)
+    // Validate size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Fișierul depășește limita de 10MB.')
+      return
+    }
 
+    setError(null)
     const path = `appointments/${appointmentId}/${Date.now()}_${file.name}`
     const storageRef = ref(storage, path)
     const task = uploadBytesResumable(storageRef, file)
@@ -28,32 +63,65 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
     task.on('state_changed', (snap) => {
       const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
       setProgress(pct)
-    }, (_err) => {
+    }, () => {
       setError('Încărcarea a eșuat.')
       setProgress(null)
     }, async () => {
       const url = await getDownloadURL(task.snapshot.ref)
       await addDoc(collection(db, 'documents'), {
         appointmentId,
-        uploaderId: user.uid,
-        fileUrl: url,
         fileName: file.name,
-        contentType: file.type,
-        size: file.size,
-        createdAt: serverTimestamp(),
+        fileType: file.type === 'application/pdf' ? 'pdf' : 'jpeg',
+        fileURL: url,
+        uploadedBy: user.uid,
+        uploadedAt: serverTimestamp(),
+        storagePath: path,
       })
-      setSuccess('Document încărcat cu succes!')
       setProgress(null)
+      showToast('Document încărcat cu succes!', 'success')
     })
   }
 
   return (
-    <div className="space-y-2">
-      <label className="label">Încărcați document (PDF/JPEG)</label>
-      <input type="file" accept="application/pdf,image/jpeg" onChange={handleFileChange} />
-      {progress !== null && <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"><LoadingSpinner /> {progress}%</div>}
-      {error && <div className="text-sm text-red-600">{error}</div>}
-      {success && <div className="text-sm text-emerald-600">{success}</div>}
+    <div className="space-y-3">
+      <div>
+        <label className="label">Încărcați documente (PDF/JPEG)</label>
+        <div className="flex items-center gap-3">
+          <input type="file" accept="application/pdf,image/jpeg" onChange={handleFileChange} />
+          {progress !== null && (
+            <div className="flex w-56 items-center gap-2">
+              <div className="h-2 w-full overflow-hidden rounded bg-white/10">
+                <div className="h-full bg-[var(--medflow-primary)]" style={{ width: `${progress}%` }} />
+              </div>
+              <span className="text-xs text-gray-200/90">{progress}%</span>
+            </div>
+          )}
+        </div>
+        {error && <div className="mt-2 text-sm text-red-300">{error}</div>}
+      </div>
+
+      <div className="space-y-2">
+        {docs.map(d => (
+          <div key={d.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-2 text-sm text-gray-100 shadow-sm">
+            <a href={d.fileURL} target="_blank" className="truncate hover:underline">{d.fileName}</a>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-300">{d.uploadedAt?.toDate?.() ? new Date(d.uploadedAt.toDate()).toLocaleString('ro-RO') : ''}</span>
+              <button className="btn-ghost" onClick={() => setToDelete(d)}>Șterge</button>
+            </div>
+          </div>
+        ))}
+        {docs.length === 0 && <div className="text-sm text-gray-300">Nu există documente încărcate.</div>}
+      </div>
+
+      <ConfirmModal
+        open={!!toDelete}
+        title="Șterge documentul?"
+        message="Această acțiune este permanentă. Continuați?"
+        confirmText="Șterge"
+        cancelText="Anulează"
+        onConfirm={() => toDelete && handleDelete(toDelete)}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   )
 }
