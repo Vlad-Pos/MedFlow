@@ -26,16 +26,16 @@ export default function Navbar() {
   }
 
   return (
-    <header className="border-b border-gray-200 bg-white/60 backdrop-blur dark:border-gray-800 dark:bg-gray-950/60">
+    <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 text-lg font-semibold">
-          <span className="h-2 w-2 rounded-full bg-blue-600"></span>
+          <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: '#9e85b0' }} />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <NavLink to="/dashboard" className={({isActive})=> isActive ? 'text-blue-600' : ''}>Tablou de bord</NavLink>
-          <NavLink to="/appointments" className={({isActive})=> isActive ? 'text-blue-600' : ''}>Programări</NavLink>
-          <NavLink to="/profile" className={({isActive})=> isActive ? 'text-blue-600' : ''}>Profil</NavLink>
+          <NavLink to="/dashboard" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Tablou de bord</NavLink>
+          <NavLink to="/appointments" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Programări</NavLink>
+          <NavLink to="/profile" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Profil</NavLink>
           <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
           {user ? (
             <button className="btn-primary" onClick={handleLogout}>Delogare</button>
@@ -51,7 +51,7 @@ export default function Navbar() {
         </button>
       </div>
       {open && (
-        <div className="border-t border-gray-200 px-4 py-3 dark:border-gray-800 md:hidden">
+        <div className="border-t border-white/10 px-4 py-3 md:hidden">
           <div className="flex flex-col gap-3">
             <NavLink to="/dashboard" onClick={()=>setOpen(false)}>Tablou de bord</NavLink>
             <NavLink to="/appointments" onClick={()=>setOpen(false)}>Programări</NavLink>
