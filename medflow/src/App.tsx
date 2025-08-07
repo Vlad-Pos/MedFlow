@@ -10,6 +10,7 @@ import Appointments from './pages/Appointments'
 import Profile from './pages/Profile'
 import ChatbotPlaceholder from './components/ChatbotPlaceholder'
 import ProtectedRoute from './auth/ProtectedRoute'
+import AIAssistant from './pages/AIAssistant'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Route path="/appointments" element={<Appointments />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/chatbot" element={<ChatbotPlaceholder />} />
+              <Route path="/ai" element={<AIAssistant />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

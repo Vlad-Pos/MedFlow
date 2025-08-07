@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Timestamp, addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../providers/AuthProvider'
+import { getNextAvailableSlots } from '../utils/slotSuggestions'
 
 export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
@@ -102,6 +103,22 @@ export default function AppointmentForm({ appointmentId, onSaved }: { appointmen
         </select>
       </div>
       <button className="btn-secondary">Salvează</button>
+
+      {!appointmentId && (
+        <div className="pt-2">
+          <div className="mb-2 text-sm text-gray-200/90">Sugestii sloturi (demo):</div>
+          <div className="flex flex-wrap gap-2">
+            {getNextAvailableSlots().map((s, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="btn-ghost"
+                onClick={() => setDateTime(new Date(s.date.getTime() - s.date.getTimezoneOffset()*60000).toISOString().slice(0,16))}
+              >{s.label}</button>
+            ))}
+          </div>
+        </div>
+      )}
     </form>
   )
 }

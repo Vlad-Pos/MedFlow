@@ -36,6 +36,7 @@ export default function Navbar() {
           <NavLink to="/dashboard" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Tablou de bord</NavLink>
           <NavLink to="/appointments" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Programări</NavLink>
           <NavLink to="/profile" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Profil</NavLink>
+          <NavLink to="/ai" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Asistent AI</NavLink>
           <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
           {user ? (
             <button className="btn-primary" onClick={handleLogout}>Delogare</button>
@@ -56,6 +57,7 @@ export default function Navbar() {
             <NavLink to="/dashboard" onClick={()=>setOpen(false)}>Tablou de bord</NavLink>
             <NavLink to="/appointments" onClick={()=>setOpen(false)}>Programări</NavLink>
             <NavLink to="/profile" onClick={()=>setOpen(false)}>Profil</NavLink>
+            <NavLink to="/ai" onClick={()=>setOpen(false)}>Asistent AI</NavLink>
             <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
             {user ? (
               <button className="btn-primary" onClick={async ()=>{await handleLogout(); setOpen(false)}}>Delogare</button>
