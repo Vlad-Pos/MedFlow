@@ -1,11 +1,23 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #9e85b0;
+  --color-primary-alt: #9479a8;
+  --color-secondary: #414a69;
+  --color-secondary-2: #283256;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --shadow-soft: 0 8px 30px rgba(0,0,0,0.12);
+}
+
 :root {
   --medflow-bg: #4c5165;
-  --medflow-primary: #9e85b0;
-  --medflow-primary-alt: #9479a8;
-  --medflow-secondary-1: #414a69;
-  --medflow-secondary-2: #283256;
+  --medflow-primary: var(--color-primary);
+  --medflow-primary-alt: var(--color-primary-alt);
+  --medflow-secondary-1: var(--color-secondary);
+  --medflow-secondary-2: var(--color-secondary-2);
 }
 
 html, body, #root { height: 100%; }
@@ -15,31 +27,39 @@ body {
   @apply bg-[var(--medflow-bg)] text-gray-100;
 }
 
-/* Cards and surfaces */
-.card { @apply rounded-xl border border-white/5 bg-[#3f455a] p-4 shadow-md shadow-black/20 backdrop-blur; }
+/* Surfaces */
+.card { @apply rounded-2xl border border-white/5 bg-[#3f455a] p-4 shadow-md shadow-black/20 backdrop-blur transition-transform; }
+.card:hover { transform: translateY(-1px); }
 
 /* Buttons */
-.btn { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-60 disabled:cursor-not-allowed; }
+.btn { @apply inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-60 disabled:cursor-not-allowed; }
 .btn-primary { @apply btn text-white shadow-md shadow-black/20; background: linear-gradient(135deg, var(--medflow-primary), var(--medflow-primary-alt)); }
-.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
 .btn-secondary { @apply btn text-white bg-[var(--medflow-secondary-1)] hover:bg-[var(--medflow-secondary-2)] shadow-sm; }
 .btn-ghost { @apply btn bg-white/5 text-gray-100 hover:bg-white/10; }
 
 /* Inputs */
-.input { @apply w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-[var(--medflow-primary)] focus:ring-[var(--medflow-primary)]; }
-.textarea { @apply w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-[var(--medflow-primary)] focus:ring-[var(--medflow-primary)]; }
+.input { @apply w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-[var(--medflow-primary)] focus:ring-[var(--medflow-primary)]; }
+.textarea { @apply w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-[var(--medflow-primary)] focus:ring-[var(--medflow-primary)]; }
 .label { @apply mb-1 block text-sm font-medium text-gray-200; }
 .link { @apply text-[var(--medflow-primary)] hover:underline; }
 
-/* Navbar/Sidebar */
-.nav-surface { @apply bg-[#3a3f53] border-b border-white/10 shadow-sm shadow-black/10; }
+/* Navbar */
+.nav-surface { @apply fixed inset-x-0 top-0 z-50 bg-[#3a3f53] border-b border-white/10 shadow-sm shadow-black/10; }
+.nav-spacer { height: 60px; }
+.active-link { @apply font-semibold underline decoration-[var(--medflow-primary)] underline-offset-8; }
+
+/* Sidebar */
 .sidebar { @apply hidden md:flex md:w-64 md:flex-col md:gap-2 md:border-r md:border-white/10 md:bg-[#3a3f53] md:p-4; }
 
 /* Spinner */
 .spinner { @apply h-5 w-5 animate-spin text-[var(--medflow-primary)]; }
 
-/* Calendar tweaks */
+/* Calendar */
 .rbc-calendar { @apply bg-transparent; }
 .rbc-time-header, .rbc-time-content, .rbc-time-view, .rbc-time-slot, .rbc-header { @apply border-white/10; }
-.rbc-event { @apply rounded-lg shadow-sm; }
+.rbc-event { @apply rounded-2xl shadow-sm; }
 .rbc-today { background-color: rgba(158,133,176,0.12); }
+
+/* Skeleton */
+.skeleton { @apply animate-pulse rounded-2xl bg-white/10; }

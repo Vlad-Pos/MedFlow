@@ -16,9 +16,10 @@ function App() {
   return (
     <div className="min-h-screen bg-[var(--medflow-bg)] text-gray-100">
       <Navbar />
+      <div className="nav-spacer" />
       <div className="mx-auto flex max-w-7xl">
         <Sidebar />
-        <main className="flex-1 px-4 py-6">
+        <main className="relative flex-1 px-4 py-6">
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/signin" element={<SignIn />} />

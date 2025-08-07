@@ -24,6 +24,7 @@ interface CalendarEvent extends Event {
   end: Date
   status: 'scheduled' | 'completed' | 'no_show'
   patientName: string
+  notes?: string
 }
 
 export default function Dashboard() {
@@ -55,6 +56,7 @@ export default function Dashboard() {
           end: new Date(dt.getTime() + 30 * 60000),
           status: data.status,
           patientName: data.patientName,
+          notes: data.notes || '',
           allDay: false,
         }
       })
@@ -71,7 +73,11 @@ export default function Dashboard() {
     return {
       event: ({ event }: { event: CalendarEvent }) => {
         const time = `${event.start.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })} - ${event.end.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })}`
-        return <EventCard title={event.patientName} status={event.status} time={time} />
+        return (
+          <div title={`${event.patientName}\n${time}\n${event.notes || ''}`}>
+            <EventCard title={event.patientName} status={event.status} time={time} />
+          </div>
+        )
       }
     }
   }
@@ -110,6 +116,7 @@ export default function Dashboard() {
           }}
         />
       </div>
+      <button className="btn-primary fixed bottom-6 right-6" onClick={() => navigate('/appointments')}>+ Programare nouă</button>
     </section>
   )
 }
