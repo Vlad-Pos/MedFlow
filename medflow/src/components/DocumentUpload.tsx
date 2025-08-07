@@ -39,10 +39,7 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
     }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !user) return
-
+  async function uploadSingleFile(file: File) {
     // Validate type
     const allowed = ['application/pdf', 'image/jpeg']
     if (!allowed.includes(file.type)) {
@@ -60,26 +57,45 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
     const storageRef = ref(storage, path)
     const task = uploadBytesResumable(storageRef, file)
 
-    task.on('state_changed', (snap) => {
-      const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
-      setProgress(pct)
-    }, () => {
-      setError('Încărcarea a eșuat.')
-      setProgress(null)
-    }, async () => {
-      const url = await getDownloadURL(task.snapshot.ref)
-      await addDoc(collection(db, 'documents'), {
-        appointmentId,
-        fileName: file.name,
-        fileType: file.type === 'application/pdf' ? 'pdf' : 'jpeg',
-        fileURL: url,
-        uploadedBy: user.uid,
-        uploadedAt: serverTimestamp(),
-        storagePath: path,
+    await new Promise<void>((resolve, reject) => {
+      task.on('state_changed', (snap) => {
+        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
+        setProgress(pct)
+      }, () => {
+        setError('Încărcarea a eșuat.')
+        setProgress(null)
+        reject(new Error('upload_failed'))
+      }, async () => {
+        const url = await getDownloadURL(task.snapshot.ref)
+        await addDoc(collection(db, 'documents'), {
+          appointmentId,
+          fileName: file.name,
+          fileType: file.type === 'application/pdf' ? 'pdf' : 'jpeg',
+          fileURL: url,
+          uploadedBy: user!.uid,
+          uploadedAt: serverTimestamp(),
+          storagePath: path,
+        })
+        resolve()
       })
-      setProgress(null)
-      showToast('Document încărcat cu succes!', 'success')
     })
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!user) return
+    const files = Array.from(e.target.files || [])
+    for (const f of files) {
+      try {
+        await uploadSingleFile(f)
+        showToast('Document încărcat cu succes!', 'success')
+      } catch {
+        // error already handled
+      } finally {
+        setProgress(null)
+      }
+    }
+    // clear input value so same file can be reselected if needed
+    e.currentTarget.value = ''
   }
 
   return (
@@ -87,7 +103,7 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
       <div>
         <label className="label">Încărcați documente (PDF/JPEG)</label>
         <div className="flex items-center gap-3">
-          <input type="file" accept="application/pdf,image/jpeg" onChange={handleFileChange} />
+          <input type="file" accept="application/pdf,image/jpeg" multiple onChange={handleFileChange} />
           {progress !== null && (
             <div className="flex w-56 items-center gap-2">
               <div className="h-2 w-full overflow-hidden rounded bg-white/10">
