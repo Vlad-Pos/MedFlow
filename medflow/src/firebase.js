@@ -1,17 +1,17 @@
 // Firebase initialization for MedFlow (JS)
-// Uses Vite environment variables; see README for .env setup
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCV4-CXiwvn0H_v6ns1ZfeEmVWrff1sBSc",
+  authDomain: "med-schedule-1.firebaseapp.com",
+  projectId: "med-schedule-1",
+  storageBucket: "med-schedule-1.firebasestorage.app",
+  messagingSenderId: "36397792612",
+  appId: "1:36397792612:web:586dbda4c92caa43840e71",
+  measurementId: "G-JRQM10JMDK"
 }
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
