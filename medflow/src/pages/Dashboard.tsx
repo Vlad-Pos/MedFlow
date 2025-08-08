@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { dateFnsLocalizer } from 'react-big-calendar'
 import type { Event } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay, endOfWeek } from 'date-fns'
 import { ro } from 'date-fns/locale'
@@ -10,6 +10,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import EventCard from '../components/EventCard'
 import MultiMonthOverview from '../components/MultiMonthOverview'
 import { isDemoMode } from '../utils/env'
+import LoadingSpinner from '../components/LoadingSpinner'
+
+const WeeklyCalendar = lazy(() => import('../components/WeeklyCalendar'))
 
 const locales = { 'ro': ro }
 const localizer = dateFnsLocalizer({
@@ -87,12 +90,12 @@ export default function Dashboard() {
     }
   }
 
-  function handleSelectEvent(e: CalendarEvent) { navigate(`/appointments?edit=${e.id}`) }
-  function handleSelectSlot(slot: any) {
+  const handleSelectEvent = useMemo(() => (e: CalendarEvent) => navigate(`/appointments?edit=${e.id}`), [navigate])
+  const handleSelectSlot = useMemo(() => (slot: any) => {
     const start = slot.start as Date
     const iso = new Date(start.getTime() - start.getTimezoneOffset()*60000).toISOString().slice(0,16)
     navigate(`/appointments?new=${encodeURIComponent(iso)}`)
-  }
+  }, [navigate])
 
   return (
     <section>
@@ -114,26 +117,18 @@ export default function Dashboard() {
       </div>
 
       <div className="card" aria-label="Calendar programări">
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          defaultView={Views.WEEK}
-          views={[Views.DAY, Views.WEEK, Views.MONTH]}
-          step={30}
-          timeslots={1}
-          selectable
-          onSelectEvent={handleSelectEvent}
-          onSelectSlot={handleSelectSlot}
-          style={{ height: 640 }}
-          eventPropGetter={eventPropGetter}
-          components={components()}
-          messages={{
-            next: 'Următor', previous: 'Anterior', today: 'Azi', month: 'Lună', week: 'Săptămână', day: 'Zi', agenda: 'Agendă'
-          }}
-          toolbar
-        />
+        <Suspense fallback={<div className="py-12"><LoadingSpinner label="Se încarcă calendarul..." /></div>}>
+          <WeeklyCalendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            onSelectEvent={handleSelectEvent}
+            onSelectSlot={handleSelectSlot}
+            eventPropGetter={eventPropGetter}
+            components={components()}
+          />
+        </Suspense>
       </div>
 
       {events.length === 0 && (

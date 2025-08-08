@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, orderBy, query, where, limit } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../providers/AuthProvider'
 import { differenceInDays, eachDayOfInterval, format, startOfMonth, startOfQuarter, startOfWeek } from 'date-fns'
@@ -70,6 +70,7 @@ export default function Analytics() {
       where('dateTime', '>=', start),
       where('dateTime', '<=', end),
       orderBy('dateTime', 'asc'),
+      limit(500),
     )
     const unsub = onSnapshot(q, snap => {
       const data: AppointmentRow[] = snap.docs.map(d => {

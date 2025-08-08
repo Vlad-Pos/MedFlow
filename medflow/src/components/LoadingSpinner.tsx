@@ -1,4 +1,6 @@
-export default function LoadingSpinner({ label }: { label?: string }) {
+import { memo } from 'react'
+
+function SpinnerBase({ label }: { label?: string }) {
   return (
     <div className="flex items-center gap-3">
       <svg className="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -9,3 +11,6 @@ export default function LoadingSpinner({ label }: { label?: string }) {
     </div>
   )
 }
+
+const LoadingSpinner = memo(SpinnerBase)
+export default LoadingSpinner

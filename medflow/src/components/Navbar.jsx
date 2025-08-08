@@ -1,8 +1,19 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import logoUrl from '../assets/medflow-logo.svg'
+
+const prefetchRouteChunk = {
+  '/dashboard': () => import('../pages/Dashboard'),
+  '/appointments': () => import('../pages/Appointments'),
+  '/analytics': () => import('../pages/Analytics'),
+  '/profile': () => import('../pages/Profile'),
+  '/chatbot': () => import('../components/ChatbotPlaceholder'),
+  '/signin': () => import('../auth/SignIn'),
+  '/signup': () => import('../auth/SignUp'),
+  '/reset': () => import('../auth/ResetPassword'),
+}
 
 function SunIcon() {
   return (
@@ -19,7 +30,7 @@ function MoonIcon() {
   )
 }
 
-export default function Navbar() {
+function Navbar() {
   const [user, setUser] = useState(null)
   const [open, setOpen] = useState(false)
   const [dark, setDark] = useState(() => {
@@ -44,14 +55,21 @@ export default function Navbar() {
     else { root.classList.remove('dark'); localStorage.setItem('theme','light') }
   }, [dark])
 
-  async function handleLogout() {
+  const handleLogout = useCallback(async () => {
     await signOut(auth)
     navigate('/signin', { replace: true })
-  }
+  }, [navigate])
+
+  const toggleTheme = useCallback(() => setDark(v=>!v), [])
 
   const activeCls = ({isActive}) => isActive ? 'text-blue-600 underline underline-offset-4' : ''
 
   const avatar = user ? (user.displayName || user.email || 'U')[0]?.toUpperCase?.() : null
+
+  const prefetch = useCallback((path) => {
+    const loader = prefetchRouteChunk[path]
+    if (loader) loader()
+  }, [])
 
   return (
     <header className="nav-surface">
@@ -61,16 +79,16 @@ export default function Navbar() {
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <NavLink to="/dashboard" className={activeCls}>Tablou de bord</NavLink>
-          <NavLink to="/appointments" className={activeCls}>Programări</NavLink>
-          <NavLink to="/profile" className={activeCls}>Profil</NavLink>
-          <NavLink to="/ai" className={activeCls}>Asistent AI</NavLink>
-          <NavLink to="/analytics" className={activeCls}>Analitice</NavLink>
+          <NavLink to="/dashboard" className={activeCls} onMouseEnter={()=>prefetch('/dashboard')}>Tablou de bord</NavLink>
+          <NavLink to="/appointments" className={activeCls} onMouseEnter={()=>prefetch('/appointments')}>Programări</NavLink>
+          <NavLink to="/profile" className={activeCls} onMouseEnter={()=>prefetch('/profile')}>Profil</NavLink>
+          <NavLink to="/ai" className={activeCls} onMouseEnter={()=>prefetch('/chatbot')}>Asistent AI</NavLink>
+          <NavLink to="/analytics" className={activeCls} onMouseEnter={()=>prefetch('/analytics')}>Analitice</NavLink>
           <button
             className="btn-ghost"
             aria-label="Comută tema"
             aria-pressed={dark}
-            onClick={()=>setDark(v=>!v)}
+            onClick={toggleTheme}
             title={dark ? 'Comută pe mod luminos' : 'Comută pe mod întunecat'}
           >
             {dark ? <SunIcon/> : <MoonIcon/>}
@@ -85,8 +103,8 @@ export default function Navbar() {
           )}
           {!user && (
             <div className="flex items-center gap-3">
-              <Link className="btn-ghost" to="/signin">Autentificare</Link>
-              <Link className="btn-primary" to="/signup">Înregistrare</Link>
+              <NavLink className={activeCls} to="/signin" onMouseEnter={()=>prefetch('/signin')}>Autentificare</NavLink>
+              <NavLink className={activeCls} to="/signup" onMouseEnter={()=>prefetch('/signup')}>Înregistrare</NavLink>
             </div>
           )}
         </nav>
@@ -106,8 +124,8 @@ export default function Navbar() {
               <button className="btn-primary" onClick={async ()=>{await handleLogout(); setOpen(false)}}>Delogare</button>
             ) : (
               <>
-                <Link className="btn-ghost" to="/signin" onClick={()=>setOpen(false)}>Autentificare</Link>
-                <Link className="btn-primary" to="/signup" onClick={()=>setOpen(false)}>Înregistrare</Link>
+                <NavLink className={activeCls} to="/signin" onClick={()=>setOpen(false)}>Autentificare</NavLink>
+                <NavLink className={activeCls} to="/signup" onClick={()=>setOpen(false)}>Înregistrare</NavLink>
               </>
             )}
           </div>
@@ -116,3 +134,5 @@ export default function Navbar() {
     </header>
   )
 }
+
+export default memo(Navbar)

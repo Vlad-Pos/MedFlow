@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage, db } from '../services/firebase'
 import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore'
@@ -9,7 +9,7 @@ import Dropzone from './Dropzone'
 
 interface DocMeta { id: string; fileName: string; fileType: string; fileURL: string; uploadedBy: string; uploadedAt?: any; storagePath?: string }
 
-export default function DocumentUpload({ appointmentId }: { appointmentId: string }) {
+function DocumentUploadBase({ appointmentId }: { appointmentId: string }) {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [progress, setProgress] = useState<number | null>(null)
@@ -128,3 +128,5 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
     </div>
   )
 }
+
+export default memo(DocumentUploadBase)
