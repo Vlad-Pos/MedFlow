@@ -1,8 +1,11 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { auth } from '../firebase/firebase'
+import { auth } from '../firebase'
+import logoUrl from '../assets/medflow-logo.svg'
 
+// Note: Vite supports importing SVGs as URLs out of the box. We import the logo
+// as a URL string and use it in an <img> tag to avoid any runtime path issues.
 export default function Navbar() {
   const [user, setUser] = useState(null)
   const [open, setOpen] = useState(false)
@@ -31,7 +34,8 @@ export default function Navbar() {
     <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 text-lg font-semibold">
-          <img src="/src/assets/medflow-logo.svg" alt="MedFlow" className="h-6 w-6" />
+          {/* Using Vite-imported URL for the SVG logo */}
+          <img src={logoUrl} alt="MedFlow" className="h-6 w-6" />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
