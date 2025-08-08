@@ -2,7 +2,11 @@ import { Link } from 'react-router-dom'
 
 export default function Landing() {
   return (
-    <section className="mx-auto max-w-5xl py-10">
+    <section className="relative mx-auto max-w-5xl py-10">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-[var(--medflow-primary)] opacity-20 blur-3xl" />
+        <div className="absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-[var(--medflow-primary-alt)] opacity-20 blur-3xl" />
+      </div>
       <div className="grid items-center gap-8 md:grid-cols-2">
         <div>
           <h1 className="text-4xl font-bold leading-tight text-gray-100">MedFlow

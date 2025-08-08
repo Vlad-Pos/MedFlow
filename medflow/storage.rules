@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Appointments path: appointments/{appointmentId}/{filename}
+    match /appointments/{appointmentId}/{fileName} {
+      allow read, write: if request.auth != null;
+      // Optionally tighten by verifying Firestore ownership via rules with get() if needed.
+    }
+
+    // Generic documents path
+    match /documents/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

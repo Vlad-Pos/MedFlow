@@ -25,6 +25,8 @@ export default function Navbar() {
     navigate('/signin', { replace: true })
   }
 
+  const linkCls = ({isActive}) => `${isActive ? 'active-link' : ''} relative after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-[var(--medflow-primary)] after:transition-all hover:after:w-full`;
+
   return (
     <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -33,10 +35,10 @@ export default function Navbar() {
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <NavLink to="/dashboard" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Tablou de bord</NavLink>
-          <NavLink to="/appointments" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Programări</NavLink>
-          <NavLink to="/profile" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Profil</NavLink>
-          <NavLink to="/ai" className={({isActive})=> isActive ? 'text-[var(--medflow-primary)]' : ''}>Asistent AI</NavLink>
+          <NavLink to="/dashboard" className={linkCls}>Tablou de bord</NavLink>
+          <NavLink to="/appointments" className={linkCls}>Programări</NavLink>
+          <NavLink to="/profile" className={linkCls}>Profil</NavLink>
+          <NavLink to="/ai" className={linkCls}>Asistent AI</NavLink>
           <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
           {user ? (
             <button className="btn-primary" onClick={handleLogout}>Delogare</button>
@@ -58,7 +60,6 @@ export default function Navbar() {
             <NavLink to="/appointments" onClick={()=>setOpen(false)}>Programări</NavLink>
             <NavLink to="/profile" onClick={()=>setOpen(false)}>Profil</NavLink>
             <NavLink to="/ai" onClick={()=>setOpen(false)}>Asistent AI</NavLink>
-            <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
             {user ? (
               <button className="btn-primary" onClick={async ()=>{await handleLogout(); setOpen(false)}}>Delogare</button>
             ) : (

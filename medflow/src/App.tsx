@@ -11,10 +11,12 @@ import Profile from './pages/Profile'
 import ChatbotPlaceholder from './components/ChatbotPlaceholder'
 import ProtectedRoute from './auth/ProtectedRoute'
 import AIAssistant from './pages/AIAssistant'
+import Intro from './components/Intro'
 
 function App() {
   return (
     <div className="min-h-screen bg-[var(--medflow-bg)] text-gray-100">
+      <Intro />
       <Navbar />
       <div className="nav-spacer" />
       <div className="mx-auto flex max-w-7xl">

@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // Users can read/write only their own user document
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Appointments: allow only owner
+    // Support both userId (preferred) and doctorId (legacy) fields
+    match /appointments/{appointmentId} {
+      allow read, write: if isSignedIn() && (
+        (exists(resource.data.userId) && resource.data.userId == request.auth.uid) ||
+        (exists(resource.data.doctorId) && resource.data.doctorId == request.auth.uid)
+      );
+    }
+
+    // Files collection (if used): restrict by uploaderId
+    match /files/{fileId} {
+      allow read, write: if isSignedIn() && resource.data.uploaderId == request.auth.uid;
+    }
+
+    // Documents collection (current implementation): restrict by uploadedBy
+    match /documents/{docId} {
+      allow read, create: if isSignedIn() && request.resource.data.uploadedBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uploadedBy == request.auth.uid;
+    }
+  }
+}
