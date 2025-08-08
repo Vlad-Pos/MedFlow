@@ -32,10 +32,10 @@ export default function Navbar() {
 
   return (
     <header className="nav-surface">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-4 text-3xl font-semibold md:text-4xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-4 text-[2rem] font-semibold leading-none md:text-[2.75rem]">
           {/* Using Vite-imported URL for the SVG logo; size and alignment tuned to match text */}
-          <img src={logoUrl} alt="MedFlow" className="h-12 w-auto align-middle" />
+          <img src={logoUrl} alt="MedFlow" className="h-[2.5rem] w-auto align-middle md:h-[3rem]" />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
