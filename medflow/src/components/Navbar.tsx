@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../providers/AuthProvider'
 import { useEffect, useState } from 'react'
+import medflowLogo from '../assets/medflow-logo.svg'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -25,8 +26,8 @@ export default function Navbar() {
     <header className="border-b border-gray-200 bg-white/60 backdrop-blur dark:bg-gray-950/60 dark:border-gray-800">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 text-lg font-semibold">
-          <span className="h-2 w-2 rounded-full bg-blue-600"></span>
-          MedFlow
+          <img src={medflowLogo} alt="" aria-hidden="true" className="h-6 w-6 md:h-7 md:w-7" />
+          <span className="tracking-tight">MedFlow</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
