@@ -11,17 +11,26 @@ export default function SignIn() {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as any)?.from?.pathname || '/dashboard'
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      setError('Vă rugăm să completați toate câmpurile.')
+      setLoading(false)
+      return
+    }
+    
     try {
-      await signIn(email, password)
+      await signIn(email.trim(), password)
       navigate(from, { replace: true })
-    } catch (err: any) {
-      setError('Autentificare eșuată. Verificați emailul și parola.')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Autentificare eșuată. Verificați emailul și parola.'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -34,14 +43,30 @@ export default function SignIn() {
         {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20">{error}</div>}
         <div>
           <label className="label">Email</label>
-          <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input 
+            className="input" 
+            type="email" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+            disabled={loading}
+            autoComplete="email"
+          />
         </div>
         <div>
           <label className="label">Parolă</label>
-          <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <input 
+            className="input" 
+            type="password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            disabled={loading}
+            autoComplete="current-password"
+          />
         </div>
         <button className="btn-primary w-full" disabled={loading}>
-          {loading ? <LoadingSpinner label="Se autentifică..." /> : 'Autentificare'}
+          {loading ? <LoadingSpinner text="Se autentifică..." /> : 'Autentificare'}
         </button>
         <div className="flex justify-between text-sm">
           <Link to="/reset" className="link">Am uitat parola</Link>

@@ -15,11 +15,21 @@ export default function ResetPassword() {
     setLoading(true)
     setError(null)
     setMessage(null)
+    
+    // Basic validation
+    if (!email.trim()) {
+      setError('Vă rugăm să introduceți adresa de email.')
+      setLoading(false)
+      return
+    }
+    
     try {
-      await resetPassword(email)
+      await resetPassword(email.trim())
       setMessage('Email de resetare trimis. Verificați căsuța poștală.')
-    } catch (err: any) {
-      setError('Nu s-a putut trimite emailul de resetare.')
+      setEmail('') // Clear email after successful submission
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Nu s-a putut trimite emailul de resetare.'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -33,10 +43,18 @@ export default function ResetPassword() {
         {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20">{error}</div>}
         <div>
           <label className="label">Email</label>
-          <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input 
+            className="input" 
+            type="email" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+            disabled={loading}
+            autoComplete="email"
+          />
         </div>
         <button className="btn-primary w-full" disabled={loading}>
-          {loading ? <LoadingSpinner label="Se trimite..." /> : 'Trimite link resetare'}
+          {loading ? <LoadingSpinner text="Se trimite..." /> : 'Trimite link resetare'}
         </button>
         <div className="text-sm">
           <Link to="/signin" className="link">Înapoi la autentificare</Link>
