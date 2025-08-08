@@ -13,6 +13,7 @@ import ProtectedRoute from './auth/ProtectedRoute'
 import AIAssistant from './pages/AIAssistant'
 import Intro from './components/Intro'
 import SkipLink from './components/SkipLink'
+import Analytics from './pages/Analytics'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/chatbot" element={<ChatbotPlaceholder />} />
               <Route path="/ai" element={<AIAssistant />} />
+              <Route path="/analytics" element={<Analytics />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

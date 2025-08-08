@@ -43,6 +43,7 @@ export default function Navbar() {
           <NavLink to="/appointments" className={linkCls}>Programări</NavLink>
           <NavLink to="/profile" className={linkCls}>Profil</NavLink>
           <NavLink to="/ai" className={linkCls}>Asistent AI</NavLink>
+          <NavLink to="/analytics" className={linkCls}>Analitice</NavLink>
           <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
           {user ? (
             <button className="btn-primary" onClick={handleLogout}>Delogare</button>
@@ -64,6 +65,7 @@ export default function Navbar() {
             <NavLink to="/appointments" onClick={()=>setOpen(false)}>Programări</NavLink>
             <NavLink to="/profile" onClick={()=>setOpen(false)}>Profil</NavLink>
             <NavLink to="/ai" onClick={()=>setOpen(false)}>Asistent AI</NavLink>
+            <NavLink to="/analytics" onClick={()=>setOpen(false)}>Analitice</NavLink>
             {user ? (
               <button className="btn-primary" onClick={async ()=>{await handleLogout(); setOpen(false)}}>Delogare</button>
             ) : (
