@@ -8,6 +8,7 @@ import { db } from '../services/firebase'
 import { useAuth } from '../providers/AuthProvider'
 import { Link, useNavigate } from 'react-router-dom'
 import EventCard from '../components/EventCard'
+import MultiMonthOverview from '../components/MultiMonthOverview'
 
 const locales = { 'ro': ro }
 const localizer = dateFnsLocalizer({
@@ -30,13 +31,14 @@ interface CalendarEvent extends Event {
 export default function Dashboard() {
   const { user } = useAuth()
   const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [monthsOverview, setMonthsOverview] = useState<3 | 6 | 12>(3)
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!user) return
     const start = startOfWeek(new Date(), { weekStartsOn: 1 })
     const end = new Date(start)
-    end.setDate(end.getDate() + 60) // 2 months window for better month view
+    end.setDate(end.getDate() + 60)
 
     const q = query(
       collection(db, 'appointments'),
@@ -115,6 +117,20 @@ export default function Dashboard() {
           toolbar
         />
       </div>
+
+      <div className="mt-6 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-100">Panoramă multi-lună</h3>
+        <div className="flex gap-2" role="group" aria-label="Selectare număr luni">
+          {[3,6,12].map(v => (
+            <button key={v} className={`btn-ghost ${monthsOverview === v ? 'ring-2 ring-[var(--medflow-primary)]' : ''}`} onClick={() => setMonthsOverview(v as 3|6|12)}>{v} luni</button>
+          ))}
+        </div>
+      </div>
+      <MultiMonthOverview
+        months={monthsOverview}
+        events={events.map(e => ({ start: e.start, status: e.status }))}
+      />
+
       <button className="btn-primary fixed bottom-6 right-6" onClick={() => navigate('/appointments')}>+ Programare nouă</button>
     </section>
   )
