@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCV4-CXiwvn0H_v6ns1ZfeEmVWrff1sBSc",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "REPLACE_WITH_REAL_API_KEY",
   authDomain: "med-schedule-1.firebaseapp.com",
   projectId: "med-schedule-1",
   storageBucket: "med-schedule-1.firebasestorage.app",

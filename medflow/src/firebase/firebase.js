@@ -4,7 +4,7 @@ import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 
 // Configurați din variabile de mediu sau completați manual pentru dezvoltare
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyCV4-CXiwvn0H_v6ns1ZfeEmVWrff1sBSc',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'REPLACE_WITH_REAL_API_KEY',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'med-schedule-1.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'med-schedule-1',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'med-schedule-1.firebasestorage.app',
