@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
 import type { Event } from 'react-big-calendar'
-import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { format, parse, startOfWeek, getDay, endOfWeek } from 'date-fns'
 import { ro } from 'date-fns/locale'
 import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore'
 import { db } from '../services/firebase'
@@ -9,6 +9,7 @@ import { useAuth } from '../providers/AuthProvider'
 import { Link, useNavigate } from 'react-router-dom'
 import EventCard from '../components/EventCard'
 import MultiMonthOverview from '../components/MultiMonthOverview'
+import { isDemoMode } from '../utils/env'
 
 const locales = { 'ro': ro }
 const localizer = dateFnsLocalizer({
@@ -33,6 +34,10 @@ export default function Dashboard() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [monthsOverview, setMonthsOverview] = useState<3 | 6 | 12>(3)
   const navigate = useNavigate()
+
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 })
+  const weekLabel = `${weekStart.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' })}–${weekEnd.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' })}`
 
   useEffect(() => {
     if (!user) return
@@ -91,10 +96,23 @@ export default function Dashboard() {
 
   return (
     <section>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-100">Program</h2>
-        <Link className="btn-primary" to="/appointments">Gestionează programările</Link>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-semibold text-gray-100">Program săptămânal</h2>
+          <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-gray-200">Săptămâna: {weekLabel}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {isDemoMode() && <span className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-200">Mod demo - date de exemplu</span>}
+          <Link className="btn-primary" to="/appointments">Gestionează programările</Link>
+        </div>
       </div>
+
+      <div className="mb-3 flex items-center gap-4 text-sm text-gray-200">
+        <div className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-[var(--medflow-primary)]" /> Programat</div>
+        <div className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-emerald-500" /> Finalizat</div>
+        <div className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-red-500" /> Nu s-a prezentat</div>
+      </div>
+
       <div className="card" aria-label="Calendar programări">
         <Calendar
           localizer={localizer}
@@ -117,6 +135,10 @@ export default function Dashboard() {
           toolbar
         />
       </div>
+
+      {events.length === 0 && (
+        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-gray-200">Nu există evenimente pentru această săptămână. Selectați un interval în calendar pentru a crea o programare.</div>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-100">Panoramă multi-lună</h3>

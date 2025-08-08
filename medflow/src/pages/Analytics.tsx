@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
+import { isDemoMode } from '../utils/env'
 
 interface AppointmentRow {
   id: string
@@ -173,7 +174,10 @@ export default function Analytics() {
     <section className="grid gap-6 md:grid-cols-5">
       {/* Local analytics sidebar */}
       <aside className="rounded-2xl border border-white/10 bg-white/5 p-3 md:col-span-1">
-        <h2 className="mb-3 text-lg font-semibold text-gray-100">Analitice</h2>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-100">Analitice</h2>
+          {isDemoMode() && <span className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-200">Mod demo - date de exemplu</span>}
+        </div>
         <div className="mb-3 space-y-2">
           <div>
             <label className="label">De la</label>

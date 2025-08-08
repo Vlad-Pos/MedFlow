@@ -4,12 +4,33 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import logoUrl from '../assets/medflow-logo.svg'
 
-// Note: Vite supports importing SVGs as URLs out of the box. We import the logo
-// as a URL string and use it in an <img> tag to avoid any runtime path issues.
+function SunIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+      <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"/><path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zm0 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V18a.75.75 0 01.75-.75zm9-6a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5H20.25a.75.75 0 01.75.75zm-15 0a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75zm11.03-6.78a.75.75 0 011.06 0l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM5.66 17.47a.75.75 0 001.06 0l1.06-1.06a.75.75 0 10-1.06-1.06L5.66 16.4a.75.75 0 000 1.06zm12.87 1.06a.75.75 0 010-1.06l1.06-1.06a.75.75 0 111.06 1.06l-1.06 1.06a.75.75 0 01-1.06 0zM6.72 5.41L5.66 4.35A.75.75 0 014.6 5.41l1.06 1.06a.75.75 0 001.06-1.06z" clipRule="evenodd"/>
+    </svg>
+  )
+}
+function MoonIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+      <path d="M21.752 15.002A9.718 9.718 0 0112 21.75a9.75 9.75 0 01-9.75-9.75 9.718 9.718 0 016.748-9.252.75.75 0 01.917.935A8.249 8.249 0 0012 20.25a8.249 8.249 0 008.317-6.085.75.75 0 011.435.837z"/>
+    </svg>
+  )
+}
+
 export default function Navbar() {
   const [user, setUser] = useState(null)
   const [open, setOpen] = useState(false)
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+  const [dark, setDark] = useState(() => {
+    const stored = localStorage.getItem('theme')
+    if (!stored) {
+      const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      localStorage.setItem('theme', prefers ? 'dark' : 'light')
+      return prefers
+    }
+    return stored === 'dark'
+  })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -28,33 +49,48 @@ export default function Navbar() {
     navigate('/signin', { replace: true })
   }
 
-  const linkCls = ({isActive}) => `${isActive ? 'active-link' : ''} relative after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-[var(--medflow-primary)] after:transition-all hover:after:w-full`;
+  const activeCls = ({isActive}) => isActive ? 'text-blue-600 underline underline-offset-4' : ''
+
+  const avatar = user ? (user.displayName || user.email || 'U')[0]?.toUpperCase?.() : null
 
   return (
     <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-4 text-[2rem] font-semibold leading-none md:text-[2.75rem]">
-          {/* Using Vite-imported URL for the SVG logo; size and alignment tuned to match text */}
-          <img src={logoUrl} alt="MedFlow" className="h-[2.5rem] w-auto align-middle md:h-[3rem]" />
+          <img src={logoUrl} alt="Siglă MedFlow" className="h-[2.5rem] w-auto align-middle md:h-[3rem]" />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <NavLink to="/dashboard" className={linkCls}>Tablou de bord</NavLink>
-          <NavLink to="/appointments" className={linkCls}>Programări</NavLink>
-          <NavLink to="/profile" className={linkCls}>Profil</NavLink>
-          <NavLink to="/ai" className={linkCls}>Asistent AI</NavLink>
-          <NavLink to="/analytics" className={linkCls}>Analitice</NavLink>
-          <button className="btn-ghost" onClick={()=>setDark(v=>!v)}>{dark ? 'Luminos' : 'Întunecat'}</button>
-          {user ? (
-            <button className="btn-primary" onClick={handleLogout}>Delogare</button>
-          ) : (
+          <NavLink to="/dashboard" className={activeCls}>Tablou de bord</NavLink>
+          <NavLink to="/appointments" className={activeCls}>Programări</NavLink>
+          <NavLink to="/profile" className={activeCls}>Profil</NavLink>
+          <NavLink to="/ai" className={activeCls}>Asistent AI</NavLink>
+          <NavLink to="/analytics" className={activeCls}>Analitice</NavLink>
+          <button
+            className="btn-ghost"
+            aria-label="Comută tema"
+            aria-pressed={dark}
+            onClick={()=>setDark(v=>!v)}
+            title={dark ? 'Comută pe mod luminos' : 'Comută pe mod întunecat'}
+          >
+            {dark ? <SunIcon/> : <MoonIcon/>}
+          </button>
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-sm font-semibold">
+                {avatar}
+              </div>
+              <button className="btn-primary" onClick={handleLogout}>Delogare</button>
+            </div>
+          )}
+          {!user && (
             <div className="flex items-center gap-3">
               <Link className="btn-ghost" to="/signin">Autentificare</Link>
               <Link className="btn-primary" to="/signup">Înregistrare</Link>
             </div>
           )}
         </nav>
-        <button className="md:hidden" onClick={()=>setOpen(o=>!o)} aria-label="Deschide meniul">
+        <button className="md:hidden" onClick={()=>setOpen(o=>!o)} aria-label="Deschide meniul" aria-expanded={open}>
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
       </div>
