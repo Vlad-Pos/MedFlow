@@ -1,0 +1,8 @@
+@layer components {
+  .h1 { @apply text-4xl md:text-5xl font-bold tracking-tight; }
+  .h2 { @apply text-3xl md:text-4xl font-semibold tracking-tight; }
+  .h3 { @apply text-2xl md:text-3xl font-semibold; }
+  .subtitle { @apply text-lg text-gray-200/90; }
+  .body { @apply text-base leading-relaxed; }
+  .caption { @apply text-sm text-gray-300; }
+}
