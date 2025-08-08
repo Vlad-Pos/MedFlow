@@ -34,8 +34,8 @@ export default function Navbar() {
     <header className="nav-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 text-lg font-semibold">
-          {/* Using Vite-imported URL for the SVG logo */}
-          <img src={logoUrl} alt="MedFlow" className="h-6 w-6" />
+          {/* Using Vite-imported URL for the SVG logo; sized to visually match text height */}
+          <img src={logoUrl} alt="MedFlow" className="h-7 w-auto object-contain relative top-[1px]" />
           MedFlow
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
