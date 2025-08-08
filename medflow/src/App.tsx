@@ -12,16 +12,18 @@ import ChatbotPlaceholder from './components/ChatbotPlaceholder'
 import ProtectedRoute from './auth/ProtectedRoute'
 import AIAssistant from './pages/AIAssistant'
 import Intro from './components/Intro'
+import SkipLink from './components/SkipLink'
 
 function App() {
   return (
     <div className="min-h-screen bg-[var(--medflow-bg)] text-gray-100">
+      <SkipLink />
       <Intro />
       <Navbar />
       <div className="nav-spacer" />
       <div className="mx-auto flex max-w-7xl">
         <Sidebar />
-        <main className="relative flex-1 px-4 py-6">
+        <main id="main-content" className="relative flex-1 px-4 py-6">
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/signin" element={<SignIn />} />

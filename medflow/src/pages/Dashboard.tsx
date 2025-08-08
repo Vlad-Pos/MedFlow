@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
+import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
 import type { Event } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { ro } from 'date-fns/locale'
@@ -36,7 +36,7 @@ export default function Dashboard() {
     if (!user) return
     const start = startOfWeek(new Date(), { weekStartsOn: 1 })
     const end = new Date(start)
-    end.setDate(end.getDate() + 7)
+    end.setDate(end.getDate() + 60) // 2 months window for better month view
 
     const q = query(
       collection(db, 'appointments'),
@@ -65,9 +65,7 @@ export default function Dashboard() {
     return () => unsub()
   }, [user])
 
-  const eventPropGetter = useMemo(() => (_event: CalendarEvent) => {
-    return { style: { background: 'transparent', border: 'none', padding: 0 } }
-  }, [])
+  const eventPropGetter = useMemo(() => (_event: CalendarEvent) => ({ style: { background: 'transparent', border: 'none', padding: 0 } }), [])
 
   function components() {
     return {
@@ -92,28 +90,29 @@ export default function Dashboard() {
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-100">Program săptămânal</h2>
+        <h2 className="text-2xl font-semibold text-gray-100">Program</h2>
         <Link className="btn-primary" to="/appointments">Gestionează programările</Link>
       </div>
-      <div className="card">
+      <div className="card" aria-label="Calendar programări">
         <Calendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
-          defaultView="week"
-          views={['week', 'day']}
+          defaultView={Views.WEEK}
+          views={[Views.DAY, Views.WEEK, Views.MONTH]}
           step={30}
           timeslots={1}
           selectable
           onSelectEvent={handleSelectEvent}
           onSelectSlot={handleSelectSlot}
-          style={{ height: 600 }}
+          style={{ height: 640 }}
           eventPropGetter={eventPropGetter}
           components={components()}
           messages={{
             next: 'Următor', previous: 'Anterior', today: 'Azi', month: 'Lună', week: 'Săptămână', day: 'Zi', agenda: 'Agendă'
           }}
+          toolbar
         />
       </div>
       <button className="btn-primary fixed bottom-6 right-6" onClick={() => navigate('/appointments')}>+ Programare nouă</button>

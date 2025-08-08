@@ -5,6 +5,7 @@ import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverT
 import { useAuth } from '../providers/AuthProvider'
 import ConfirmModal from './ConfirmModal'
 import { useToast } from './ToastProvider'
+import Dropzone from './Dropzone'
 
 interface DocMeta { id: string; fileName: string; fileType: string; fileURL: string; uploadedBy: string; uploadedAt?: any; storagePath?: string }
 
@@ -40,17 +41,9 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
   }
 
   async function uploadSingleFile(file: File) {
-    // Validate type
     const allowed = ['application/pdf', 'image/jpeg']
-    if (!allowed.includes(file.type)) {
-      setError('Doar PDF sau JPEG sunt permise.')
-      return
-    }
-    // Validate size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Fișierul depășește limita de 10MB.')
-      return
-    }
+    if (!allowed.includes(file.type)) { setError('Doar PDF sau JPEG.'); return }
+    if (file.size > 10 * 1024 * 1024) { setError('Maxim 10MB.'); return }
 
     setError(null)
     const path = `appointments/${appointmentId}/${Date.now()}_${file.name}`
@@ -81,45 +74,39 @@ export default function DocumentUpload({ appointmentId }: { appointmentId: strin
     })
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!user) return
-    const files = Array.from(e.target.files || [])
+  async function onFiles(files: File[]) {
     for (const f of files) {
       try {
         await uploadSingleFile(f)
         showToast('Document încărcat cu succes!', 'success')
-      } catch {
-        // error already handled
-      } finally {
-        setProgress(null)
-      }
+      } catch {}
+      finally { setProgress(null) }
     }
-    // clear input value so same file can be reselected if needed
-    e.currentTarget.value = ''
   }
 
   return (
     <div className="space-y-3">
       <div>
         <label className="label">Încărcați documente (PDF/JPEG)</label>
-        <div className="flex items-center gap-3">
-          <input type="file" accept="application/pdf,image/jpeg" multiple onChange={handleFileChange} />
-          {progress !== null && (
-            <div className="flex w-56 items-center gap-2">
-              <div className="h-2 w-full overflow-hidden rounded bg-white/10">
-                <div className="h-full bg-[var(--medflow-primary)]" style={{ width: `${progress}%` }} />
-              </div>
-              <span className="text-xs text-gray-200/90">{progress}%</span>
+        <Dropzone onFiles={onFiles} />
+        {progress !== null && (
+          <div className="mt-2 flex w-56 items-center gap-2">
+            <div className="h-2 w-full overflow-hidden rounded bg-white/10">
+              <div className="h-full bg-[var(--medflow-primary)]" style={{ width: `${progress}%` }} />
             </div>
-          )}
-        </div>
+            <span className="text-xs text-gray-200/90">{progress}%</span>
+          </div>
+        )}
         {error && <div className="mt-2 text-sm text-red-300">{error}</div>}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2" aria-live="polite">
         {docs.map(d => (
-          <div key={d.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-2 text-sm text-gray-100 shadow-sm">
-            <a href={d.fileURL} target="_blank" className="truncate hover:underline">{d.fileName}</a>
+          <div key={d.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-2 text-sm text-gray-100 shadow-sm">
+            <div className="flex items-center gap-3">
+              {d.fileType === 'jpeg' && <img src={d.fileURL} alt={d.fileName} className="h-10 w-10 rounded object-cover" />}
+              <a href={d.fileURL} target="_blank" className="hover:underline">{d.fileName}</a>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-300">{d.uploadedAt?.toDate?.() ? new Date(d.uploadedAt.toDate()).toLocaleString('ro-RO') : ''}</span>
               <button className="btn-ghost" onClick={() => setToDelete(d)}>Șterge</button>
