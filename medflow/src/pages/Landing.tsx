@@ -7,6 +7,10 @@ export default function Landing() {
         <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-[var(--medflow-primary)] opacity-20 blur-3xl" />
         <div className="absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-[var(--medflow-primary-alt)] opacity-20 blur-3xl" />
       </div>
+      <div className="mb-6 flex items-center gap-3">
+        <img src="/src/assets/medflow-logo.svg" alt="MedFlow Logo Test" className="h-10 w-10" />
+        <span className="text-sm text-gray-200/80">Logo test</span>
+      </div>
       <div className="grid items-center gap-8 md:grid-cols-2">
         <div>
           <h1 className="text-4xl font-bold leading-tight text-gray-100">MedFlow
