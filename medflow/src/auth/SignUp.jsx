@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { auth } from '../firebase/firebase'
+import { auth } from '../firebase'
 import { saveUserToFirestore } from '../firebase/firebase'
 import { Link, useNavigate } from 'react-router-dom'
+import { authErrorToRoMessage } from '../utils/firebaseErrors'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
@@ -33,8 +34,7 @@ export default function SignUp() {
       await saveUserToFirestore(cred.user, 'doctor')
       navigate('/dashboard', { replace: true })
     } catch (e) {
-      if (e?.code === 'auth/email-already-in-use') setError('Email deja folosit.')
-      else setError('Înregistrarea a eșuat. Încercați din nou.')
+      setError(authErrorToRoMessage(e?.code))
     } finally {
       setLoading(false)
     }

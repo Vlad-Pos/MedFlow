@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { auth } from '../firebase/firebase'
+import { auth } from '../firebase'
 import { Link, useNavigate } from 'react-router-dom'
+import { authErrorToRoMessage } from '../utils/firebaseErrors'
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('')
@@ -18,7 +19,7 @@ export default function ResetPassword() {
       await sendPasswordResetEmail(auth, email)
       navigate('/signin', { replace: true, state: { msg: 'Email de resetare trimis.' } })
     } catch (e) {
-      setError('Nu s-a putut trimite emailul de resetare. Încercați din nou.')
+      setError(authErrorToRoMessage(e?.code))
     } finally {
       setLoading(false)
     }

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase/firebase'
+import { auth } from '../firebase'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { authErrorToRoMessage } from '../utils/firebaseErrors'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -24,7 +25,7 @@ export default function SignIn() {
       await signInWithEmailAndPassword(auth, email, password)
       navigate('/dashboard', { replace: true })
     } catch (e) {
-      setError('Autentificare nereușită. Verifică adresa de email și parola.')
+      setError(authErrorToRoMessage(e?.code))
     } finally {
       setLoading(false)
     }
