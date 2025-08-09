@@ -7,6 +7,7 @@ import { NotificationContainer } from './components/Notification'
 import PageTransition from './components/PageTransition'
 import { SkipToMainContent, KeyboardNavigation } from './components/Accessibility'
 import { useResponsive } from './utils/useResponsive'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
 // Lazy load all route components
 const Landing = lazy(() => import('./pages/Landing'))
@@ -16,6 +17,7 @@ const SignUp = lazy(() => import('./pages/auth/SignUp'))
 const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Appointments = lazy(() => import('./pages/Appointments'))
+const Patients = lazy(() => import('./pages/Patients'))
 const Analytics = lazy(() => import('./pages/Analytics'))
 const Profile = lazy(() => import('./pages/Profile'))
 const PatientReports = lazy(() => import('./pages/PatientReports'))
@@ -26,6 +28,7 @@ const AppointmentResponse = lazy(() => import('./pages/AppointmentResponse'))
 function App() {
   // Responsive state available for future use
   useResponsive()
+  useKeyboardShortcuts()
 
   return (
     <KeyboardNavigation>
@@ -108,6 +111,18 @@ function App() {
                   <Suspense fallback={<RouteLoadingSpinner />}>
                     <PageTransition>
                       <Appointments />
+                    </PageTransition>
+                  </Suspense>
+                </main>
+              </>
+            } />
+            <Route path="/patients" element={
+              <>
+                <Navbar />
+                <main id="main-content" className="container-responsive py-6">
+                  <Suspense fallback={<RouteLoadingSpinner />}>
+                    <PageTransition>
+                      <Patients />
                     </PageTransition>
                   </Suspense>
                 </main>

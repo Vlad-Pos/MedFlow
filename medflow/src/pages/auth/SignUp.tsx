@@ -144,10 +144,10 @@ export default function SignUp() {
             <Stethoscope className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-medflow-text-primary">
               Înregistrare MedFlow
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-medflow-text-secondary mt-1">
               Creați un cont pentru accesul la platformă
             </p>
           </div>
@@ -169,7 +169,7 @@ export default function SignUp() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="card space-y-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-xl border border-medflow-primary/10" 
+        className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
         onSubmit={handleSubmit}
         noValidate
       >
@@ -183,8 +183,8 @@ export default function SignUp() {
               transition={{ duration: 0.3 }}
               className={`flex items-center space-x-3 p-4 rounded-lg ${
                 rateLimited 
-                  ? 'bg-orange-50 border border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' 
-                  : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                  ? 'bg-orange-500/20 border border-orange-400/30' 
+                  : 'bg-red-500/20 border border-red-400/30'
               }`}
               role="alert"
               aria-live="polite"
@@ -197,8 +197,8 @@ export default function SignUp() {
               />
               <span className={`text-sm font-medium ${
                 rateLimited 
-                  ? 'text-orange-800 dark:text-orange-300' 
-                  : 'text-red-800 dark:text-red-300'
+                  ? 'text-orange-200' 
+                  : 'text-red-200'
               }`}>
                 {error}
               </span>
@@ -318,7 +318,7 @@ export default function SignUp() {
         >
           <div className="flex items-start space-x-3">
             <Shield className="h-5 w-5 text-medflow-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="text-sm text-medflow-text-secondary">
               <p className="font-medium mb-1">Protecția datelor medicale</p>
               <p className="text-xs leading-relaxed">
                 Prin crearea contului, confirmați că sunteți un profesionist medical autorizat 
@@ -334,7 +334,7 @@ export default function SignUp() {
         <motion.button
           type="submit"
           disabled={loading || rateLimited}
-          className="w-full bg-medflow-primary hover:bg-medflow-secondary text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+          className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
         >
@@ -357,13 +357,13 @@ export default function SignUp() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-center text-sm border-t border-gray-200 dark:border-gray-700 pt-4"
+          className="text-center text-sm border-t border-white/10 pt-4"
         >
-          <div className="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center justify-center space-x-2 text-medflow-text-secondary">
             <span>Aveți deja cont?</span>
             <Link 
               to="/signin" 
-              className="text-medflow-primary hover:text-medflow-secondary transition-colors duration-200 font-medium"
+              className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
             >
               Autentificați-vă
             </Link>
@@ -376,7 +376,7 @@ export default function SignUp() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400"
+        className="mt-6 text-center text-xs text-medflow-text-muted"
       >
         <p>Datele sunt criptate și protejate conform standardelor medicale și GDPR</p>
       </motion.div>

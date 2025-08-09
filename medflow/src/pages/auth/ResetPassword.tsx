@@ -106,10 +106,10 @@ export default function ResetPassword() {
             <KeyRound className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-medflow-text-primary">
               Resetare parolă
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-medflow-text-secondary mt-1">
               Recuperați accesul la contul MedFlow
             </p>
           </div>
@@ -131,7 +131,7 @@ export default function ResetPassword() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="card space-y-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-xl border border-medflow-primary/10" 
+        className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
         onSubmit={handleSubmit}
         noValidate
       >
@@ -143,7 +143,7 @@ export default function ResetPassword() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center space-x-3 p-4 rounded-lg bg-emerald-50 border border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"
+              className="flex items-center space-x-3 p-4 rounded-lg bg-emerald-500/20 border border-emerald-400/30"
               role="alert"
               aria-live="polite"
             >
@@ -151,7 +151,7 @@ export default function ResetPassword() {
                 className="h-5 w-5 flex-shrink-0 text-emerald-600" 
                 aria-hidden="true" 
               />
-              <div className="text-sm text-emerald-800 dark:text-emerald-300">
+              <div className="text-sm text-emerald-200">
                 <p className="font-medium mb-1">Email trimis cu succes!</p>
                 <p className="text-xs">{message}</p>
               </div>
@@ -169,8 +169,8 @@ export default function ResetPassword() {
               transition={{ duration: 0.3 }}
               className={`flex items-center space-x-3 p-4 rounded-lg ${
                 rateLimited 
-                  ? 'bg-orange-50 border border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' 
-                  : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                  ? 'bg-orange-500/20 border border-orange-400/30' 
+                  : 'bg-red-500/20 border border-red-400/30'
               }`}
               role="alert"
               aria-live="polite"
@@ -183,8 +183,8 @@ export default function ResetPassword() {
               />
               <span className={`text-sm font-medium ${
                 rateLimited 
-                  ? 'text-orange-800 dark:text-orange-300' 
-                  : 'text-red-800 dark:text-red-300'
+                  ? 'text-orange-200' 
+                  : 'text-red-200'
               }`}>
                 {error}
               </span>
@@ -198,11 +198,11 @@ export default function ResetPassword() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+            className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4"
           >
             <div className="flex items-start space-x-3">
               <Mail className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-              <div className="text-sm text-blue-800 dark:text-blue-300">
+              <div className="text-sm text-blue-200">
                 <p className="font-medium mb-1">Cum funcționează resetarea</p>
                 <p className="text-xs leading-relaxed">
                   Introduceți emailul asociat contului MedFlow. Veți primi un link securizat 
@@ -240,7 +240,7 @@ export default function ResetPassword() {
           <motion.button
             type="submit"
             disabled={loading || rateLimited || !email.trim()}
-            className="w-full bg-medflow-primary hover:bg-medflow-secondary text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+            className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
             whileHover={{ scale: loading ? 1 : 1.02 }}
             whileTap={{ scale: loading ? 1 : 0.98 }}
           >
@@ -273,7 +273,7 @@ export default function ResetPassword() {
                 setMessage(null)
                 setEmail('')
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-3"
+              className="w-full bg-medflow-surface border border-white/20 text-medflow-text-primary hover:bg-medflow-surface-elevated font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-3"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -288,19 +288,19 @@ export default function ResetPassword() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm border-t border-gray-200 dark:border-gray-700 pt-4"
+          className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm border-t border-white/10 pt-4"
         >
           <Link 
             to="/signin" 
-            className="flex items-center space-x-2 text-medflow-primary hover:text-medflow-secondary transition-colors duration-200 font-medium"
+            className="flex items-center space-x-2 text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span>Înapoi la autentificare</span>
           </Link>
-          <div className="hidden sm:block text-gray-300 dark:text-gray-600">|</div>
+          <div className="hidden sm:block text-medflow-text-muted">|</div>
           <Link 
             to="/signup" 
-            className="text-gray-600 dark:text-gray-400 hover:text-medflow-primary transition-colors duration-200"
+            className="text-medflow-text-secondary hover:text-medflow-accent transition-colors duration-200"
           >
             Creează cont nou
           </Link>
@@ -312,7 +312,7 @@ export default function ResetPassword() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400"
+        className="mt-6 text-center text-xs text-medflow-text-muted"
       >
         <p>Link-urile de resetare sunt securizate și expiră automat pentru protecția contului</p>
       </motion.div>

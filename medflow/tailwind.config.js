@@ -38,6 +38,30 @@ export default {
           success: '#10b981',
           info: '#3b82f6',
           neutral: '#6b7280',
+        },
+        
+        // Enhanced contrast dark gradient theme system
+        'medflow': {
+          'gradient': 'var(--medflow-gradient-primary)',
+          'accent': {
+            DEFAULT: 'rgb(var(--medflow-accent) / <alpha-value>)',
+            'hover': 'rgb(var(--medflow-accent-hover) / <alpha-value>)',
+            'dark': 'rgb(var(--medflow-accent-dark) / <alpha-value>)',
+          },
+          'text': {
+            'primary': 'var(--medflow-text-primary)',
+            'secondary': 'var(--medflow-text-secondary)',
+            'muted': 'var(--medflow-text-muted)',
+            'high-contrast': '#FFFFFF',
+            'high-contrast-secondary': '#F8FAFC',
+            'high-contrast-muted': '#E5E7EB',
+          },
+          'surface': {
+            DEFAULT: 'rgb(var(--medflow-surface) / <alpha-value>)',
+            'elevated': 'rgb(var(--medflow-surface-elevated) / <alpha-value>)',
+            'high-contrast': 'rgba(30, 36, 58, 0.95)',
+            'elevated-high-contrast': 'rgba(45, 51, 73, 0.95)',
+          }
         }
       },
       animation: {

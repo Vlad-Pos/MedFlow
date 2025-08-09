@@ -8,13 +8,11 @@ import {
   Sun, 
   Moon, 
   User, 
+  Users,
   Calendar, 
-  BarChart3, 
-  MessageCircle, 
   LogOut,
   Home,
-  FileText,
-  CalendarCheck
+  FileText
 } from 'lucide-react'
 import medflowLogo from '../assets/medflow-logo.svg'
 
@@ -50,13 +48,36 @@ export default function Navbar() {
   }, [open])
 
   const navItems = [
-    { to: '/dashboard', label: 'Tablou de bord', icon: Home, description: 'Vizualizează programările și statisticile' },
-    { to: '/appointments', label: 'Programări', icon: Calendar, description: 'Gestionează programările pacienților' },
-    { to: '/reports', label: 'Rapoarte medicale', icon: FileText, description: 'Gestionează rapoartele de consultație' },
-    { to: '/monthly-review', label: 'Revizuire lunară', icon: CalendarCheck, description: 'Revizuiește și pregătește rapoartele pentru trimitere' },
-    { to: '/chatbot', label: 'Chat pacient', icon: MessageCircle, description: 'Comunică cu pacienții prin chat' },
-    { to: '/analytics', label: 'Analitica', icon: BarChart3, description: 'Analizează performanța cabinetului' },
-    { to: '/profile', label: 'Profil', icon: User, description: 'Gestionează profilul și setările' },
+    { 
+      to: '/dashboard', 
+      label: 'Dashboard', 
+      icon: Home, 
+      description: 'Prezentare generală și statistici rapide'
+    },
+    { 
+      to: '/appointments', 
+      label: 'Programări', 
+      icon: Calendar, 
+      description: 'Gestionează programările zilnice și săptămânale'
+    },
+    { 
+      to: '/patients', 
+      label: 'Pacienți', 
+      icon: Users, 
+      description: 'Gestionează informațiile și istoricul pacienților'
+    },
+    { 
+      to: '/reports', 
+      label: 'Rapoarte', 
+      icon: FileText, 
+      description: 'Generează și vizualizează rapoarte medicale'
+    },
+    { 
+      to: '/profile', 
+      label: 'Profil', 
+      icon: User, 
+      description: 'Gestionează profilul și setările contului'
+    },
   ]
 
   const handleLogout = async () => {
@@ -73,7 +94,10 @@ export default function Navbar() {
     <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 border-b border-gray-200/50 bg-white/60 backdrop-blur-md dark:bg-gray-950/70 dark:border-gray-800/50"
+      className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-md"
+      style={{ 
+        background: 'linear-gradient(135deg, rgba(29, 31, 33, 0.95), rgba(42, 45, 49, 0.95))'
+      }}
       role="banner"
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -160,10 +184,10 @@ export default function Navbar() {
               key={item.to}
               to={item.to}
               className={({ isActive }) => 
-                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2 ${
                   isActive 
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
+                    ? 'bg-medflow-accent/20 text-medflow-accent' 
+                    : 'text-medflow-text-secondary hover:text-medflow-text-primary hover:bg-white/5'
                 }`
               }
               aria-label={`${item.label} - ${item.description}`}
@@ -181,7 +205,7 @@ export default function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleThemeToggle}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="p-2 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2"
             aria-label={dark ? 'Comută la modul deschis' : 'Comută la modul întunecat'}
             aria-pressed={dark}
           >
@@ -204,7 +228,7 @@ export default function Navbar() {
           ) : (
             <div className="flex items-center gap-3">
               <Link 
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg" 
+                className="px-4 py-2 text-medflow-text-secondary hover:text-medflow-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2 rounded-lg" 
                 to="/signin"
                 aria-label="Autentificare în cont"
               >
@@ -215,7 +239,7 @@ export default function Navbar() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Link 
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" 
+                  className="px-4 py-2 bg-medflow-accent text-white rounded-lg hover:bg-medflow-accent-hover transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2" 
                   to="/signup"
                   aria-label="Creează cont nou"
                 >
@@ -230,7 +254,7 @@ export default function Navbar() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2"
           onClick={() => setOpen(o => !o)}
           aria-label={open ? 'Închide meniul' : 'Deschide meniul'}
           aria-expanded={open}
@@ -247,7 +271,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-t border-gray-200/50 bg-white/95 backdrop-blur-md dark:bg-gray-950/95 dark:border-gray-800/50 md:hidden overflow-hidden"
+            className="border-t border-white/10 bg-medflow-surface/95 backdrop-blur-md md:hidden overflow-hidden"
             id="mobile-menu"
             role="navigation"
             aria-label="Meniul mobil"
@@ -264,10 +288,10 @@ export default function Navbar() {
                     to={item.to}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) => 
-                      `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2 ${
                         isActive 
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' 
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
+                          ? 'bg-medflow-accent/20 text-medflow-accent' 
+                          : 'text-medflow-text-secondary hover:text-medflow-text-primary hover:bg-white/5'
                       }`
                     }
                     aria-label={`${item.label} - ${item.description}`}
@@ -278,14 +302,14 @@ export default function Navbar() {
                 </motion.div>
               ))}
               
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+              <div className="pt-4 border-t border-white/10">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Temă</span>
+                  <span className="text-sm text-medflow-text-secondary">Temă</span>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleThemeToggle}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="p-2 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2"
                     aria-label={dark ? 'Comută la modul deschis' : 'Comută la modul întunecat'}
                     aria-pressed={dark}
                   >
@@ -307,7 +331,7 @@ export default function Navbar() {
                 ) : (
                   <div className="flex flex-col gap-2 mt-2">
                     <Link 
-                      className="px-3 py-3 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg" 
+                      className="px-3 py-3 text-medflow-text-secondary hover:text-medflow-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2 rounded-lg" 
                       to="/signin"
                       onClick={() => setOpen(false)}
                       aria-label="Autentificare în cont"
@@ -315,7 +339,7 @@ export default function Navbar() {
                       Autentificare
                     </Link>
                     <Link 
-                      className="px-3 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" 
+                      className="px-3 py-3 bg-medflow-accent text-white rounded-lg hover:bg-medflow-accent-hover transition-colors text-center focus:outline-none focus:ring-2 focus:ring-medflow-accent focus:ring-offset-2" 
                       to="/signup"
                       onClick={() => setOpen(false)}
                       aria-label="Creează cont nou"

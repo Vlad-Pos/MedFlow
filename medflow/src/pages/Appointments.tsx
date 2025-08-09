@@ -28,8 +28,9 @@ import NotificationStatus from '../components/NotificationStatus'
 import PatientFlagIndicator from '../components/PatientFlagIndicator'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, List, Plus, FileText, User, XCircle, Edit, CheckCircle, Clock, AlertTriangle, ClipboardList, Files } from 'lucide-react'
+import { Calendar, List, Plus, FileText, User, XCircle, Edit, CheckCircle, Clock, AlertTriangle, ClipboardList, Files, Search } from 'lucide-react'
 import { formatDateTime } from '../utils/dateUtils'
+import PatientSearch from '../components/PatientSearch'
 
 interface DocMeta { id: string; fileUrl: string; fileName: string; contentType: string; createdAt?: any }
 
@@ -315,7 +316,7 @@ export default function Appointments() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-medflow-text-secondary">
             Se încarcă programările...
           </p>
         </div>
@@ -329,21 +330,21 @@ export default function Appointments() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 text-medflow-text-primary"
       >
         {/* Enhanced Header with MedFlow Branding */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex items-center space-x-4">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-3xl font-bold text-medflow-text-primary">
               Gestionare Programări
             </h2>
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            <div className="flex items-center space-x-2 bg-medflow-surface/60 backdrop-blur-sm rounded-lg p-1">
               <button
                 onClick={() => setView('calendar')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'calendar'
-                    ? 'bg-medflow-primary text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    ? 'bg-medflow-accent text-white'
+                    : 'text-medflow-text-secondary hover:text-medflow-text-primary'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -353,8 +354,8 @@ export default function Appointments() {
                 onClick={() => setView('list')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'list'
-                    ? 'bg-medflow-primary text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    ? 'bg-medflow-accent text-white'
+                    : 'text-medflow-text-secondary hover:text-medflow-text-primary'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -364,8 +365,8 @@ export default function Appointments() {
                 onClick={() => setView('templates')}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'templates'
-                    ? 'bg-medflow-primary text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    ? 'bg-medflow-accent text-white'
+                    : 'text-medflow-text-secondary hover:text-medflow-text-primary'
                 }`}
               >
                 <Files className="w-4 h-4" />
@@ -375,7 +376,7 @@ export default function Appointments() {
           </div>
           
           <button 
-            className="flex items-center space-x-2 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors shadow-md hover:shadow-lg"
+            className="flex items-center space-x-2 px-4 py-2 bg-medflow-accent text-white rounded-lg hover:bg-medflow-accent-hover transition-colors shadow-md hover:shadow-lg"
             onClick={() => { setSelectedId(undefined); setCreatingAt(new Date().toISOString().slice(0,16)) }}
           >
             <Plus className="w-4 h-4" />
@@ -390,20 +391,40 @@ export default function Appointments() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
+              className="flex items-center space-x-3 p-4 bg-red-500/20 border border-red-400/30 rounded-lg"
             >
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
               <div>
-                <h4 className="font-medium text-red-800 dark:text-red-300">
+                <h4 className="font-medium text-red-200">
                   Eroare de încărcare
                 </h4>
-                <p className="text-sm text-red-700 dark:text-red-400">
+                <p className="text-sm text-red-200">
                   {error}
                 </p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Patient Search for New Appointments */}
+        <div className="bg-medflow-surface/60 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-medflow-text-primary mb-4 flex items-center space-x-2">
+            <Search className="w-5 h-5 text-medflow-accent" />
+            <span>Programare pentru pacient existent</span>
+          </h3>
+          <PatientSearch 
+            onPatientSelect={(patient) => {
+              // Pre-fill appointment form with patient data
+              // This would require updating AppointmentForm to accept patient data
+              console.log('Selected patient for appointment:', patient)
+              // Future: setSelectedPatientForAppointment(patient)
+            }}
+            placeholder="Căutați pacient pentru a crea programare..."
+          />
+          <p className="text-sm text-medflow-text-muted mt-2">
+            Selectați un pacient existent pentru a pre-completa informațiile de contact în formularul de programare.
+          </p>
+        </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar/List View */}
@@ -426,14 +447,14 @@ export default function Appointments() {
             />
           ) : (
             <div className="space-y-4">
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg overflow-hidden">
+              <div className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg overflow-hidden">
                 <div className="space-y-1">
                   {appointments.map((appointment) => (
                     <motion.div
                       key={appointment.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+                      className="flex items-center justify-between p-4 hover:bg-medflow-surface/80 transition-colors border-b border-white/10 last:border-b-0"
                     >
                       <div className="flex items-center space-x-4 flex-1 min-w-0">
                         <div className="w-12 h-12 bg-medflow-primary/10 rounded-full flex items-center justify-center">
@@ -441,7 +462,7 @@ export default function Appointments() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-3 mb-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                            <h3 className="font-semibold text-medflow-text-primary truncate">
                               {appointment.patientName}
                             </h3>
                             <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
@@ -449,11 +470,11 @@ export default function Appointments() {
                               <span>{getStatusText(appointment.status)}</span>
                             </span>
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-medflow-text-secondary">
                             📅 {formatDateTime(appointment.dateTime)}
                           </div>
                           {appointment.symptoms && (
-                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate">
+                            <div className="text-xs text-medflow-text-muted mt-1 truncate">
                               {appointment.symptoms}
                             </div>
                           )}
@@ -559,7 +580,7 @@ export default function Appointments() {
             className="card sticky top-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-medflow-text-primary">
                 {selectedId ? 'Editează programare' : 'Creează programare'}
               </h3>
               {selectedId && (

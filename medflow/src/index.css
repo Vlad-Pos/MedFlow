@@ -2,12 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enhanced Base styles and CSS variables for MedFlow */
+/* Core visual style inspired by n8n.io */
 :root {
-  /* MedFlow Brand Colors */
-  --medflow-background: #4c5165;
-  --medflow-primary: #9e85b0;
-  --medflow-secondary: #9479a8;
+  /* n8n.io-inspired Dark Theme Colors */
+  --medflow-gradient-primary: linear-gradient(135deg, #1d1f21, #2a2d31);
+  --medflow-dark-bg: #0f0f10;
+  --medflow-surface-dark: #1a1b1e;
+  --medflow-surface-elevated: #24262a;
+  --medflow-accent-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
+  --medflow-text-glow: rgba(255, 255, 255, 0.9);
+  
+  /* Neon accent colors inspired by n8n */
+  --medflow-neon-primary: #ff7e5f;
+  --medflow-neon-secondary: #feb47b;
+  --medflow-neon-blue: #4a9eff;
+  --medflow-neon-purple: #b084cc;
+  
+  /* ACCENT: Enhanced contrast lotus logo color - buttons, icons, interactive states */
+  --medflow-accent: 169 144 187;
+  --medflow-accent-hover: 189 163 209;
+  --medflow-accent-dark: 148 125 163;
+  
+  /* TEXT: Enhanced contrast light colors for dark backgrounds */
+  --medflow-text-primary: #FFFFFF;
+  --medflow-text-secondary: #F1F5F9;
+  --medflow-text-muted: #D1D5DB;
+  
+  /* SUPPORTING: Enhanced contrast dark neutrals */
+  --medflow-surface: 42 48 70;
+  --medflow-surface-elevated: 57 63 84;
+  
+  /* Legacy variables maintained for compatibility */
+  --medflow-background: #32384E;
+  --medflow-primary: #9F86B1;
+  --medflow-secondary: #8A7399;
   
   /* Legacy compatibility */
   --medflow-blue: #3B82F6; /* blue-500 */
@@ -15,19 +43,19 @@
   --medflow-white: #FFFFFF;
   
   /* Enhanced MedFlow gradients */
-  --medflow-gradient: linear-gradient(135deg, var(--medflow-primary) 0%, var(--medflow-secondary) 100%);
-  --medflow-gradient-subtle: linear-gradient(135deg, rgba(158, 133, 176, 0.1) 0%, rgba(148, 121, 168, 0.1) 100%);
-  --medflow-gradient-dark: linear-gradient(135deg, #3a3d4d 0%, #2d3040 100%);
+  --medflow-gradient: var(--medflow-gradient-primary);
+  --medflow-gradient-subtle: linear-gradient(135deg, rgba(159, 134, 177, 0.1) 0%, rgba(138, 115, 153, 0.1) 100%);
+  --medflow-gradient-dark: var(--medflow-gradient-primary);
   
-  /* Light mode MedFlow theme */
-  --medflow-bg-primary: #ffffff;
-  --medflow-bg-secondary: #f8fafc;
-  --medflow-bg-tertiary: #f1f5f9;
-  --medflow-text-primary: #1e293b;
-  --medflow-text-secondary: #64748b;
-  --medflow-text-tertiary: #94a3b8;
-  --medflow-border: #e2e8f0;
-  --medflow-border-hover: var(--medflow-primary);
+  /* Dark theme base colors */
+  --medflow-bg-primary: rgba(50, 56, 78, 0.95);
+  --medflow-bg-secondary: rgba(65, 71, 92, 0.9);
+  --medflow-bg-tertiary: rgba(93, 93, 117, 0.8);
+  --medflow-text-primary: #FFFFFF;
+  --medflow-text-secondary: #F1F5F9;
+  --medflow-text-tertiary: #D1D5DB;
+  --medflow-border: rgba(255, 255, 255, 0.15);
+  --medflow-border-hover: var(--medflow-accent);
   
   /* Responsive spacing */
   --spacing-xs: 0.5rem;
@@ -63,9 +91,9 @@
   --medflow-bg-primary: #0f172a;
   --medflow-bg-secondary: #1e293b;
   --medflow-bg-tertiary: #334155;
-  --medflow-text-primary: #f1f5f9;
-  --medflow-text-secondary: #cbd5e1;
-  --medflow-text-tertiary: #94a3b8;
+  --medflow-text-primary: #FFFFFF;
+  --medflow-text-secondary: #F8FAFC;
+  --medflow-text-tertiary: #E2E8F0;
   --medflow-border: #334155;
   --medflow-border-hover: var(--medflow-primary);
   
@@ -84,15 +112,20 @@ html, body, #root {
 }
 
 body {
-  @apply text-gray-900 dark:text-gray-100;
-  background: var(--medflow-gradient-subtle), linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background: var(--medflow-gradient-primary);
+  background-attachment: fixed;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
   font-feature-settings: 'rlig' 1, 'calt' 1;
-  transition: background var(--medflow-transition-slow);
+  transition: background 0.5s ease;
+  margin: 0;
+  padding: 0;
 }
 
 /* Dark mode body styling with MedFlow theme */
 .dark body {
-  background: var(--medflow-gradient-dark), linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background: var(--medflow-gradient-primary);
 }
 
 /* Smooth scrolling */
@@ -167,11 +200,13 @@ html {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-medflow-primary text-white hover:bg-medflow-secondary focus:ring-medflow-primary shadow-sm hover:shadow-md;
+  @apply bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-medflow-accent/30 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-600 shadow-sm hover:shadow-md;
+  @apply bg-medflow-surface/80 border border-white/20 text-medflow-text-primary hover:bg-medflow-surface-elevated/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medflow-accent/30 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-ghost {
@@ -179,8 +214,9 @@ html {
 }
 
 .input {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
+  @apply bg-medflow-surface/80 border border-white/20 text-medflow-text-primary placeholder-medflow-text-muted focus:border-medflow-accent focus:ring-2 focus:ring-medflow-accent/30 w-full rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none transition-all duration-200;
   min-height: var(--touch-target-min);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Mobile-first input styles */
@@ -196,7 +232,8 @@ html {
 }
 
 .card {
-  @apply rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:bg-gray-900 dark:border-gray-800 transition-all duration-200 hover:shadow-md;
+  @apply bg-medflow-surface/80 backdrop-blur-sm border border-white/10 text-medflow-text-primary rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .label {
@@ -347,15 +384,18 @@ html {
 }
 
 .status-scheduled {
-  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300;
+  @apply bg-blue-500/25 text-blue-200 border-blue-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .status-completed {
-  @apply bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300;
+  @apply bg-green-500/25 text-green-200 border-green-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .status-no-show {
-  @apply bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300;
+  @apply bg-red-500/25 text-red-200 border-red-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Loading spinner */
@@ -504,13 +544,42 @@ html {
   }
 }
 
-/* Accessibility styles */
+/* Enhanced accessibility and contrast styles */
 .high-contrast {
   filter: contrast(150%) brightness(110%);
 }
 
 .high-contrast * {
   border-width: 2px !important;
+}
+
+/* High contrast text utilities */
+.text-high-contrast {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.text-high-contrast-secondary {
+  color: #F8FAFC !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.text-high-contrast-muted {
+  color: #E5E7EB !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Enhanced surface contrasts */
+.surface-high-contrast {
+  background-color: rgba(30, 36, 58, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px);
+}
+
+.surface-elevated-high-contrast {
+  background-color: rgba(45, 51, 73, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(12px);
 }
 
 .reduced-motion * {
@@ -562,6 +631,95 @@ html {
   .text-large {
     font-size: 1.25rem;
     line-height: 1.75rem;
+  }
+}
+
+/* n8n.io-inspired section styling */
+.section {
+  padding: 80px 10%;
+  transition: background 0.5s ease;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+button {
+  border-radius: 12px;
+  padding: 14px 28px;
+  background: var(--medflow-accent-gradient);
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+}
+
+/* Fade-in animation classes */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero title animation support */
+.hero-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced mobile responsiveness for n8n.io style */
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 5%;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.1;
+  }
+  
+  .fade-in {
+    transform: translateY(15px);
+  }
+  
+  /* Optimize animations for mobile */
+  button {
+    transform: none !important;
+  }
+  
+  button:active {
+    transform: scale(0.95) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 40px 4%;
+  }
+  
+  .hero-title {
+    font-size: 2rem !important;
+  }
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  button:hover {
+    transform: none;
+  }
+  
+  .fade-in:hover {
+    transform: translateY(0);
   }
 }
 

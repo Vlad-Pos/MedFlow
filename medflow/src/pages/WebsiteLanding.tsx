@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { initAllAnimations } from '../utils/n8nAnimations'
+import { initPerformanceOptimizations } from '../utils/performance'
 import { 
   ArrowRight, 
   Calendar, 
@@ -32,6 +34,10 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import medflowLogo from '../assets/medflow-logo.svg'
+import EarlyAccessForm from '../components/EarlyAccessForm'
+import N8nFeatureCard from '../components/N8nFeatureCard'
+import N8nButton from '../components/N8nButton'
+import { HeroBackground, ScrollEffectGraphics, SectionIllustrations, NeonIconSet } from '../components/N8nVisualEffects'
 
 export default function WebsiteLanding() {
   const { user } = useAuth()
@@ -48,6 +54,17 @@ export default function WebsiteLanding() {
   const parallaxY2 = useTransform(scrollY, [0, 1000], [0, -150])
   const parallaxY3 = useTransform(scrollY, [0, 1000], [0, -100])
   
+  // Initialize n8n.io-inspired animations and performance optimizations
+  useEffect(() => {
+    const cleanupAnimations = initAllAnimations();
+    const cleanupPerformance = initPerformanceOptimizations();
+    
+    return () => {
+      cleanupAnimations();
+      cleanupPerformance();
+    };
+  }, []);
+
   // Cycle through features
   useEffect(() => {
     const interval = setInterval(() => {
@@ -56,81 +73,58 @@ export default function WebsiteLanding() {
     return () => clearInterval(interval)
   }, [])
 
-  // Features with Romanian content
+  // Features with honest descriptions
   const features = [
     {
       icon: Calendar,
-      title: 'Gestionarea Programărilor',
-      description: 'Sistem inteligent de programări cu calendar sincronizat, notificări automate și gestionare conflicte în timp real.',
-      benefit: 'Economie 3h/zi'
+      title: 'Calendar programări',
+      description: 'Programare și vizualizare programări cu notificări de bază. Interface simplu pentru gestionarea zilnică.',
+      benefit: 'Disponibil în beta'
     },
     {
       icon: Users,
-      title: 'Dosare Digitale Pacienți',
-      description: 'Evidență completă digitală cu istoric medical, documente securizate și acces rapid la informații critice.',
-      benefit: '100% paperless'
+      title: 'Gestionare pacienți',
+      description: 'Stocare informații de contact și istoric basic. Căutare rapidă și organizare simplă a datelor.',
+      benefit: 'Funcții esențiale'
     },
     {
       icon: FileText,
-      title: 'Rapoarte Finale Pacienți',
-      description: 'Generare automată de rapoarte medicale detaliate și transmitere securizată către autorități.',
-      benefit: 'Conformitate automată'
+      title: 'Rapoarte simple',
+      description: 'Export date în format CSV pentru programări și pacienți. Rapoarte complexe în dezvoltare.',
+      benefit: 'Export de bază'
     },
     {
       icon: BarChart3,
-      title: 'Submisii Guvernamentale',
-      description: 'Automatizare completă a raportării către autorități cu validare automată și tracking status.',
-      benefit: 'Zero erori administrative'
+      title: 'Statistici practice',
+      description: 'Vizualizare metrici simpli despre programări săptămânale și lunare. Dashboard cu informații esențiale.',
+      benefit: 'Metrici de bază'
     }
   ]
 
-  // Efficiency metrics
+  // Realistic metrics
   const metrics = [
-    { number: '3h', label: 'Timp economisit zilnic', icon: Clock },
-    { number: '90%', label: 'Reducere erori administrative', icon: CheckCircle },
+    { number: '15min', label: 'Timp mediu de setup', icon: Clock },
+    { number: 'Beta', label: 'Versiune curentă', icon: CheckCircle },
     { number: '100%', label: 'Conformitate GDPR', icon: Shield },
-    { number: '2.5x', label: 'Creștere productivitate', icon: BarChart3 }
+    { number: '48h', label: 'Timp răspuns suport', icon: BarChart3 }
   ]
 
-  // Testimonials with professional tone
-  const testimonials = [
-    {
-      name: 'Dr. Elena Marinescu',
-      role: 'Medic de Familie',
-      location: 'București',
-      text: 'MedFlow mi-a simplificat complet gestionarea cabinetului. Programările sunt automate, dosarele pacienților complet digitalizate, iar raportarea către autorități se face cu un click.',
-      rating: 5,
-      metric: '3h/zi economisit'
-    },
-    {
-      name: 'Dr. Andrei Popescu',
-      role: 'Director Medical',
-      location: 'Cluj-Napoca',
-      text: 'Securitatea datelor și conformitatea GDPR sunt impecabile. Echipa noastră s-a adaptat rapid, iar eficiența a crescut cu 40% în prima lună.',
-      rating: 5,
-      metric: '40% creștere eficiență'
-    },
-    {
-      name: 'Clinica Medicală Praxis',
-      role: 'Rețea de clinici',
-      location: 'România',
-      text: 'Am implementat MedFlow în toate cele 8 clinici. ROI-ul a fost atins în 2 luni, iar satisfacția medicilor a crescut semnificativ.',
-      rating: 5,
-      metric: 'ROI în 2 luni'
-    }
-  ]
+  // Removed fake testimonials - will be replaced with early access section
 
   return (
-    <div className="min-h-screen bg-white">
+    <div 
+      className="min-h-screen"
+      style={{ background: 'var(--medflow-gradient-primary)' }}
+    >
       {/* Header with navigation */}
       <motion.header 
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         style={{ 
           backdropFilter: `blur(${headerBlur}px)`,
-          backgroundColor: `rgba(255, 255, 255, ${headerOpacity})`
+          backgroundColor: `rgba(50, 56, 78, ${headerOpacity * 0.95})`
         }}
-        className="fixed top-0 w-full z-50 border-b border-gray-100 shadow-sm transition-all duration-300"
+        className="fixed top-0 w-full z-50 border-b border-white/10 shadow-sm transition-all duration-300"
         role="banner"
         aria-label="Navigație principală MedFlow"
       >
@@ -150,10 +144,10 @@ export default function WebsiteLanding() {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Meniu principal">
-              <a href="#home" className="text-gray-600 hover:text-[#32384E] transition-colors font-medium">Acasă</a>
-              <a href="#features" className="text-gray-600 hover:text-[#32384E] transition-colors font-medium">Funcționalități</a>
-              <a href="#demo" className="text-gray-600 hover:text-[#32384E] transition-colors font-medium">Demo</a>
-              <a href="#contact" className="text-gray-600 hover:text-[#32384E] transition-colors font-medium">Contact</a>
+              <a href="#home" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors font-medium">Acasă</a>
+              <a href="#features" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors font-medium">Funcționalități</a>
+              <a href="#demo" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors font-medium">Demo</a>
+              <a href="#contact" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors font-medium">Contact</a>
             </nav>
 
             {/* CTA Buttons */}
@@ -169,7 +163,7 @@ export default function WebsiteLanding() {
                 <>
                   <Link
                     to="/signin"
-                    className="text-[#32384E] hover:text-[#41475C] transition-colors font-medium"
+                    className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors font-medium"
                   >
                     Autentificare
                   </Link>
@@ -177,7 +171,7 @@ export default function WebsiteLanding() {
                     to="/signup"
                     className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
                   >
-                    Încearcă gratuit
+                    Înregistrează-te pentru beta
                   </Link>
                 </>
               )}
@@ -188,7 +182,7 @@ export default function WebsiteLanding() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-gray-600 hover:text-[#32384E]"
+                className="p-2 rounded-lg text-medflow-text-secondary hover:text-medflow-text-primary"
                 aria-label={mobileMenuOpen ? "Închide meniul" : "Deschide meniul"}
                 aria-expanded={mobileMenuOpen}
               >
@@ -204,21 +198,21 @@ export default function WebsiteLanding() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="md:hidden border-t border-gray-100 py-4"
+                className="md:hidden border-t border-white/10 py-4"
               >
                 <div className="flex flex-col space-y-4">
-                  <a href="#home" className="text-gray-600 hover:text-[#32384E] transition-colors">Acasă</a>
-                  <a href="#features" className="text-gray-600 hover:text-[#32384E] transition-colors">Funcționalități</a>
-                  <a href="#demo" className="text-gray-600 hover:text-[#32384E] transition-colors">Demo</a>
-                  <a href="#contact" className="text-gray-600 hover:text-[#32384E] transition-colors">Contact</a>
+                  <a href="#home" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors">Acasă</a>
+                  <a href="#features" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors">Funcționalități</a>
+                  <a href="#demo" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors">Demo</a>
+                  <a href="#contact" className="text-medflow-text-secondary hover:text-medflow-text-primary transition-colors">Contact</a>
                   {!user && (
-                    <div className="flex flex-col space-y-2 pt-4 border-t border-gray-100">
-                      <Link to="/signin" className="text-[#32384E] font-medium">Autentificare</Link>
+                    <div className="flex flex-col space-y-2 pt-4 border-t border-white/10">
+                      <Link to="/signin" className="text-medflow-text-secondary font-medium">Autentificare</Link>
                       <Link 
                         to="/signup" 
                         className="bg-gradient-to-r from-[#32384E] to-[#5D5D75] text-white px-4 py-2 rounded-lg text-center font-medium"
                       >
-                        Încearcă gratuit
+                        Înregistrează-te pentru beta
                       </Link>
                     </div>
                   )}
@@ -242,34 +236,23 @@ export default function WebsiteLanding() {
           className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 font-medium flex items-center space-x-2"
         >
           <Play className="w-4 h-4" />
-          <span>Încearcă demo-ul</span>
+          <span>Explorează platforma</span>
         </motion.button>
       </motion.div>
 
-      {/* Hero Section */}
+      {/* Hero Section with n8n.io-inspired styling */}
       <motion.section 
         id="home"
         style={{ y: heroY }}
-        className="pt-24 pb-20 relative overflow-hidden"
+        className="pt-24 pb-20 relative overflow-hidden section fade-in"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         role="main"
         aria-labelledby="hero-title"
       >
-        {/* Enhanced Gradient Background with Parallax */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#32384E]/10 via-[#41475C]/5 to-[#5D5D75]/10"></div>
-        <motion.div 
-          style={{ y: parallaxY1 }}
-          className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-[#9F86B1]/20 to-[#32384E]/10 rounded-full blur-3xl"
-        />
-        <motion.div 
-          style={{ y: parallaxY2 }}
-          className="absolute bottom-40 right-32 w-80 h-80 bg-gradient-to-r from-[#5D5D75]/15 to-[#41475C]/10 rounded-full blur-2xl"
-        />
-        <motion.div 
-          style={{ y: parallaxY3 }}
-          className="absolute top-60 right-20 w-64 h-64 bg-gradient-to-r from-[#32384E]/10 to-[#9F86B1]/15 rounded-full blur-xl"
-        />
+        {/* Enhanced n8n.io-inspired background with visual effects */}
+        <HeroBackground />
+        <ScrollEffectGraphics />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -287,20 +270,20 @@ export default function WebsiteLanding() {
                 <div className="w-6 h-6 bg-gradient-to-r from-[#9F86B1] to-[#32384E] rounded-full flex items-center justify-center">
                   <img src={medflowLogo} alt="MedFlow" className="w-4 h-4 filter brightness-0 invert" />
                 </div>
-                <span className="text-[#32384E] font-bold text-base">Platforma medicală 100% românească</span>
+                <span className="text-[#32384E] font-bold text-base">Platformă în dezvoltare - Acces timpuriu disponibil</span>
                 <div className="w-2 h-2 bg-[#9F86B1] rounded-full animate-pulse"></div>
               </motion.div>
 
-              <h1 id="hero-title" className="text-5xl md:text-7xl font-extrabold text-gray-900 leading-[0.95] mb-8 tracking-tight">
+              <h1 id="hero-title" className="hero-title text-5xl md:text-7xl font-extrabold text-white leading-[0.95] mb-8 tracking-tight">
                 Gestionarea
-                <span className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] bg-clip-text text-transparent"> medicală</span>
+                <span className="bg-gradient-to-r from-[#ff7e5f] via-[#feb47b] to-[#4a9eff] bg-clip-text text-transparent"> medicală</span>
                 <br />
-                <span className="text-4xl md:text-6xl font-bold text-gray-700">simplificată</span>
+                <span className="text-4xl md:text-6xl font-bold text-gray-100">simplificată</span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed font-light max-w-2xl">
-                Transformăm practica medicală prin digitalizare completă. 
-                <strong className="font-semibold text-gray-800">Gestionați programările și dosarele pacienților</strong> într-o singură platformă securizată și conformă GDPR.
+              <p className="text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed font-light max-w-2xl">
+                Testați viitorul gestionării practice medicale. Platformă în faza beta cu funcționalități 
+                de bază implementate pentru <strong className="font-semibold text-white">calendar programări și gestionare pacienți</strong>.
               </p>
               
               {/* Key Benefits */}
@@ -308,7 +291,7 @@ export default function WebsiteLanding() {
                 {[
                   { icon: Calendar, text: 'Programări automate', color: 'text-[#32384E]', bg: 'bg-[#32384E]/5', gradient: 'from-[#32384E] to-[#9F86B1]' },
                   { icon: Shield, text: 'GDPR compliant', color: 'text-[#41475C]', bg: 'bg-[#41475C]/5', gradient: 'from-[#41475C] to-[#32384E]' },
-                  { icon: Clock, text: 'Economie 3h/zi', color: 'text-[#5D5D75]', bg: 'bg-[#5D5D75]/5', gradient: 'from-[#5D5D75] to-[#9F86B1]' },
+                  { icon: Clock, text: 'Eficiență îmbunătățită', color: 'text-[#5D5D75]', bg: 'bg-[#5D5D75]/5', gradient: 'from-[#5D5D75] to-[#9F86B1]' },
                   { icon: Users, text: 'Dosare digitale', color: 'text-[#4D5266]', bg: 'bg-[#4D5266]/5', gradient: 'from-[#4D5266] to-[#32384E]' }
                 ].map((benefit, index) => (
                   <motion.div
@@ -358,7 +341,7 @@ export default function WebsiteLanding() {
                         to="/signup"
                         className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[#32384E]/25 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
                       >
-                        <span className="relative z-10">Încearcă gratuit acum</span>
+                        <span className="relative z-10">Înregistrează-te pentru beta</span>
                         <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
                         <div className="absolute inset-0 bg-gradient-to-r from-[#41475C] via-[#5D5D75] to-[#32384E] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </Link>
@@ -371,7 +354,7 @@ export default function WebsiteLanding() {
                       className="group inline-flex items-center justify-center px-10 py-5 border-2 border-[#32384E] text-[#32384E] text-xl font-bold rounded-2xl hover:bg-[#32384E] hover:text-white transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-[#32384E]/20"
                     >
                       <Play className="mr-3 w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
-                      Vezi demo live
+                      Explorează funcționalitățile
                     </motion.a>
                   </>
                 )}
@@ -448,11 +431,14 @@ export default function WebsiteLanding() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/* Features Section with n8n.io styling */}
       <motion.section 
         id="features"
-        style={{ y: featuresY }}
-        className="py-20 bg-gray-50"
+        style={{ 
+          y: featuresY,
+          background: 'linear-gradient(135deg, #1a1b1e, #24262a)'
+        }}
+        className="py-20 section fade-in"
         role="region"
         aria-labelledby="features-title"
       >
@@ -463,11 +449,11 @@ export default function WebsiteLanding() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 id="features-title" className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
+            <h2 id="features-title" className="text-4xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
               Funcționalități
-              <span className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] bg-clip-text text-transparent"> esențiale</span>
+              <span className="bg-gradient-to-r from-[#ff7e5f] via-[#feb47b] to-[#4a9eff] bg-clip-text text-transparent"> esențiale</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-light leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
               Toate instrumentele necesare pentru gestionarea eficientă a cabinetului medical într-o singură platformă intuitivă și sigură
             </p>
             
@@ -489,33 +475,32 @@ export default function WebsiteLanding() {
             </div>
           </motion.div>
 
+          {/* Section illustration */}
+          <div className="mb-12">
+            <SectionIllustrations variant="workflow" />
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
+              <N8nFeatureCard
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#32384E]/10 to-[#5D5D75]/10 rounded-lg mb-4">
-                  <feature.icon className="w-6 h-6 text-[#32384E]" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 mb-4">{feature.description}</p>
-                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-[#32384E]/10 to-[#5D5D75]/10 rounded-full">
-                  <span className="text-sm font-medium text-[#32384E]">{feature.benefit}</span>
-                </div>
-              </motion.div>
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                benefit={feature.benefit}
+                index={index}
+                isActive={index === activeFeature}
+              />
             ))}
           </div>
         </div>
       </motion.section>
 
-      {/* Efficiency Metrics Section */}
-      <motion.section className="py-20">
+      {/* Efficiency Metrics Section with n8n.io styling */}
+      <motion.section 
+        className="py-20 section fade-in"
+        style={{ background: 'linear-gradient(135deg, #0f0f10, #1a1b1e)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -523,11 +508,11 @@ export default function WebsiteLanding() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
               Creștere măsurabilă a
-              <span className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] bg-clip-text text-transparent"> productivității</span>
+              <span className="bg-gradient-to-r from-[#ff7e5f] via-[#feb47b] to-[#4a9eff] bg-clip-text text-transparent"> productivității</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 font-light max-w-3xl mx-auto leading-relaxed">
               Rezultate reale și măsurabile obținute de medicii care folosesc MedFlow zilnic
             </p>
             <div className="mt-8 inline-flex items-center space-x-2 bg-green-100 px-6 py-3 rounded-full">
@@ -554,7 +539,7 @@ export default function WebsiteLanding() {
                   y: -8,
                   transition: { duration: 0.2 }
                 }}
-                className="group text-center p-8 bg-white/60 backdrop-blur rounded-2xl border border-[#9F86B1]/10 hover:border-[#9F86B1]/30 hover:shadow-xl hover:shadow-[#9F86B1]/10 transition-all duration-300 cursor-pointer"
+                className="group text-center p-8 bg-medflow-surface/50 backdrop-blur rounded-2xl border border-[#9F86B1]/10 hover:border-[#9F86B1]/30 hover:shadow-xl hover:shadow-[#9F86B1]/10 transition-all duration-300 cursor-pointer"
               >
                 <motion.div 
                   className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#32384E]/10 via-[#9F86B1]/10 to-[#5D5D75]/10 rounded-full mx-auto mb-6 group-hover:from-[#9F86B1]/20 group-hover:via-[#32384E]/20 group-hover:to-[#5D5D75]/20 transition-all duration-300"
@@ -643,7 +628,7 @@ export default function WebsiteLanding() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="bg-white rounded-2xl p-8 shadow-xl">
+              <div className="bg-medflow-surface/50 rounded-2xl p-8 shadow-xl">
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center space-x-2 bg-green-100 px-4 py-2 rounded-full mb-4">
                     <CheckCircle className="w-5 h-5 text-green-600" />
@@ -659,7 +644,7 @@ export default function WebsiteLanding() {
                     { label: 'AES-256', status: 'Criptat', color: 'text-purple-600' },
                     { label: 'Uptime', status: '99.98%', color: 'text-orange-600' }
                   ].map((cert, index) => (
-                    <div key={index} className="text-center p-4 bg-gray-50 rounded-lg">
+                    <div key={index} className="text-center p-4 bg-medflow-surface/60 rounded-lg">
                       <div className="text-sm text-gray-600">{cert.label}</div>
                       <div className={`font-semibold ${cert.color}`}>{cert.status}</div>
                     </div>
@@ -671,7 +656,7 @@ export default function WebsiteLanding() {
         </div>
       </motion.section>
 
-      {/* Testimonials Section */}
+      {/* Early Access Section */}
       <motion.section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -681,42 +666,49 @@ export default function WebsiteLanding() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Ce spun
-              <span className="bg-gradient-to-r from-[#32384E] to-[#5D5D75] bg-clip-text text-transparent"> medicii</span>
+              Alătură-te programului de 
+              <span className="bg-gradient-to-r from-[#32384E] to-[#5D5D75] bg-clip-text text-transparent"> acces timpuriu</span>
             </h2>
-            <p className="text-lg text-gray-600">Experiențele reale ale profesioniștilor medicali care folosesc MedFlow</p>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Fii printre primii medici care testează și modelează viitorul gestionării digitale a practicii medicale.
+              Accesul timpuriu include suport dedicat și preț preferențial.
+            </p>
           </motion.div>
 
+          <div className="max-w-md mx-auto mb-16">
+            <EarlyAccessForm />
+          </div>
+          
+          {/* Benefits Grid */}
           <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
+            {[
+              { 
+                title: "Acces prioritar", 
+                desc: "Primii care testează funcționalitățile noi și oferă feedback pentru îmbunătățiri",
+                icon: "⚡"
+              },
+              { 
+                title: "Suport dedicat", 
+                desc: "Asistență directă de la echipa de dezvoltare pentru configurare și utilizare",
+                icon: "🛠️"
+              },
+              { 
+                title: "Preț redus", 
+                desc: "Tarife preferențiale pentru early adopters când platforma va fi lansată oficial",
+                icon: "💰"
+              }
+            ].map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                
-                <p className="text-gray-600 mb-6 italic">"{testimonial.text}"</p>
-                
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500">{testimonial.role}</div>
-                      <div className="text-sm text-gray-400">{testimonial.location}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-[#32384E]">{testimonial.metric}</div>
-                    </div>
-                  </div>
-                </div>
+                <div className="text-4xl mb-4">{benefit.icon}</div>
+                <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{benefit.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -791,7 +783,7 @@ export default function WebsiteLanding() {
             className="relative"
           >
             {/* Demo Container */}
-            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#9F86B1]/20">
+            <div className="bg-medflow-surface/50 rounded-3xl shadow-2xl overflow-hidden border border-[#9F86B1]/20">
               {/* Browser Header */}
               <div className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] p-6 text-white">
                 <div className="flex items-center justify-between">
@@ -811,82 +803,57 @@ export default function WebsiteLanding() {
                 </div>
               </div>
               
-              {/* Demo Content Area */}
-              <div className="relative bg-gradient-to-br from-gray-50 to-white p-12 min-h-[600px] flex flex-col items-center justify-center text-center">
-                {/* Animated Demo Placeholder */}
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.05, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{ 
-                    duration: 4, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-r from-[#32384E]/10 via-[#9F86B1]/10 to-[#5D5D75]/10 rounded-full mb-8 relative"
-                >
-                  <Play className="w-16 h-16 text-[#32384E]" />
+              <div className="p-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Funcționalități disponibile</h3>
+                    <ul className="space-y-3">
+                      {[
+                        'Calendar cu programări interactive',
+                        'Gestionare informații pacienți',
+                        'Export rapoarte în CSV/PDF',
+                        'Dashboard cu metrici esențiale',
+                        'Sincronizare în timp real'
+                      ].map((feature, index) => (
+                        <li key={index} className="flex items-center space-x-3">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <span className="text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   
-                  {/* Pulsing rings */}
-                  <div className="absolute inset-0 border-4 border-[#9F86B1]/30 rounded-full animate-ping"></div>
-                  <div className="absolute inset-4 border-2 border-[#32384E]/20 rounded-full animate-pulse"></div>
-                </motion.div>
-                
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                  Demo-ul interactiv MedFlow
-                </h3>
-                <p className="text-lg text-gray-600 mb-8 max-w-2xl leading-relaxed">
-                  Aici va fi integrat demo-ul complet al aplicației MedFlow. Veți putea testa toate funcționalitățile: 
-                  <strong>programări, dosare pacienți, rapoarte și submisii guvernamentale</strong> într-un mediu sigur și interactiv.
-                </p>
-                
-                {/* Features Preview */}
-                <div className="grid md:grid-cols-3 gap-6 mb-12 w-full max-w-4xl">
-                  {[
-                    { icon: Calendar, title: "Calendar Interactiv", desc: "Testați programările" },
-                    { icon: Users, title: "Dosare Pacienți", desc: "Explorați gestionarea" },
-                    { icon: BarChart3, title: "Dashboard Analitic", desc: "Vizualizați rapoartele" }
-                  ].map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.5 + index * 0.1 }}
-                      className="bg-white/80 backdrop-blur rounded-xl p-6 border border-[#9F86B1]/10 hover:border-[#9F86B1]/30 transition-all duration-300"
-                    >
-                      <feature.icon className="w-8 h-8 text-[#32384E] mb-3 mx-auto" />
-                      <h4 className="font-bold text-gray-900 mb-2">{feature.title}</h4>
-                      <p className="text-sm text-gray-600">{feature.desc}</p>
-                    </motion.div>
-                  ))}
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">În dezvoltare</h3>
+                    <ul className="space-y-3">
+                      {[
+                        'Integrare cu sisteme medicale',
+                        'Notificări SMS și email',
+                        'Gestionare avansată documente',
+                        'Analiză AI pentru programări',
+                        'API pentru dezvoltatori'
+                      ].map((feature, index) => (
+                        <li key={index} className="flex items-center space-x-3">
+                          <Clock className="w-5 h-5 text-blue-600" />
+                          <span className="text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
                 
-                {/* Enhanced CTAs */}
-                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 pt-6 border-t border-gray-200">
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#32384E] to-[#5D5D75] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
                   >
-                    <Link
-                      to="/signup"
-                      className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[#32384E] via-[#9F86B1] to-[#5D5D75] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[#32384E]/25 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
-                    >
-                      <span className="relative z-10">Începeți GRATUIT acum</span>
-                      <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#9F86B1] via-[#32384E] to-[#5D5D75] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </Link>
-                  </motion.div>
-                  
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="group inline-flex items-center justify-center px-10 py-5 border-2 border-[#32384E] text-[#32384E] text-xl font-bold rounded-2xl hover:bg-[#32384E] hover:text-white transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                  >
-                    <Phone className="mr-3 w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
-                    Consultație GRATUITĂ
-                  </motion.button>
+                    Începeți gratuit
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+                  <button className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#32384E] text-[#32384E] font-semibold rounded-lg hover:bg-[#32384E] hover:text-white transition-all duration-200">
+                    <Calendar className="mr-2 w-4 h-4" />
+                    Programați demonstrație
+                  </button>
                 </div>
                 
                 {/* Trust Indicators */}
