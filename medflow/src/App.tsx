@@ -15,6 +15,7 @@ const Analytics = lazy(() => import('./pages/Analytics'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ChatbotPlaceholder = lazy(() => import('./components/ChatbotPlaceholder'))
 const ProtectedRoute = lazy(() => import('./auth/ProtectedRoute'))
+const AIAssistant = lazy(() => import('./pages/AIAssistant'))
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/chatbot" element={<ChatbotPlaceholder />} />
+                <Route path="/ai" element={<AIAssistant />} />
                 <Route path="/analytics" element={<Analytics />} />
               </Route>
 
