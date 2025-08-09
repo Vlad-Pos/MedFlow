@@ -2,12 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles and CSS variables for MedFlow */
+/* Enhanced Base styles and CSS variables for MedFlow */
 :root {
+  /* MedFlow Brand Colors */
+  --medflow-background: #4c5165;
+  --medflow-primary: #9e85b0;
+  --medflow-secondary: #9479a8;
+  
+  /* Legacy compatibility */
   --medflow-blue: #3B82F6; /* blue-500 */
   --medflow-green: #10B981; /* emerald-500 */
   --medflow-white: #FFFFFF;
-  --medflow-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* Enhanced MedFlow gradients */
+  --medflow-gradient: linear-gradient(135deg, var(--medflow-primary) 0%, var(--medflow-secondary) 100%);
+  --medflow-gradient-subtle: linear-gradient(135deg, rgba(158, 133, 176, 0.1) 0%, rgba(148, 121, 168, 0.1) 100%);
+  --medflow-gradient-dark: linear-gradient(135deg, #3a3d4d 0%, #2d3040 100%);
+  
+  /* Light mode MedFlow theme */
+  --medflow-bg-primary: #ffffff;
+  --medflow-bg-secondary: #f8fafc;
+  --medflow-bg-tertiary: #f1f5f9;
+  --medflow-text-primary: #1e293b;
+  --medflow-text-secondary: #64748b;
+  --medflow-text-tertiary: #94a3b8;
+  --medflow-border: #e2e8f0;
+  --medflow-border-hover: var(--medflow-primary);
   
   /* Responsive spacing */
   --spacing-xs: 0.5rem;
@@ -26,6 +46,34 @@
   --sab: env(safe-area-inset-bottom);
   --sal: env(safe-area-inset-left);
   --sar: env(safe-area-inset-right);
+  
+  /* Shadows and effects */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(158, 133, 176, 0.05);
+  --medflow-shadow: 0 4px 6px -1px rgba(158, 133, 176, 0.1), 0 2px 4px -1px rgba(158, 133, 176, 0.06);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(158, 133, 176, 0.1), 0 4px 6px -2px rgba(158, 133, 176, 0.05);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(158, 133, 176, 0.1), 0 10px 10px -5px rgba(158, 133, 176, 0.04);
+  
+  /* Animation timing */
+  --medflow-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --medflow-transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode MedFlow theme */
+.dark {
+  --medflow-bg-primary: #0f172a;
+  --medflow-bg-secondary: #1e293b;
+  --medflow-bg-tertiary: #334155;
+  --medflow-text-primary: #f1f5f9;
+  --medflow-text-secondary: #cbd5e1;
+  --medflow-text-tertiary: #94a3b8;
+  --medflow-border: #334155;
+  --medflow-border-hover: var(--medflow-primary);
+  
+  /* Dark mode shadows with MedFlow colors */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --medflow-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 
 html, body, #root {
@@ -36,8 +84,15 @@ html, body, #root {
 }
 
 body {
-  @apply bg-blue-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  @apply text-gray-900 dark:text-gray-100;
+  background: var(--medflow-gradient-subtle), linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
   font-feature-settings: 'rlig' 1, 'calt' 1;
+  transition: background var(--medflow-transition-slow);
+}
+
+/* Dark mode body styling with MedFlow theme */
+.dark body {
+  background: var(--medflow-gradient-dark), linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
 }
 
 /* Smooth scrolling */
@@ -112,7 +167,7 @@ html {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 shadow-sm hover:shadow-md;
+  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-medflow-primary text-white hover:bg-medflow-secondary focus:ring-medflow-primary shadow-sm hover:shadow-md;
 }
 
 .btn-secondary {
@@ -124,7 +179,7 @@ html {
 }
 
 .input {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
+  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
   min-height: var(--touch-target-min);
 }
 
@@ -137,7 +192,7 @@ html {
 }
 
 .textarea {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
+  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
 }
 
 .card {
@@ -149,7 +204,7 @@ html {
 }
 
 .link {
-  @apply text-blue-600 hover:underline dark:text-blue-400 transition-colors duration-200;
+  @apply text-medflow-primary hover:underline hover:text-medflow-secondary transition-colors duration-200;
 }
 
 /* Modern gradient backgrounds */
@@ -347,7 +402,7 @@ html {
 
 /* Modern focus styles */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  @apply focus:outline-none focus:ring-2 focus:ring-medflow-primary focus:ring-offset-2;
 }
 
 /* Responsive grid utilities */

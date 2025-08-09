@@ -30,7 +30,7 @@ export default function LoadingSpinner({
     return (
       <div className={`flex items-center justify-center space-x-1 ${className}`}>
         <motion.div
-          className={`bg-blue-600 rounded-full ${sizeClasses[size]}`}
+          className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 1, 0.5]
@@ -42,7 +42,7 @@ export default function LoadingSpinner({
           }}
         />
         <motion.div
-          className={`bg-blue-600 rounded-full ${sizeClasses[size]}`}
+          className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 1, 0.5]
@@ -55,7 +55,7 @@ export default function LoadingSpinner({
           }}
         />
         <motion.div
-          className={`bg-blue-600 rounded-full ${sizeClasses[size]}`}
+          className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 1, 0.5]
@@ -80,7 +80,7 @@ export default function LoadingSpinner({
     return (
       <div className={`flex items-center justify-center ${className}`}>
         <motion.div
-          className={`bg-blue-600 rounded-full ${sizeClasses[size]}`}
+          className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
           animate={{
             scale: [1, 1.5, 1],
             opacity: [0.3, 0.8, 0.3]
@@ -110,7 +110,7 @@ export default function LoadingSpinner({
           ease: "linear"
         }}
       >
-        <Loader2 className={`text-blue-600 ${sizeClasses[size]}`} />
+        <Loader2 className={`text-medflow-primary ${sizeClasses[size]}`} />
       </motion.div>
       {text && (
         <span className={`ml-3 text-gray-600 dark:text-gray-400 ${textSizes[size]}`}>

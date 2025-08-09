@@ -308,3 +308,4 @@ export function KeyboardNavigation({ children, className = '' }: AccessibilityPr
 
   return <div className={className}>{children}</div>
 }
+

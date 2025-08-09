@@ -40,7 +40,7 @@ export function addDemoAppointment(appointment: any) {
   demoAppointments.push(newAppointment)
   demoAppointments.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
   notifyDemoListeners()
-  return newId
+  return newAppointment
 }
 
 export function updateDemoAppointment(id: string, updates: any) {

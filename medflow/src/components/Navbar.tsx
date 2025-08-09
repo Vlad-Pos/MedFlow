@@ -12,7 +12,9 @@ import {
   BarChart3, 
   MessageCircle, 
   LogOut,
-  Home
+  Home,
+  FileText,
+  CalendarCheck
 } from 'lucide-react'
 import medflowLogo from '../assets/medflow-logo.svg'
 
@@ -50,6 +52,8 @@ export default function Navbar() {
   const navItems = [
     { to: '/dashboard', label: 'Tablou de bord', icon: Home, description: 'Vizualizează programările și statisticile' },
     { to: '/appointments', label: 'Programări', icon: Calendar, description: 'Gestionează programările pacienților' },
+    { to: '/reports', label: 'Rapoarte medicale', icon: FileText, description: 'Gestionează rapoartele de consultație' },
+    { to: '/monthly-review', label: 'Revizuire lunară', icon: CalendarCheck, description: 'Revizuiește și pregătește rapoartele pentru trimitere' },
     { to: '/chatbot', label: 'Chat pacient', icon: MessageCircle, description: 'Comunică cu pacienții prin chat' },
     { to: '/analytics', label: 'Analitica', icon: BarChart3, description: 'Analizează performanța cabinetului' },
     { to: '/profile', label: 'Profil', icon: User, description: 'Gestionează profilul și setările' },
@@ -73,34 +77,79 @@ export default function Navbar() {
       role="banner"
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        {/* Logo */}
+        {/* 
+        ⚠️  CRITICAL: DO NOT MODIFY THIS LOGO SECTION ⚠️
+        
+        REQUIREMENTS FOR FUTURE AI AGENTS:
+        1. Logo size MUST remain: h-10 w-10 md:h-11 md:w-11 (40px mobile, 44px desktop)
+        2. Logo position MUST remain: marginTop: '-2px' (exactly 2px above center)
+        3. Text size MUST remain: text-2xl md:text-3xl (24px mobile, 30px desktop)
+        4. Default colors MUST remain: #9479A8 (matching original SVG purple tone)
+        5. Logo gradient MUST remain: blue→purple (90deg, #3B82F6 0%, #7C3AED 100%)
+        6. Text gradient MUST remain: purple→blue (90deg, #7C3AED 0%, #3B82F6 100%) - INVERTED from logo
+        7. Animations MUST remain synchronized with group-hover and 300ms ease-in-out transitions
+        8. Logo MUST always redirect to "/" (landing page) regardless of login status
+        9. Logo MUST stay still (no movement/rotation on hover)
+        10. Both elements MUST animate together when hovering over either logo OR text
+        
+        This configuration was specifically requested and perfected by the user.
+        Any changes to sizing, colors, positioning, or animations will break the intended design.
+        */}
         <Link 
-          to={user ? '/dashboard' : '/'} 
+          to="/" 
           className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg p-1"
           aria-label="MedFlow - Pagina principală"
         >
-          <div
-            aria-hidden
-            className="relative h-8 w-8 md:h-9 md:w-9"
-            style={{
-              // Use the provided SVG as a mask so we can color it via CSS
-              WebkitMaskImage: `url(${medflowLogo})`,
-              maskImage: `url(${medflowLogo})`,
-              WebkitMaskRepeat: 'no-repeat',
-              maskRepeat: 'no-repeat',
-              WebkitMaskSize: 'contain',
-              maskSize: 'contain',
-              WebkitMaskPosition: 'center',
-              maskPosition: 'center',
-            }}
+          {/* Logo container - DO NOT CHANGE SIZE OR POSITION */}
+          <div 
+            className="relative h-10 w-10 md:h-11 md:w-11 overflow-hidden" 
+            style={{ marginTop: '-2px' }}
           >
-            {/* Base gradient layer (visible by default) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 transition-opacity duration-300 opacity-100 group-hover:opacity-0" />
-            {/* Solid color layer fades in on hover */}
-            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100" style={{ background: '#263155' }} />
+            {/* Default: original SVG colors - DO NOT CHANGE */}
+            <img
+              src={medflowLogo}
+              alt="Logo MedFlow"
+              className="h-full w-full"
+            />
+            {/* Hover: blue→purple gradient overlay - DO NOT CHANGE GRADIENT DIRECTION */}
+            <div
+              className="absolute inset-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100"
+              style={{
+                WebkitMaskImage: `url(${medflowLogo})`,
+                maskImage: `url(${medflowLogo})`,
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain',
+                WebkitMaskPosition: 'center',
+                maskPosition: 'center',
+                background: 'linear-gradient(90deg, #3B82F6 0%, #7C3AED 100%)',
+              }}
+            />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            MedFlow
+          {/* Text container - DO NOT CHANGE SIZE OR COLORS */}
+          <span 
+            className="text-2xl md:text-3xl font-bold transition-all duration-300 ease-in-out relative"
+          >
+            {/* Default text color - MUST match logo color #9479A8 */}
+            <span 
+              className="transition-opacity duration-300 ease-in-out group-hover:opacity-0"
+              style={{ color: '#9479A8' }}
+            >
+              MedFlow
+            </span>
+            {/* Gradient text overlay - purple→blue (INVERTED from logo) - DO NOT CHANGE */}
+            <span 
+              className="absolute inset-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100"
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #7C3AED 0%, #3B82F6 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent'
+              }}
+            >
+              MedFlow
+            </span>
           </span>
         </Link>
 

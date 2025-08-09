@@ -276,7 +276,7 @@ export const fadeInVariants: Variants = {
   }
 }
 
-// Slide in from left
+// Additional animation variants
 export const slideInLeftVariants: Variants = {
   initial: {
     opacity: 0,
@@ -292,7 +292,6 @@ export const slideInLeftVariants: Variants = {
   }
 }
 
-// Slide in from right
 export const slideInRightVariants: Variants = {
   initial: {
     opacity: 0,
@@ -308,7 +307,6 @@ export const slideInRightVariants: Variants = {
   }
 }
 
-// Scale in animation
 export const scaleInVariants: Variants = {
   initial: {
     opacity: 0,
@@ -323,6 +321,10 @@ export const scaleInVariants: Variants = {
     }
   }
 }
+
+
+
+
 
 // Bounce animation
 export const bounceVariants: Variants = {
