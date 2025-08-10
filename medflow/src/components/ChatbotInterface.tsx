@@ -37,6 +37,7 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import { getAIService, ChatbotResponse, detectEmergency } from '../services/aiService'
 import LoadingSpinner from './LoadingSpinner'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface ChatMessage {
   id: string
@@ -241,14 +242,15 @@ ${response.followUp.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
+    <DesignWorkWrapper componentName="ChatbotInterface">
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={onClose}
+        >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -491,5 +493,6 @@ ${response.followUp.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </DesignWorkWrapper>
   )
 }

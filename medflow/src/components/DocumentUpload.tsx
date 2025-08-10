@@ -33,6 +33,7 @@ import {
 } from 'lucide-react'
 import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface DocumentUploadProps {
   appointmentId: string
@@ -335,7 +336,8 @@ export default function DocumentUpload({
   }, [])
 
   return (
-    <div className="space-y-4">
+    <DesignWorkWrapper componentName="DocumentUpload">
+      <div className="space-y-4">
       {/* Upload Area */}
       <motion.div
         className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
@@ -498,5 +500,6 @@ export default function DocumentUpload({
         </div>
       </div>
     </div>
+    </DesignWorkWrapper>
   )
 }

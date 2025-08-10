@@ -39,6 +39,7 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
 import { formatDateTime } from '../utils/dateUtils'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface DocumentData {
   id: string
@@ -254,7 +255,8 @@ export default function DocumentManager({
   }
 
   return (
-    <div className="space-y-4">
+    <DesignWorkWrapper componentName="DocumentManager">
+      <div className="space-y-4">
       {/* Documents List */}
       <div className={`space-y-3 ${compact ? 'space-y-2' : ''}`}>
         <AnimatePresence>
@@ -510,5 +512,6 @@ export default function DocumentManager({
         )}
       </AnimatePresence>
     </div>
+    </DesignWorkWrapper>
   )
 }

@@ -14,6 +14,7 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 import { analyzePasswordStrength, type PasswordStrength } from '../../utils/authValidation'
+import DesignWorkWrapper from '../../../DesignWorkWrapper'
 
 interface PasswordStrengthIndicatorProps {
   password: string
@@ -54,60 +55,62 @@ export default function PasswordStrengthIndicator({
   }
 
   return (
-    <div className={`space-y-3 ${className}`} role="region" aria-label="Indicarea puterii parolei">
-      {/* Strength bar and feedback */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Puterea parolei:</span>
-          <span className={`font-medium ${colors.text}`}>
-            {getStrengthLabel(strength.score)}
-          </span>
-        </div>
-        
-        {/* Visual strength bar */}
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div
-            className={`h-full rounded-full ${colors.bar}`}
-            initial={{ width: 0 }}
-            animate={{ width: `${(strength.score / 5) * 100}%` }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          />
-        </div>
-        
-        {/* Feedback message */}
-        <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className={`text-xs ${colors.text}`}
-        >
-          {strength.feedback}
-        </motion.p>
-      </div>
-
-      {/* Requirements checklist */}
-      {showRequirements && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="space-y-2"
-        >
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Cerințe parolă:
-          </h4>
-          <div className="grid grid-cols-1 gap-2 text-xs">
-            {Object.entries(strength.requirements).map(([key, met]) => (
-              <RequirementItem
-                key={key}
-                label={requirementLabels[key as keyof typeof requirementLabels]}
-                met={met}
-              />
-            ))}
+    <DesignWorkWrapper componentName="PasswordStrengthIndicator">
+      <div className={`space-y-3 ${className}`} role="region" aria-label="Indicarea puterii parolei">
+        {/* Strength bar and feedback */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Puterea parolei:</span>
+            <span className={`font-medium ${colors.text}`}>
+              {getStrengthLabel(strength.score)}
+            </span>
           </div>
-        </motion.div>
-      )}
-    </div>
+          
+          {/* Visual strength bar */}
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full ${colors.bar}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${(strength.score / 5) * 100}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          </div>
+          
+          {/* Feedback message */}
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className={`text-xs ${colors.text}`}
+          >
+            {strength.feedback}
+          </motion.p>
+        </div>
+
+        {/* Requirements checklist */}
+        {showRequirements && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="space-y-2"
+          >
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Cerințe parolă:
+            </h4>
+            <div className="grid grid-cols-1 gap-2 text-xs">
+              {Object.entries(strength.requirements).map(([key, met]) => (
+                <RequirementItem
+                  key={key}
+                  label={requirementLabels[key as keyof typeof requirementLabels]}
+                  met={met}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 

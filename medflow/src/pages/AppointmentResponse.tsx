@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import { fadeInVariants, cardVariants } from '../utils/animations'
 import LoadingSpinner from '../components/LoadingSpinner'
+import DesignWorkWrapper from '../DesignWorkWrapper'
 
 interface AppointmentInfo {
   id: string
@@ -376,14 +377,15 @@ export default function AppointmentResponse() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="max-w-2xl mx-auto px-4">
-        <motion.div
-          variants={fadeInVariants}
-          initial="initial"
-          animate="animate"
-          className="space-y-8"
-        >
+    <DesignWorkWrapper componentName="AppointmentResponse">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+        <div className="max-w-2xl mx-auto px-4">
+          <motion.div
+            variants={fadeInVariants}
+            initial="initial"
+            animate="animate"
+            className="space-y-8"
+          >
           {/* Header */}
           <div className="text-center">
             <div className="flex justify-center mb-4">
@@ -542,5 +544,6 @@ export default function AppointmentResponse() {
         </motion.div>
       </div>
     </div>
+    </DesignWorkWrapper>
   )
 }

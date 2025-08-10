@@ -639,6 +639,7 @@ export default function PatientReports() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
     </DesignWorkWrapper>
   )
 }

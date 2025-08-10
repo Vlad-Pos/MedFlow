@@ -24,6 +24,7 @@ import { useAuth } from '../../providers/AuthProvider'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ValidatedInput from '../../components/auth/ValidatedInput'
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator'
+import DesignWorkWrapper from '../../../DesignWorkWrapper'
 import { 
   validateSignUpForm,
   validateDisplayName,
@@ -93,6 +94,12 @@ export default function SignUp() {
       return
     }
     
+    // Ensure role is valid before calling signUp
+    if (formData.role !== 'doctor' && formData.role !== 'nurse') {
+      setError('Rolul selectat nu este valid.')
+      return
+    }
+    
     setLoading(true)
     setError(null)
     
@@ -101,7 +108,7 @@ export default function SignUp() {
         formData.email.trim(), 
         formData.password, 
         formData.displayName.trim(), 
-        formData.role
+        formData.role as 'doctor' | 'nurse'
       )
       
       // Clear rate limit on successful registration
@@ -126,240 +133,241 @@ export default function SignUp() {
   ]
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="mx-auto max-w-lg"
-    >
-      {/* Header Section */}
+    <DesignWorkWrapper componentName="SignUp">
       <motion.div 
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="text-center mb-8"
+        transition={{ duration: 0.6 }}
+        className="mx-auto max-w-lg"
       >
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <div className="p-3 bg-medflow-primary/10 rounded-full">
-            <Stethoscope className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-medflow-text-primary">
-              Înregistrare MedFlow
-            </h1>
-            <p className="text-sm text-medflow-text-secondary mt-1">
-              Creați un cont pentru accesul la platformă
-            </p>
-          </div>
-        </div>
-        
-        {/* AI Integration Placeholder */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-lg border border-medflow-primary/10"
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center mb-8"
         >
-          🤖 Asistență AI pentru completarea formularului va fi disponibilă în curând
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="p-3 bg-medflow-primary/10 rounded-full">
+              <Stethoscope className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-medflow-text-primary">
+                Înregistrare MedFlow
+              </h1>
+              <p className="text-sm text-medflow-text-secondary mt-1">
+                Creați un cont pentru accesul la platformă
+              </p>
+            </div>
+          </div>
+          
+          {/* AI Integration Placeholder */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-lg border border-medflow-primary/10"
+          >
+            🤖 Asistență AI pentru completarea formularului va fi disponibilă în curând
+          </motion.div>
         </motion.div>
-      </motion.div>
 
-      {/* Registration Form */}
-      <motion.form 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
-        onSubmit={handleSubmit}
-        noValidate
-      >
-        {/* Error Display */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className={`flex items-center space-x-3 p-4 rounded-lg ${
-                rateLimited 
-                  ? 'bg-orange-500/20 border border-orange-400/30' 
-                  : 'bg-red-500/20 border border-red-400/30'
-              }`}
-              role="alert"
-              aria-live="polite"
-            >
-              <AlertTriangle 
-                className={`h-5 w-5 flex-shrink-0 ${
-                  rateLimited ? 'text-orange-600' : 'text-red-600'
-                }`} 
-                aria-hidden="true" 
-              />
-              <span className={`text-sm font-medium ${
-                rateLimited 
-                  ? 'text-orange-200' 
-                  : 'text-red-200'
-              }`}>
-                {error}
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Registration Form */}
+        <motion.form 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          {/* Error Display */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className={`flex items-center space-x-3 p-4 rounded-lg ${
+                  rateLimited 
+                    ? 'bg-orange-500/20 border border-orange-400/30' 
+                    : 'bg-red-500/20 border border-red-400/30'
+                }`}
+                role="alert"
+                aria-live="polite"
+              >
+                <AlertTriangle 
+                  className={`h-5 w-5 flex-shrink-0 ${
+                    rateLimited ? 'text-orange-600' : 'text-red-600'
+                  }`} 
+                  aria-hidden="true" 
+                />
+                <span className={`text-sm font-medium ${
+                  rateLimited 
+                    ? 'text-orange-200' 
+                    : 'text-red-200'
+                }`}>
+                  {error}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* Display Name Input */}
-        <ValidatedInput
-          type="text"
-          name="displayName"
-          value={formData.displayName}
-          onChange={handleInputChange('displayName')}
-          validateFn={validateDisplayName}
-          label="Nume complet"
-          placeholder="Dr. Ion Popescu / Asist. Maria Ionescu"
-          autoComplete="name"
-          icon="user"
-          required
-          disabled={loading || rateLimited}
-          aiSuggestions={true}
-          ariaLabel="Introduceți numele complet pentru identificare profesională"
-        />
+          {/* Display Name Input */}
+          <ValidatedInput
+            type="text"
+            name="displayName"
+            value={formData.displayName}
+            onChange={handleInputChange('displayName')}
+            validateFn={validateDisplayName}
+            label="Nume complet"
+            placeholder="Dr. Ion Popescu / Asist. Maria Ionescu"
+            autoComplete="name"
+            icon="user"
+            required
+            disabled={loading || rateLimited}
+            aiSuggestions={true}
+            ariaLabel="Introduceți numele complet pentru identificare profesională"
+          />
 
-        {/* Email Input */}
-        <ValidatedInput
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange('email')}
-          validateFn={validateEmail}
-          label="Adresa de email"
-          placeholder="medic@cabinet.ro"
-          autoComplete="email"
-          icon="email"
-          required
-          disabled={loading || rateLimited}
-          aiSuggestions={true}
-          ariaLabel="Introduceți adresa de email pentru autentificare"
-        />
+          {/* Email Input */}
+          <ValidatedInput
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange('email')}
+            validateFn={validateEmail}
+            label="Adresa de email"
+            placeholder="medic@cabinet.ro"
+            autoComplete="email"
+            icon="email"
+            required
+            disabled={loading || rateLimited}
+            aiSuggestions={true}
+            ariaLabel="Introduceți adresa de email pentru autentificare"
+          />
 
-        {/* Professional Role Selection */}
-        <ValidatedInput
-          type="select"
-          name="role"
-          value={formData.role}
-          onChange={handleInputChange('role')}
-          validateFn={validateRole}
-          label="Calificarea profesională"
-          placeholder="Selectați calificarea dvs."
-          options={roleOptions}
-          icon="role"
-          required
-          disabled={loading || rateLimited}
-          ariaLabel="Selectați calificarea profesională medicală"
-        />
+          {/* Professional Role Selection */}
+          <ValidatedInput
+            type="select"
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange('role')}
+            validateFn={validateRole}
+            label="Calificarea profesională"
+            placeholder="Selectați calificarea dvs."
+            options={roleOptions}
+            icon="role"
+            required
+            disabled={loading || rateLimited}
+            ariaLabel="Selectați calificarea profesională medicală"
+          />
 
-        {/* Password Input */}
-        <div className="space-y-3">
+          {/* Password Input */}
+          <div className="space-y-3">
+            <ValidatedInput
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange('password')}
+              validateFn={(password) => validatePassword(password)}
+              label="Parola"
+              placeholder="Alegeți o parolă sigură"
+              autoComplete="new-password"
+              icon="lock"
+              showToggle={true}
+              required
+              disabled={loading || rateLimited}
+              ariaLabel="Alegeți o parolă sigură pentru cont"
+            />
+            
+            {/* Password Strength Indicator */}
+            <AnimatePresence>
+              {showPasswordStrength && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <PasswordStrengthIndicator 
+                    password={formData.password}
+                    showRequirements={true}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Confirm Password Input */}
           <ValidatedInput
             type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange('password')}
-            validateFn={(password) => validatePassword(password)}
-            label="Parola"
-            placeholder="Alegeți o parolă sigură"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange('confirmPassword')}
+            validateFn={(confirmPassword) => validatePassword(formData.password, confirmPassword)}
+            label="Confirmați parola"
+            placeholder="Introduceți din nou parola"
             autoComplete="new-password"
             icon="lock"
             showToggle={true}
             required
             disabled={loading || rateLimited}
-            ariaLabel="Alegeți o parolă sigură pentru cont"
+            ariaLabel="Confirmați parola introdusă anterior"
           />
-          
-          {/* Password Strength Indicator */}
-          <AnimatePresence>
-            {showPasswordStrength && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <PasswordStrengthIndicator 
-                  password={formData.password}
-                  showRequirements={true}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
-        {/* Confirm Password Input */}
-        <ValidatedInput
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleInputChange('confirmPassword')}
-          validateFn={(confirmPassword) => validatePassword(formData.password, confirmPassword)}
-          label="Confirmați parola"
-          placeholder="Introduceți din nou parola"
-          autoComplete="new-password"
-          icon="lock"
-          showToggle={true}
-          required
-          disabled={loading || rateLimited}
-          ariaLabel="Confirmați parola introdusă anterior"
-        />
-
-        {/* Terms and Conditions Notice */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg p-4"
-        >
-          <div className="flex items-start space-x-3">
-            <Shield className="h-5 w-5 text-medflow-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <div className="text-sm text-medflow-text-secondary">
-              <p className="font-medium mb-1">Protecția datelor medicale</p>
-              <p className="text-xs leading-relaxed">
-                Prin crearea contului, confirmați că sunteți un profesionist medical autorizat 
-                și acceptați <Link to="/terms" className="text-medflow-primary hover:underline">Termenii și Condițiile</Link> 
-                {' '}și <Link to="/privacy" className="text-medflow-primary hover:underline">Politica de Confidențialitate</Link> 
-                {' '}conform GDPR.
-              </p>
+          {/* Terms and Conditions Notice */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg p-4"
+          >
+            <div className="flex items-start space-x-3">
+              <Shield className="h-5 w-5 text-medflow-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="text-sm text-medflow-text-secondary">
+                <p className="font-medium mb-1">Protecția datelor medicale</p>
+                <p className="text-xs leading-relaxed">
+                  Prin crearea contului, confirmați că sunteți un profesionist medical autorizat 
+                  și acceptați <Link to="/terms" className="text-medflow-primary hover:underline">Termenii și Condițiile</Link> 
+                  {' '}și <Link to="/privacy" className="text-medflow-primary hover:underline">Politica de Confidențialitate</Link> 
+                  {' '}conform GDPR.
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Submit Button */}
-        <motion.button
-          type="submit"
-          disabled={loading || rateLimited}
-          className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
-          whileHover={{ scale: loading ? 1 : 1.02 }}
-          whileTap={{ scale: loading ? 1 : 0.98 }}
-        >
-          {loading ? (
-            <LoadingSpinner 
-              size="sm" 
-              text="Se creează contul..." 
-              className="text-white"
-            />
-          ) : (
-            <>
-              <UserPlus className="h-5 w-5" aria-hidden="true" />
-              <span>Creează cont MedFlow</span>
-            </>
-          )}
-        </motion.button>
+          {/* Submit Button */}
+          <motion.button
+            type="submit"
+            disabled={loading || rateLimited}
+            className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+          >
+            {loading ? (
+              <LoadingSpinner 
+                size="sm" 
+                text="Se creează contul..." 
+                className="text-white"
+              />
+            ) : (
+              <>
+                <UserPlus className="h-5 w-5" aria-hidden="true" />
+                <span>Creează cont MedFlow</span>
+              </>
+            )}
+          </motion.button>
 
-        {/* Footer Links */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-sm border-t border-white/10 pt-4"
-        >
-                      <div className="flex items-center justify-center space-x-2 text-medflow-text-secondary">
+          {/* Footer Links */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-center text-sm border-t border-white/10 pt-4"
+          >
+                        <div className="flex items-center justify-center space-x-2 text-medflow-text-secondary">
             <span>Aveți deja cont?</span>
             <Link 
               to="/signin" 
@@ -381,5 +389,6 @@ export default function SignUp() {
         <p>Datele sunt criptate și protejate conform standardelor medicale și GDPR</p>
       </motion.div>
     </motion.div>
+    </DesignWorkWrapper>
   )
 }

@@ -762,6 +762,7 @@ export default function AmendmentManager({
           />
         </div>
       </ConfirmationDialog>
+    </div>
     </DesignWorkWrapper>
   )
 }

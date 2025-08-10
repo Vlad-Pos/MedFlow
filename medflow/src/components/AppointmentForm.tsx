@@ -56,6 +56,7 @@ import {
   MedicalSelectInput 
 } from './AppointmentFormInput'
 import LoadingSpinner from './LoadingSpinner'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
@@ -394,7 +395,8 @@ export default function AppointmentForm({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg">
+    <DesignWorkWrapper componentName="AppointmentForm">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg">
       {/* Professional Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center space-x-3">
@@ -672,5 +674,6 @@ export default function AppointmentForm({
         </div>
       </motion.form>
     </div>
+    </DesignWorkWrapper>
   )
 }

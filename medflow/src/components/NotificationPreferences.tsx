@@ -33,6 +33,7 @@ import {
 import PatientNotificationPreferencesService from '../services/notificationPreferences'
 import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface NotificationPreferencesProps {
   patientId?: string
@@ -291,7 +292,8 @@ export default function NotificationPreferences({
   }
   
   return (
-    <div className={`max-w-4xl mx-auto space-y-6 ${className}`}>
+    <DesignWorkWrapper componentName="NotificationPreferences">
+      <div className={`max-w-4xl mx-auto space-y-6 ${className}`}>
       {/* Header */}
       <div className="text-center">
         <div className="flex items-center justify-center mb-4">
@@ -705,5 +707,6 @@ export default function NotificationPreferences({
         </button>
       </div>
     </div>
+    </DesignWorkWrapper>
   )
 }

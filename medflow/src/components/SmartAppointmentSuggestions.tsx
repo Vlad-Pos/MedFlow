@@ -34,6 +34,7 @@ import { useAuth } from '../providers/AuthProvider'
 import { getAIService, AppointmentSuggestion } from '../services/aiService'
 import { formatDateTime } from '../utils/dateUtils'
 import LoadingSpinner from './LoadingSpinner'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface SmartAppointmentSuggestionsProps {
   doctorId?: string
@@ -176,7 +177,8 @@ export default function SmartAppointmentSuggestions({
   }, [])
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg ${className}`}>
+    <DesignWorkWrapper componentName="SmartAppointmentSuggestions">
+      <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg ${className}`}>
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
@@ -435,5 +437,6 @@ export default function SmartAppointmentSuggestions({
         </div>
       </div>
     </div>
+    </DesignWorkWrapper>
   )
 }
