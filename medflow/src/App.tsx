@@ -8,6 +8,7 @@ import PageTransition from './components/PageTransition'
 import { SkipToMainContent, KeyboardNavigation } from './components/Accessibility'
 import { useResponsive } from './utils/useResponsive'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import DesignWorkWrapper from '../DesignWorkWrapper'
 
 // Lazy load all route components
 const Landing = lazy(() => import('./pages/Landing'))
@@ -31,176 +32,178 @@ function App() {
   useKeyboardShortcuts()
 
   return (
-    <KeyboardNavigation>
-      <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-        <SkipToMainContent />
-        <NotificationContainer />
-        
-        {/* Landing page gets full viewport */}
-        <Routes>
-          <Route path="/" element={
-            <Suspense fallback={<RouteLoadingSpinner />}>
-              <main id="main-content" className="w-full">
-                <WebsiteLanding />
-              </main>
-            </Suspense>
-          } />
-          <Route path="/website" element={
-            <Suspense fallback={<RouteLoadingSpinner />}>
-              <main id="main-content" className="w-full">
-                <WebsiteLanding />
-              </main>
-            </Suspense>
-          } />
+    <DesignWorkWrapper componentName="App">
+      <KeyboardNavigation>
+        <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+          <SkipToMainContent />
+          <NotificationContainer />
           
-          {/* Other pages get constrained container */}
-          <Route path="/signin" element={
-            <>
-              <Navbar />
-              <main id="main-content" className="container-responsive py-6">
-                <Suspense fallback={<RouteLoadingSpinner />}>
-                  <PageTransition>
-                    <SignIn />
-                  </PageTransition>
-                </Suspense>
-              </main>
-            </>
-          } />
-          <Route path="/signup" element={
-            <>
-              <Navbar />
-              <main id="main-content" className="container-responsive py-6">
-                <Suspense fallback={<RouteLoadingSpinner />}>
-                  <PageTransition>
-                    <SignUp />
-                  </PageTransition>
-                </Suspense>
-              </main>
-            </>
-          } />
-          <Route path="/reset" element={
-            <>
-              <Navbar />
-              <main id="main-content" className="container-responsive py-6">
-                <Suspense fallback={<RouteLoadingSpinner />}>
-                  <PageTransition>
-                    <ResetPassword />
-                  </PageTransition>
-                </Suspense>
-              </main>
-            </>
-          } />
+          {/* Landing page gets full viewport */}
+          <Routes>
+            <Route path="/" element={
+              <Suspense fallback={<RouteLoadingSpinner />}>
+                <main id="main-content" className="w-full">
+                  <WebsiteLanding />
+                </main>
+              </Suspense>
+            } />
+            <Route path="/website" element={
+              <Suspense fallback={<RouteLoadingSpinner />}>
+                <main id="main-content" className="w-full">
+                  <WebsiteLanding />
+                </main>
+              </Suspense>
+            } />
+            
+            {/* Other pages get constrained container */}
+            <Route path="/signin" element={
+              <>
+                <Navbar />
+                <main id="main-content" className="container-responsive py-6">
+                  <Suspense fallback={<RouteLoadingSpinner />}>
+                    <PageTransition>
+                      <SignIn />
+                    </PageTransition>
+                  </Suspense>
+                </main>
+              </>
+            } />
+            <Route path="/signup" element={
+              <>
+                <Navbar />
+                <main id="main-content" className="container-responsive py-2">
+                  <Suspense fallback={<RouteLoadingSpinner />}>
+                    <PageTransition>
+                      <SignUp />
+                    </PageTransition>
+                  </Suspense>
+                </main>
+              </>
+            } />
+            <Route path="/reset" element={
+              <>
+                <Navbar />
+                <main id="main-content" className="container-responsive py-6">
+                  <Suspense fallback={<RouteLoadingSpinner />}>
+                    <PageTransition>
+                      <ResetPassword />
+                    </PageTransition>
+                  </Suspense>
+                </main>
+              </>
+            } />
 
-          <Route element={<PrivateRoute />}> 
-            <Route path="/dashboard" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <Dashboard />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
+            <Route element={<PrivateRoute />}> 
+              <Route path="/dashboard" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <Dashboard />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/appointments" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <Appointments />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/patients" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <Patients />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/analytics" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <Analytics />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/profile" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <Profile />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/reports" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <PatientReports />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/monthly-review" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <MonthlyReportReview />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+              <Route path="/chatbot" element={
+                <>
+                  <Navbar />
+                  <main id="main-content" className="container-responsive py-6">
+                    <Suspense fallback={<RouteLoadingSpinner />}>
+                      <PageTransition>
+                        <ChatbotPlaceholder />
+                      </PageTransition>
+                    </Suspense>
+                  </main>
+                </>
+              } />
+            </Route>
+            
+            {/* Public appointment response route (no authentication required) */}
+            <Route path="/appointment-response/:token" element={
+              <Suspense fallback={<RouteLoadingSpinner />}>
+                <AppointmentResponse />
+              </Suspense>
             } />
-            <Route path="/appointments" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <Appointments />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/patients" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <Patients />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/analytics" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <Analytics />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/profile" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <Profile />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/reports" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <PatientReports />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/monthly-review" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <MonthlyReportReview />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-            <Route path="/chatbot" element={
-              <>
-                <Navbar />
-                <main id="main-content" className="container-responsive py-6">
-                  <Suspense fallback={<RouteLoadingSpinner />}>
-                    <PageTransition>
-                      <ChatbotPlaceholder />
-                    </PageTransition>
-                  </Suspense>
-                </main>
-              </>
-            } />
-          </Route>
-          
-          {/* Public appointment response route (no authentication required) */}
-          <Route path="/appointment-response/:token" element={
-            <Suspense fallback={<RouteLoadingSpinner />}>
-              <AppointmentResponse />
-            </Suspense>
-          } />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-    </KeyboardNavigation>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </KeyboardNavigation>
+    </DesignWorkWrapper>
   )
 }
 

@@ -11,6 +11,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface AccessibilityProps {
   children: ReactNode
@@ -41,16 +42,18 @@ export function HighContrastMode({ children, className = '' }: AccessibilityProp
   }
 
   return (
-    <div className={className}>
-      <button
-        onClick={toggleHighContrast}
-        className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        aria-label={isHighContrast ? 'Disable high contrast' : 'Enable high contrast'}
-      >
-        <Contrast className="w-5 h-5" />
-      </button>
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="HighContrastMode">
+      <div className={className}>
+        <button
+          onClick={toggleHighContrast}
+          className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label={isHighContrast ? 'Disable high contrast' : 'Enable high contrast'}
+        >
+          <Contrast className="w-5 h-5" />
+        </button>
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -81,25 +84,27 @@ export function FontSizeControls({ children, className = '' }: AccessibilityProp
   }
 
   return (
-    <div className={className}>
-      <div className="fixed bottom-4 left-4 z-50 flex gap-2">
-        <button
-          onClick={decreaseFontSize}
-          className="p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          aria-label="Decrease font size"
-        >
-          <ZoomOut className="w-5 h-5" />
-        </button>
-        <button
-          onClick={increaseFontSize}
-          className="p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          aria-label="Increase font size"
-        >
-          <ZoomIn className="w-5 h-5" />
-        </button>
+    <DesignWorkWrapper componentName="FontSizeControls">
+      <div className={className}>
+        <div className="fixed bottom-4 left-4 z-50 flex gap-2">
+          <button
+            onClick={decreaseFontSize}
+            className="p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            aria-label="Decrease font size"
+          >
+            <ZoomOut className="w-5 h-5" />
+          </button>
+          <button
+            onClick={increaseFontSize}
+            className="p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            aria-label="Increase font size"
+          >
+            <ZoomIn className="w-5 h-5" />
+          </button>
+        </div>
+        {children}
       </div>
-      {children}
-    </div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -127,16 +132,18 @@ export function ReducedMotion({ children, className = '' }: AccessibilityProps) 
   }
 
   return (
-    <div className={className}>
-      <button
-        onClick={toggleReducedMotion}
-        className="fixed bottom-4 right-20 z-50 p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        aria-label={isReducedMotion ? 'Enable animations' : 'Disable animations'}
-      >
-        {isReducedMotion ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-      </button>
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="ReducedMotion">
+      <div className={className}>
+        <button
+          onClick={toggleReducedMotion}
+          className="fixed bottom-4 right-20 z-50 p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          aria-label={isReducedMotion ? 'Enable animations' : 'Disable animations'}
+        >
+          {isReducedMotion ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        </button>
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -191,12 +198,14 @@ export function FocusTrap({ children, className = '' }: AccessibilityProps) {
   }, [])
 
   return (
-    <div className={className}>
-      {isActive && (
-        <div className="fixed inset-0 z-40 bg-black/50" />
-      )}
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="FocusTrap">
+      <div className={className}>
+        {isActive && (
+          <div className="fixed inset-0 z-40 bg-black/50" />
+        )}
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -207,13 +216,15 @@ export function LiveRegion({ children, className = '', 'aria-live': ariaLive = '
   'aria-live'?: 'polite' | 'assertive' | 'off'
 }) {
   return (
-    <div
-      className={className}
-      aria-live={ariaLive}
-      aria-atomic="true"
-    >
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="LiveRegion">
+      <div
+        className={className}
+        aria-live={ariaLive}
+        aria-atomic="true"
+      >
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -222,56 +233,58 @@ export function AccessibilityToolbar({ children, className = '' }: Accessibility
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className={className}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        aria-label="Accessibility options"
-        aria-expanded={isOpen}
-      >
-        <Sun className="w-5 h-5" />
-      </button>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="fixed bottom-16 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4"
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="space-y-2">
-              <button
-                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                onClick={() => {
-                  // Toggle high contrast
-                }}
-              >
-                High Contrast
-              </button>
-              <button
-                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                onClick={() => {
-                  // Increase font size
-                }}
-              >
-                Larger Text
-              </button>
-              <button
-                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                onClick={() => {
-                  // Toggle reduced motion
-                }}
-              >
-                Reduce Motion
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="AccessibilityToolbar">
+      <div className={className}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Accessibility options"
+          aria-expanded={isOpen}
+        >
+          <Sun className="w-5 h-5" />
+        </button>
+        
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="fixed bottom-16 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4"
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="space-y-2">
+                <button
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  onClick={() => {
+                    // Toggle high contrast
+                  }}
+                >
+                  High Contrast
+                </button>
+                <button
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  onClick={() => {
+                    // Increase font size
+                  }}
+                >
+                  Larger Text
+                </button>
+                <button
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  onClick={() => {
+                    // Toggle reduced motion
+                  }}
+                >
+                  Reduce Motion
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 

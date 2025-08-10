@@ -25,6 +25,7 @@ import { isDemoMode, subscribeToDemoAppointments, addDemoAppointment, deleteDemo
 import { collection, onSnapshot, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import LoadingSpinner from './LoadingSpinner'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface Appointment {
   id: string
@@ -273,324 +274,328 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
   }, [user, currentDate])
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Header with MedFlow Branding */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Calendar Medical
-          </h2>
-          
-          {/* Connection Status Indicator */}
-          <div className="flex items-center space-x-2">
-            {calendarState.connectionStatus === 'connected' && (
-              <div className="flex items-center space-x-1 text-emerald-600">
-                <Wifi className="w-4 h-4" />
-                <span className="text-xs font-medium">Conectat</span>
-              </div>
-            )}
-            {calendarState.connectionStatus === 'disconnected' && (
-              <div className="flex items-center space-x-1 text-red-600">
-                <WifiOff className="w-4 h-4" />
-                <span className="text-xs font-medium">Deconectat</span>
-              </div>
-            )}
-            {calendarState.connectionStatus === 'reconnecting' && (
-              <div className="flex items-center space-x-1 text-orange-600">
-                <LoadingSpinner size="sm" />
-                <span className="text-xs font-medium">Reconectare...</span>
-              </div>
-            )}
-          </div>
-          
-          {/* AI Features Indicator */}
-          {aiFeatures.smartScheduling && (
-            <div className="flex items-center space-x-1 px-2 py-1 bg-medflow-primary/10 rounded-full">
-              <Brain className="w-3 h-3 text-medflow-primary" />
-              <span className="text-xs text-medflow-primary font-medium">AI Activ</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-          {/* View Toggle */}
-          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              onClick={() => setView('week')}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                view === 'week'
-                  ? 'bg-medflow-primary text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-              }`}
-            >
-              Săptămână
-            </button>
-            <button
-              onClick={() => setView('month')}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                view === 'month'
-                  ? 'bg-medflow-primary text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-              }`}
-            >
-              Lună
-            </button>
-          </div>
-          
-          {/* Navigation Controls */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handlePrevious}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Săptămâna/Luna anterioară"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+    <DesignWorkWrapper componentName="ModernCalendar">
+      <div className="space-y-6">
+        {/* Enhanced Header with MedFlow Branding */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              Calendar Medical
+            </h2>
             
-            <span className="text-lg font-medium text-gray-900 dark:text-white min-w-[140px] text-center">
-              {format(currentDate, 'MMMM yyyy', { locale: ro })}
-            </span>
-            
-            <button
-              onClick={handleNext}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Săptămâna/Luna următoare"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-          
-          {/* Quick Add Button with AI Enhancement */}
-          <button
-            onClick={() => setShowQuickAdd(true)}
-            className="flex items-center justify-center space-x-2 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors shadow-md hover:shadow-lg"
-            disabled={calendarState.loading}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Programare rapidă</span>
-            {aiFeatures.smartScheduling && (
-              <Zap className="w-3 h-3 ml-1" title="Asistență AI disponibilă" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Error and Loading States */}
-      <AnimatePresence>
-        {calendarState.error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
-          >
-            <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            <div>
-              <h4 className="font-medium text-red-800 dark:text-red-300">
-                Eroare de conectare
-              </h4>
-              <p className="text-sm text-red-700 dark:text-red-400">
-                {calendarState.error}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* AI Integration Placeholder */}
-      {aiFeatures.smartScheduling && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg p-3"
-        >
-          <div className="flex items-center space-x-2 text-medflow-primary">
-            <Brain className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              🤖 Asistența AI pentru programare este activă - detectare conflicte și sugestii optime
-            </span>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Enhanced Quick Add Modal with MedFlow Branding */}
-      <AnimatePresence>
-        {showQuickAdd && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setShowQuickAdd(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-medflow-primary/10 rounded-lg">
-                    <Plus className="w-5 h-5 text-medflow-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Programare rapidă
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Adăugați o programare nouă rapid
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowQuickAdd(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  aria-label="Închide dialogul"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* AI Assistance Placeholder */}
-              {aiFeatures.smartScheduling && (
-                <div className="mb-4 p-3 bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg">
-                  <div className="flex items-center space-x-2 text-medflow-primary">
-                    <Brain className="w-4 h-4" />
-                    <span className="text-sm font-medium">
-                      🤖 Asistența AI vă poate sugera ore optime pentru această programare
-                    </span>
-                  </div>
+            {/* Connection Status Indicator */}
+            <div className="flex items-center space-x-2">
+              {calendarState.connectionStatus === 'connected' && (
+                <div className="flex items-center space-x-1 text-emerald-600">
+                  <Wifi className="w-4 h-4" />
+                  <span className="text-xs font-medium">Conectat</span>
                 </div>
               )}
+              {calendarState.connectionStatus === 'disconnected' && (
+                <div className="flex items-center space-x-1 text-red-600">
+                  <WifiOff className="w-4 h-4" />
+                  <span className="text-xs font-medium">Deconectat</span>
+                </div>
+              )}
+              {calendarState.connectionStatus === 'reconnecting' && (
+                <div className="flex items-center space-x-1 text-orange-600">
+                  <LoadingSpinner size="sm" />
+                  <span className="text-xs font-medium">Reconectare...</span>
+                </div>
+              )}
+            </div>
+            
+            {/* AI Features Indicator */}
+            {aiFeatures.smartScheduling && (
+              <div className="flex items-center space-x-1 px-2 py-1 bg-medflow-primary/10 rounded-full">
+                <Brain className="w-3 h-3 text-medflow-primary" />
+                <span className="text-xs text-medflow-primary font-medium">AI Activ</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+            {/* View Toggle */}
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setView('week')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  view === 'week'
+                    ? 'bg-medflow-primary text-white'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                }`}
+              >
+                Săptămână
+              </button>
+              <button
+                onClick={() => setView('month')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  view === 'month'
+                    ? 'bg-medflow-primary text-white'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                }`}
+              >
+                Lună
+              </button>
+            </div>
+            
+            {/* Navigation Controls */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevious}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Săptămâna/Luna anterioară"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
               
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleQuickAdd(); }}>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    Nume pacient *
-                  </label>
-                  <input
-                    type="text"
-                    value={quickAddData.patientName}
-                    onChange={(e) => setQuickAddData({ ...quickAddData, patientName: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
-                    placeholder="Ex: Ion Popescu"
-                    required
-                    aria-describedby="patient-name-help"
-                  />
-                  <p id="patient-name-help" className="text-xs text-gray-500 mt-1">
-                    Introduceți numele complet al pacientului
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                      Data *
-                    </label>
-                    <input
-                      type="date"
-                      value={quickAddData.date}
-                      onChange={(e) => setQuickAddData({ ...quickAddData, date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                      Ora *
-                    </label>
-                    <input
-                      type="time"
-                      value={quickAddData.time}
-                      onChange={(e) => setQuickAddData({ ...quickAddData, time: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    Motivul consultației (opțional)
-                  </label>
-                  <textarea
-                    value={quickAddData.symptoms}
-                    onChange={(e) => setQuickAddData({ ...quickAddData, symptoms: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors resize-none"
-                    rows={3}
-                    placeholder="Ex: Dureri de cap frecvente, control de rutină..."
-                    aria-describedby="symptoms-help"
-                  />
-                  <p id="symptoms-help" className="text-xs text-gray-500 mt-1">
-                    Adăugați o scurtă descriere a motivului consultației
-                  </p>
-                </div>
-                
-                <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    type="button"
-                    onClick={() => setShowQuickAdd(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
-                  >
-                    Anulează
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!quickAddData.patientName.trim()}
-                    className="flex-1 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-                  >
-                    <div className="flex items-center justify-center space-x-2">
-                      <Plus className="w-4 h-4" />
-                      <span>Creează programare</span>
-                    </div>
-                  </button>
-                </div>
-              </form>
+              <span className="text-lg font-medium text-gray-900 dark:text-white min-w-[140px] text-center">
+                {format(currentDate, 'MMMM yyyy', { locale: ro })}
+              </span>
+              
+              <button
+                onClick={handleNext}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Săptămâna/Luna următoare"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Quick Add Button with AI Enhancement */}
+            <button
+              onClick={() => setShowQuickAdd(true)}
+              className="flex items-center justify-center space-x-2 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors shadow-md hover:shadow-lg"
+              disabled={calendarState.loading}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Programare rapidă</span>
+                           {aiFeatures.smartScheduling && (
+               <span title="Asistență AI disponibilă">
+                 <Zap className="w-3 h-3 ml-1" />
+               </span>
+             )}
+            </button>
+          </div>
+        </div>
+
+        {/* Error and Loading States */}
+        <AnimatePresence>
+          {calendarState.error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
+            >
+              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium text-red-800 dark:text-red-300">
+                  Eroare de conectare
+                </h4>
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {calendarState.error}
+                </p>
+              </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* AI Integration Placeholder */}
+        {aiFeatures.smartScheduling && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg p-3"
+          >
+            <div className="flex items-center space-x-2 text-medflow-primary">
+              <Brain className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                🤖 Asistența AI pentru programare este activă - detectare conflicte și sugestii optime
+              </span>
+            </div>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Enhanced Calendar Grid with Loading States */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-lg">
-        {calendarState.loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <LoadingSpinner size="lg" />
-              <p className="mt-4 text-gray-600 dark:text-gray-400">
-                Se încarcă calendarul medical...
-              </p>
+        {/* Enhanced Quick Add Modal with MedFlow Branding */}
+        <AnimatePresence>
+          {showQuickAdd && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setShowQuickAdd(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-medflow-primary/10 rounded-lg">
+                      <Plus className="w-5 h-5 text-medflow-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Programare rapidă
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Adăugați o programare nouă rapid
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowQuickAdd(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Închide dialogul"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* AI Assistance Placeholder */}
+                {aiFeatures.smartScheduling && (
+                  <div className="mb-4 p-3 bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg">
+                    <div className="flex items-center space-x-2 text-medflow-primary">
+                      <Brain className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        🤖 Asistența AI vă poate sugera ore optime pentru această programare
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleQuickAdd(); }}>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      Nume pacient *
+                    </label>
+                    <input
+                      type="text"
+                      value={quickAddData.patientName}
+                      onChange={(e) => setQuickAddData({ ...quickAddData, patientName: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
+                      placeholder="Ex: Ion Popescu"
+                      required
+                      aria-describedby="patient-name-help"
+                    />
+                    <p id="patient-name-help" className="text-xs text-gray-500 mt-1">
+                      Introduceți numele complet al pacientului
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        Data *
+                      </label>
+                      <input
+                        type="date"
+                        value={quickAddData.date}
+                        onChange={(e) => setQuickAddData({ ...quickAddData, date: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                        Ora *
+                      </label>
+                      <input
+                        type="time"
+                        value={quickAddData.time}
+                        onChange={(e) => setQuickAddData({ ...quickAddData, time: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      Motivul consultației (opțional)
+                    </label>
+                    <textarea
+                      value={quickAddData.symptoms}
+                      onChange={(e) => setQuickAddData({ ...quickAddData, symptoms: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors resize-none"
+                      rows={3}
+                      placeholder="Ex: Dureri de cap frecvente, control de rutină..."
+                      aria-describedby="symptoms-help"
+                    />
+                    <p id="symptoms-help" className="text-xs text-gray-500 mt-1">
+                      Adăugați o scurtă descriere a motivului consultației
+                    </p>
+                  </div>
+                  
+                  <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setShowQuickAdd(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                    >
+                      Anulează
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!quickAddData.patientName.trim()}
+                      className="flex-1 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                    >
+                      <div className="flex items-center justify-center space-x-2">
+                        <Plus className="w-4 h-4" />
+                        <span>Creează programare</span>
+                      </div>
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Enhanced Calendar Grid with Loading States */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-lg">
+          {calendarState.loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <LoadingSpinner size="lg" />
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                  Se încarcă calendarul medical...
+                </p>
+              </div>
             </div>
-          </div>
-        ) : view === 'week' ? (
-          <WeekView
-            days={calendarData as Date[]}
-            appointments={appointments}
-            timeSlots={timeSlots}
-            onAppointmentClick={onAppointmentClick}
-            onTimeSlotClick={onTimeSlotClick}
-            onDeleteAppointment={handleDeleteAppointment}
-            getStatusColor={getStatusColor}
-            getStatusTextColor={getStatusTextColor}
-            getStatusText={getStatusText}
-            loading={calendarState.loading}
-          />
-        ) : (
-          <MonthView
-            weeks={calendarData as Date[][]}
-            appointments={appointments}
-            onAppointmentClick={onAppointmentClick}
-            onDeleteAppointment={handleDeleteAppointment}
-            getStatusColor={getStatusColor}
-            getStatusTextColor={getStatusTextColor}
-            getStatusText={getStatusText}
-            loading={calendarState.loading}
-          />
-        )}
+          ) : view === 'week' ? (
+            <WeekView
+              days={calendarData as Date[]}
+              appointments={appointments}
+              timeSlots={timeSlots}
+              onAppointmentClick={onAppointmentClick}
+              onTimeSlotClick={onTimeSlotClick}
+              onDeleteAppointment={handleDeleteAppointment}
+              getStatusColor={getStatusColor}
+              getStatusTextColor={getStatusTextColor}
+              getStatusText={getStatusText}
+              loading={calendarState.loading}
+            />
+          ) : (
+            <MonthView
+              weeks={calendarData as Date[][]}
+              appointments={appointments}
+              onAppointmentClick={onAppointmentClick}
+              onDeleteAppointment={handleDeleteAppointment}
+              getStatusColor={getStatusColor}
+              getStatusTextColor={getStatusTextColor}
+              getStatusText={getStatusText}
+              loading={calendarState.loading}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </DesignWorkWrapper>
   )
 })
 

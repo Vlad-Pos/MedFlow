@@ -15,6 +15,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface ThemeContextType {
   isDarkMode: boolean
@@ -183,7 +184,7 @@ export function ThemeToggle({
   showLabel = false,
   variant = 'switch'
 }: ThemeToggleProps) {
-  const { isDarkMode, toggleTheme, isSystemTheme } = useTheme()
+  const { isDarkMode, toggleTheme, isSystemTheme, setSystemTheme } = useTheme()
 
   const sizeClasses = {
     sm: 'w-8 h-5',
@@ -205,6 +206,102 @@ export function ThemeToggle({
 
   if (variant === 'switch') {
     return (
+      <DesignWorkWrapper componentName="ThemeToggle">
+        <div className={`flex items-center space-x-3 ${className}`}>
+          {showLabel && (
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {isDarkMode ? 'Mod întunecat' : 'Mod luminos'}
+              {isSystemTheme && (
+                <span className="text-xs text-gray-500 ml-1">(sistem)</span>
+              )}
+            </span>
+          )}
+          
+          <motion.button
+            onClick={toggleTheme}
+            className={`relative inline-flex ${sizeClasses[size]} items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-medflow-primary focus:ring-offset-2 ${
+              isDarkMode 
+                ? 'bg-medflow-primary' 
+                : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+            whileTap={{ scale: 0.95 }}
+            role="switch"
+            aria-checked={isDarkMode}
+            aria-label={isDarkMode ? 'Comutați la modul luminos' : 'Comutați la modul întunecat'}
+          >
+            <motion.span
+              className={`inline-block ${thumbSizeClasses[size]} transform rounded-full bg-white shadow-lg transition-transform duration-200 ${translateClasses[size]}`}
+              layout
+            >
+              <motion.div
+                className="w-full h-full flex items-center justify-center"
+                initial={false}
+                animate={{ rotate: isDarkMode ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isDarkMode ? (
+                  <svg className="w-2/3 h-2/3 text-medflow-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-2/3 h-2/3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </motion.div>
+            </motion.span>
+          </motion.button>
+        </div>
+      </DesignWorkWrapper>
+    )
+  }
+
+  if (variant === 'button') {
+    return (
+      <DesignWorkWrapper componentName="ThemeToggle">
+        <motion.button
+          onClick={toggleTheme}
+          className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+            isDarkMode 
+              ? 'bg-gray-800 text-white hover:bg-gray-700' 
+              : 'bg-white text-gray-800 hover:bg-gray-100'
+          } border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md ${className}`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          aria-label={`Comută la tema ${isDarkMode ? 'deschisă' : 'închisă'}`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          {showLabel && (
+            <span className="text-sm font-medium">{isDarkMode ? 'Mod întunecat' : 'Mod luminos'}</span>
+          )}
+        </motion.button>
+      </DesignWorkWrapper>
+    )
+  }
+
+  if (variant === 'icon') {
+    return (
+      <DesignWorkWrapper componentName="ThemeToggle">
+        <motion.button
+          onClick={toggleTheme}
+          className={`p-2 rounded-lg transition-all duration-200 ${
+            isDarkMode 
+              ? 'bg-gray-800 text-white hover:bg-gray-700' 
+              : 'bg-white text-gray-800 hover:bg-gray-100'
+          } border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md ${className}`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          aria-label={`Comută la tema ${isDarkMode ? 'deschisă' : 'închisă'}`}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </motion.button>
+      </DesignWorkWrapper>
+    )
+  }
+
+  // Default switch variant
+  return (
+    <DesignWorkWrapper componentName="ThemeToggle">
       <div className={`flex items-center space-x-3 ${className}`}>
         {showLabel && (
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -250,10 +347,8 @@ export function ThemeToggle({
           </motion.span>
         </motion.button>
       </div>
-    )
-  }
-
-  return null
+    </DesignWorkWrapper>
+  )
 }
 
 /**

@@ -16,6 +16,7 @@ import { useState, useEffect, forwardRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, AlertCircle, CheckCircle2, User, Mail, Lock, UserCheck } from 'lucide-react'
 import type { AuthValidationResult } from '../../utils/authValidation'
+import DesignWorkWrapper from '../../../DesignWorkWrapper'
 
 interface ValidatedInputProps {
   // Input props
@@ -134,163 +135,165 @@ export default forwardRef<HTMLInputElement | HTMLSelectElement, ValidatedInputPr
     const hasSuccess = touched && validation.isValid && value
     
     return (
-      <div className={`space-y-2 ${className}`}>
-        {/* Label */}
-        <label 
-          htmlFor={name}
-          className={`label flex items-center space-x-2 ${required ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}
-        >
-          {IconComponent && (
-            <IconComponent 
-              className={`h-4 w-4 ${focused ? 'text-medflow-primary' : 'text-gray-500'} transition-colors`}
-              aria-hidden="true"
-            />
-          )}
-          <span>{label}</span>
-          {aiSuggestions && (
-            <div className="text-xs text-medflow-primary opacity-60" title="Asistență AI disponibilă">
-              🤖
-            </div>
-          )}
-        </label>
-        
-        {/* Input container */}
-        <div className="relative">
-          {type === 'select' ? (
-            // Select dropdown
-            <select
-              ref={ref as React.Ref<HTMLSelectElement>}
-              id={name}
-              name={name}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onBlur={handleBlur}
-              onFocus={handleFocus}
-              disabled={disabled}
-              required={required}
-              className={getInputStateClasses()}
-              aria-label={ariaLabel || label}
-              aria-describedby={ariaDescribedBy}
-              aria-invalid={hasError}
-              {...props}
-            >
-              <option value="">{placeholder || `Selectați ${label.toLowerCase()}`}</option>
-              {options?.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            // Text/email/password input
-            <input
-              ref={ref as React.Ref<HTMLInputElement>}
-              type={inputType}
-              id={name}
-              name={name}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onBlur={handleBlur}
-              onFocus={handleFocus}
-              placeholder={placeholder}
-              autoComplete={autoComplete}
-              disabled={disabled}
-              required={required}
-              className={`${getInputStateClasses()} ${showToggle ? 'pr-12' : 'pr-10'}`}
-              aria-label={ariaLabel || label}
-              aria-describedby={ariaDescribedBy}
-              aria-invalid={hasError}
-              {...props}
-            />
-          )}
-          
-          {/* Status icon */}
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-            {hasError && (
-              <AlertCircle 
-                className="h-5 w-5 text-red-500" 
+      <DesignWorkWrapper componentName="ValidatedInput">
+        <div className={`space-y-2 ${className}`}>
+          {/* Label */}
+          <label 
+            htmlFor={name}
+            className={`label flex items-center space-x-2 ${required ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}`}
+          >
+            {IconComponent && (
+              <IconComponent 
+                className={`h-4 w-4 ${focused ? 'text-medflow-primary' : 'text-gray-500'} transition-colors`}
                 aria-hidden="true"
               />
             )}
-            {hasSuccess && (
-              <CheckCircle2 
-                className="h-5 w-5 text-emerald-500" 
-                aria-hidden="true"
+            <span>{label}</span>
+            {aiSuggestions && (
+              <div className="text-xs text-medflow-primary opacity-60" title="Asistență AI disponibilă">
+                🤖
+              </div>
+            )}
+          </label>
+          
+          {/* Input container */}
+          <div className="relative">
+            {type === 'select' ? (
+              // Select dropdown
+              <select
+                ref={ref as React.Ref<HTMLSelectElement>}
+                id={name}
+                name={name}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onBlur={handleBlur}
+                onFocus={handleFocus}
+                disabled={disabled}
+                required={required}
+                className={getInputStateClasses()}
+                aria-label={ariaLabel || label}
+                aria-describedby={ariaDescribedBy}
+                aria-invalid={hasError}
+                {...props}
+              >
+                <option value="">{placeholder || `Selectați ${label.toLowerCase()}`}</option>
+                {options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              // Text/email/password input
+              <input
+                ref={ref as React.Ref<HTMLInputElement>}
+                type={inputType}
+                id={name}
+                name={name}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onBlur={handleBlur}
+                onFocus={handleFocus}
+                placeholder={placeholder}
+                autoComplete={autoComplete}
+                disabled={disabled}
+                required={required}
+                className={`${getInputStateClasses()} ${showToggle ? 'pr-12' : 'pr-10'}`}
+                aria-label={ariaLabel || label}
+                aria-describedby={ariaDescribedBy}
+                aria-invalid={hasError}
+                {...props}
               />
             )}
             
-            {/* Password toggle */}
-            {showToggle && type === 'password' && (
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="ml-2 p-1 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-medflow-primary transition-colors"
-                aria-label={showPassword ? 'Ascunde parola' : 'Arată parola'}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {/* Validation messages */}
-        <AnimatePresence mode="wait">
-          {touched && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-1"
-            >
-              {/* Error messages */}
-              {validation.errors.map((error, index) => (
-                <motion.p
-                  key={`error-${index}`}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.1 }}
-                  className="text-sm text-red-600 dark:text-red-400 flex items-center space-x-2"
-                  role="alert"
-                >
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                  <span>{error}</span>
-                </motion.p>
-              ))}
+            {/* Status icon */}
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+              {hasError && (
+                <AlertCircle 
+                  className="h-5 w-5 text-red-500" 
+                  aria-hidden="true"
+                />
+              )}
+              {hasSuccess && (
+                <CheckCircle2 
+                  className="h-5 w-5 text-emerald-500" 
+                  aria-hidden="true"
+                />
+              )}
               
-              {/* Warning messages */}
-              {validation.warnings?.map((warning, index) => (
-                <motion.p
-                  key={`warning-${index}`}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.1 }}
-                  className="text-sm text-orange-600 dark:text-orange-400 flex items-center space-x-2"
+              {/* Password toggle */}
+              {showToggle && type === 'password' && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="ml-2 p-1 text-gray-500 hover:text-gray-700 focus:outline-none focus:text-medflow-primary transition-colors"
+                  aria-label={showPassword ? 'Ascunde parola' : 'Arată parola'}
                 >
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                  <span>{warning}</span>
-                </motion.p>
-              ))}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Validation messages */}
+          <AnimatePresence mode="wait">
+            {touched && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-1"
+              >
+                {/* Error messages */}
+                {validation.errors.map((error, index) => (
+                  <motion.p
+                    key={`error-${index}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.1 }}
+                    className="text-sm text-red-600 dark:text-red-400 flex items-center space-x-2"
+                    role="alert"
+                  >
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <span>{error}</span>
+                  </motion.p>
+                ))}
+                
+                {/* Warning messages */}
+                {validation.warnings?.map((warning, index) => (
+                  <motion.p
+                    key={`warning-${index}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.1 }}
+                    className="text-sm text-orange-600 dark:text-orange-400 flex items-center space-x-2"
+                  >
+                    <AlertCircle className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <span>{warning}</span>
+                  </motion.p>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {/* AI assistance placeholder */}
+          {aiSuggestions && focused && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-md border border-medflow-primary/10"
+            >
+              🤖 Asistență AI: Va fi disponibilă în curând pentru sugestii și completare automată
             </motion.div>
           )}
-        </AnimatePresence>
-        
-        {/* AI assistance placeholder */}
-        {aiSuggestions && focused && (
-          <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-md border border-medflow-primary/10"
-          >
-            🤖 Asistență AI: Va fi disponibilă în curând pentru sugestii și completare automată
-          </motion.div>
-        )}
-      </div>
+        </div>
+      </DesignWorkWrapper>
     )
   }
 )

@@ -32,6 +32,7 @@ import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
 import { format } from 'date-fns'
 import { ro } from 'date-fns/locale'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PatientFlaggingHistoryProps {
   patientId?: string
@@ -331,7 +332,8 @@ export default function PatientFlaggingHistory({
   }
   
   return (
-    <div className={`space-y-6 ${className}`}>
+    <DesignWorkWrapper componentName="PatientFlaggingHistory">
+      <div className={`space-y-6 ${className}`}>
       {/* Summary (if viewing specific patient) */}
       {summary && (
         <div className="bg-white border rounded-lg p-6">
@@ -568,6 +570,7 @@ export default function PatientFlaggingHistory({
           onResolve={handleResolveFlag}
         />
       )}
-    </div>
+      </div>
+    </DesignWorkWrapper>
   )
 }

@@ -8,6 +8,7 @@ import {
   X 
 } from 'lucide-react'
 import { notificationVariants } from '../utils/animations'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 export interface NotificationProps {
   id: string
@@ -77,78 +78,80 @@ export default function Notification({
   }
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          variants={notificationVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          className={`
-            fixed top-4 right-4 z-50 max-w-sm w-full
-            border rounded-lg shadow-lg backdrop-blur-sm
-            ${styles.bgColor} ${styles.borderColor}
-          `}
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ 
-                  type: 'spring',
-                  stiffness: 200,
-                  damping: 15,
-                  delay: 0.1
-                }}
-                className={`flex-shrink-0 ${styles.iconColor}`}
-              >
-                <Icon className="w-5 h-5" aria-hidden="true" />
-              </motion.div>
-              
-              <div className="flex-1 min-w-0">
-                <motion.h4
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className={`text-sm font-medium ${styles.textColor}`}
+    <DesignWorkWrapper componentName="Notification">
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            variants={notificationVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className={`
+              fixed top-4 right-4 z-50 max-w-sm w-full
+              border rounded-lg shadow-lg backdrop-blur-sm
+              ${styles.bgColor} ${styles.borderColor}
+            `}
+            role="alert"
+            aria-live="assertive"
+          >
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 15,
+                    delay: 0.1
+                  }}
+                  className={`flex-shrink-0 ${styles.iconColor}`}
                 >
-                  {title}
-                </motion.h4>
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </motion.div>
                 
-                {message && (
-                  <motion.p
+                <div className="flex-1 min-w-0">
+                  <motion.h4
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className={`mt-1 text-sm ${styles.textColor} opacity-90`}
+                    transition={{ delay: 0.2 }}
+                    className={`text-sm font-medium ${styles.textColor}`}
                   >
-                    {message}
-                  </motion.p>
-                )}
+                    {title}
+                  </motion.h4>
+                  
+                  {message && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className={`mt-1 text-sm ${styles.textColor} opacity-90`}
+                    >
+                      {message}
+                    </motion.p>
+                  )}
+                </div>
+                
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleClose}
+                  className={`
+                    flex-shrink-0 p-1 rounded-md
+                    hover:bg-black/5 dark:hover:bg-white/5
+                    focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${styles.textColor}
+                  `}
+                  aria-label="Închide notificarea"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </motion.button>
               </div>
-              
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleClose}
-                className={`
-                  flex-shrink-0 p-1 rounded-md
-                  hover:bg-black/5 dark:hover:bg-white/5
-                  focus:outline-none focus:ring-2 focus:ring-offset-2
-                  ${styles.textColor}
-                `}
-                aria-label="Închide notificarea"
-              >
-                <X className="w-4 h-4" aria-hidden="true" />
-              </motion.button>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </DesignWorkWrapper>
   )
 }
 
@@ -174,17 +177,19 @@ export function NotificationContainer() {
   }, [])
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      <AnimatePresence>
-        {notifications.map((notification) => (
-          <Notification
-            key={notification.id}
-            {...notification}
-            onClose={removeNotification}
-          />
-        ))}
-      </AnimatePresence>
-    </div>
+    <DesignWorkWrapper componentName="NotificationContainer">
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        <AnimatePresence>
+          {notifications.map((notification) => (
+            <Notification
+              key={notification.id}
+              {...notification}
+              onClose={removeNotification}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+    </DesignWorkWrapper>
   )
 }
 

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { cardVariants, featureVariants } from '../utils/animations'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface AnimatedCardProps {
   children: ReactNode
@@ -36,19 +37,21 @@ export default function AnimatedCard({
   const variants = variant === 'feature' ? featureVariants : cardVariants
 
   return (
-    <motion.div
-      className={baseClasses}
-      variants={variants}
-      initial="initial"
-      whileInView="animate"
-      whileHover={interactive ? "hover" : undefined}
-      whileTap={interactive ? "tap" : undefined}
-      onClick={onClick}
-      transition={{ delay }}
-      viewport={{ once: true }}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="AnimatedCard">
+      <motion.div
+        className={baseClasses}
+        variants={variants}
+        initial="initial"
+        whileInView="animate"
+        whileHover={interactive ? "hover" : undefined}
+        whileTap={interactive ? "tap" : undefined}
+        onClick={onClick}
+        transition={{ delay }}
+        viewport={{ once: true }}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 

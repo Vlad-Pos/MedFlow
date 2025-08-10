@@ -6,6 +6,7 @@
 import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 import { ReactNode } from 'react'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface N8nButtonProps {
   children: ReactNode
@@ -33,9 +34,9 @@ export default function N8nButton({
   const baseClasses = "relative overflow-hidden rounded-xl font-bold transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
   
   const variants = {
-    primary: "bg-gradient-to-r from-[#ff7e5f] to-[#feb47b] text-white shadow-lg hover:shadow-xl hover:shadow-[#ff7e5f]/25 focus:ring-[#ff7e5f]/50 hover:-translate-y-1",
-    secondary: "bg-transparent border-2 border-[#ff7e5f] text-[#ff7e5f] hover:bg-[#ff7e5f] hover:text-white focus:ring-[#ff7e5f]/50 hover:-translate-y-1",
-    ghost: "bg-transparent text-gray-300 hover:text-white hover:bg-white/10 focus:ring-white/50"
+    primary: "bg-gradient-to-r from-[#A18AB2] to-[#9280A5] text-white shadow-lg hover:shadow-xl hover:shadow-[#A18AB2]/25 focus:ring-[#A18AB2]/50 hover:-translate-y-1",
+    secondary: "bg-transparent border-2 border-[#A18AB2] text-[#A18AB2] hover:bg-[#A18AB2] hover:text-white focus:ring-[#A18AB2]/50 hover:-translate-y-1",
+    ghost: "bg-transparent text-white hover:text-[#A18AB2] hover:bg-[#A18AB2]/10 focus:ring-[#A18AB2]/50"
   }
   
   const sizes = {
@@ -47,50 +48,52 @@ export default function N8nButton({
   const Component = href ? motion.a : motion.button
   
   return (
-    <Component
-      href={href}
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
-    >
-      {/* Animated background gradient */}
-      {variant === 'primary' && (
+    <DesignWorkWrapper componentName="N8nButton">
+      <Component
+        href={href}
+        onClick={onClick}
+        disabled={disabled}
+        className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+        whileHover={{ scale: disabled ? 1 : 1.02 }}
+        whileTap={{ scale: disabled ? 1 : 0.98 }}
+      >
+        {/* Animated background gradient */}
+        {variant === 'primary' && (
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-[#9280A5] to-[#A18AB2] opacity-0 hover:opacity-100 transition-opacity duration-300"
+            initial={false}
+          />
+        )}
+        
+        {/* Shine effect */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-[#feb47b] to-[#ff7e5f] opacity-0 hover:opacity-100 transition-opacity duration-300"
-          initial={false}
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 -skew-x-12"
+          whileHover={{ x: ['0%', '100%'], opacity: [0, 1, 0] }}
+          transition={{ duration: 0.6 }}
         />
-      )}
-      
-      {/* Shine effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 -skew-x-12"
-        whileHover={{ x: ['0%', '100%'], opacity: [0, 1, 0] }}
-        transition={{ duration: 0.6 }}
-      />
-      
-      <span className="relative z-10 flex items-center gap-2">
-        {Icon && iconPosition === 'left' && (
-          <motion.div
-            animate={{ rotate: [0, 5, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Icon className="w-5 h-5" />
-          </motion.div>
-        )}
         
-        {children}
-        
-        {Icon && iconPosition === 'right' && (
-          <motion.div
-            whileHover={{ x: 2 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Icon className="w-5 h-5" />
-          </motion.div>
-        )}
-      </span>
-    </Component>
+        <span className="relative z-10 flex items-center gap-2">
+          {Icon && iconPosition === 'left' && (
+            <motion.div
+              animate={{ rotate: [0, 5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Icon className="w-5 h-5" />
+            </motion.div>
+          )}
+          
+          {children}
+          
+          {Icon && iconPosition === 'right' && (
+            <motion.div
+              whileHover={{ x: 2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Icon className="w-5 h-5" />
+            </motion.div>
+          )}
+        </span>
+      </Component>
+    </DesignWorkWrapper>
   )
 }

@@ -28,6 +28,7 @@ import {
   Stethoscope
 } from 'lucide-react'
 import { ReportValidation, ValidationStatus } from '../types/patientReports'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface ReportValidationIndicatorProps {
   validation: ReportValidation | null
@@ -215,11 +216,12 @@ export default function ReportValidationIndicator({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`space-y-4 ${className}`}
-    >
+    <DesignWorkWrapper componentName="ReportValidationIndicator">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`space-y-4 ${className}`}
+      >
       {/* Overall Status Header */}
       <div className={`p-4 rounded-lg border-2 ${
         isValid 
@@ -391,6 +393,7 @@ export default function ReportValidationIndicator({
           )}
         </div>
       )}
-    </motion.div>
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, ReactNode } from 'react'
 import { motion, PanInfo } from 'framer-motion'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface TouchGesturesProps {
   children: ReactNode
@@ -115,21 +116,23 @@ export default function TouchGestures({
   }
 
   return (
-    <motion.div
-      ref={containerRef}
-      className={className}
-      onTap={handleTap}
-      onPanEnd={handlePanEnd}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      whileTap={{ scale: 0.98 }}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.1}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="TouchGestures">
+      <motion.div
+        ref={containerRef}
+        className={className}
+        onTap={handleTap}
+        onPanEnd={handlePanEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        whileTap={{ scale: 0.98 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -178,22 +181,24 @@ export function SwipeableCard({
   }
 
   return (
-    <motion.div
-      className={`relative ${className}`}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.1}
-      onDragStart={handleDragStart}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-      whileDrag={{ scale: 1.02 }}
-      animate={{
-        x: isDragging ? (dragDirection === 'left' ? -20 : 20) : 0
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="SwipeableCard">
+      <motion.div
+        className={`relative ${className}`}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        whileDrag={{ scale: 1.02 }}
+        animate={{
+          x: isDragging ? (dragDirection === 'left' ? -20 : 20) : 0
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -230,31 +235,33 @@ export function PullToRefresh({
   }
 
   return (
-    <motion.div
-      className={className}
-      onPan={handlePan}
-      onPanEnd={handlePanEnd}
-      animate={{
-        y: isPulling ? pullDistance * 0.3 : 0
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-    >
-      {isPulling && (
-        <motion.div
-          className="absolute top-0 left-0 right-0 flex justify-center items-center h-16 bg-blue-50 dark:bg-blue-900/20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+    <DesignWorkWrapper componentName="PullToRefresh">
+      <motion.div
+        className={className}
+        onPan={handlePan}
+        onPanEnd={handlePanEnd}
+        animate={{
+          y: isPulling ? pullDistance * 0.3 : 0
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        {isPulling && (
           <motion.div
-            className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-        </motion.div>
-      )}
-      {children}
-    </motion.div>
+            className="absolute top-0 left-0 right-0 flex justify-center items-center h-16 bg-blue-50 dark:bg-blue-900/20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+          </motion.div>
+        )}
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -279,15 +286,17 @@ export function PinchToZoom({
   }
 
   return (
-    <motion.div
-      className={`overflow-hidden ${className}`}
-      onWheel={handleWheel}
-      style={{ scale }}
-      drag
-      dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="PinchToZoom">
+      <motion.div
+        className={`overflow-hidden ${className}`}
+        onWheel={handleWheel}
+        style={{ scale }}
+        drag
+        dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 

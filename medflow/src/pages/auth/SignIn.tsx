@@ -28,6 +28,7 @@ import {
   clearAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
+import DesignWorkWrapper from '../../../DesignWorkWrapper'
 
 export default function SignIn() {
   // Hooks
@@ -119,176 +120,173 @@ export default function SignIn() {
   }, [])
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="mx-auto max-w-md"
-    >
-      {/* Header Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="text-center mb-8"
-      >
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <div className="p-3 bg-medflow-primary/10 rounded-full">
-            <Shield className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
+    <DesignWorkWrapper componentName="SignIn">
+      <div className="min-h-screen bg-gradient-to-br from-medflow-primary/5 via-white to-medflow-secondary/5 flex items-center justify-center p-4">
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center mb-8"
+        >
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="p-3 bg-medflow-primary/10 rounded-full">
+              <Shield className="h-8 w-8 text-medflow-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-medflow-text-primary">
+                Autentificare
+              </h1>
+              <p className="text-sm text-medflow-text-secondary mt-1">
+                Accesați platforma MedFlow
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-medflow-text-primary">
-              Autentificare
-            </h1>
-            <p className="text-sm text-medflow-text-secondary mt-1">
-              Accesați platforma MedFlow
-            </p>
-          </div>
-        </div>
-        
-        {/* AI Integration Placeholder */}
+          
+          {/* AI Integration Placeholder */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-lg border border-medflow-primary/10"
+          >
+            🤖 Asistență AI pentru autentificare va fi disponibilă în curând
+          </motion.div>
+        </motion.div>
+
+        {/* Authentication Form */}
+        <motion.form 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          {/* Error Display */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className={`flex items-center space-x-3 p-4 rounded-lg ${
+                  rateLimited 
+                    ? 'bg-orange-500/20 border border-orange-400/30' 
+                    : 'bg-red-500/20 border border-red-400/30'
+                }`}
+                role="alert"
+                aria-live="polite"
+              >
+                <AlertTriangle 
+                  className={`h-5 w-5 flex-shrink-0 ${
+                    rateLimited ? 'text-orange-600' : 'text-red-600'
+                  }`} 
+                  aria-hidden="true" 
+                />
+                <span className={`text-sm font-medium ${
+                  rateLimited 
+                    ? 'text-orange-200' 
+                    : 'text-red-200'
+                }`}>
+                  {error}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Email Input */}
+          <ValidatedInput
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange('email')}
+            validateFn={validateEmail}
+            label="Adresa de email"
+            placeholder="medic@exemple.ro"
+            autoComplete="email"
+            icon="email"
+            required
+            disabled={loading || rateLimited}
+            aiSuggestions={true}
+            ariaLabel="Introduceți adresa de email pentru autentificare"
+          />
+
+          {/* Password Input */}
+          <ValidatedInput
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange('password')}
+            validateFn={validatePassword}
+            label="Parola"
+            placeholder="Introduceți parola"
+            autoComplete="current-password"
+            icon="lock"
+            showToggle={true}
+            required
+            disabled={loading || rateLimited}
+            ariaLabel="Introduceți parola pentru autentificare"
+          />
+
+          {/* Submit Button */}
+          <motion.button
+            type="submit"
+            disabled={loading || rateLimited}
+            className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+          >
+            {loading ? (
+              <LoadingSpinner 
+                size="sm" 
+                text="Se autentifică..." 
+                className="text-white"
+              />
+            ) : (
+              <>
+                <LogIn className="h-5 w-5" aria-hidden="true" />
+                <span>Autentificare</span>
+              </>
+            )}
+          </motion.button>
+
+          {/* Footer Links */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 text-sm border-t border-white/10 pt-4"
+          >
+            <Link 
+              to="/reset" 
+              className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
+            >
+              Am uitat parola
+            </Link>
+            <div className="flex items-center space-x-2 text-medflow-text-secondary">
+              <span>Nu aveți cont?</span>
+              <Link 
+                to="/signup" 
+                className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
+              >
+                Înregistrați-vă
+              </Link>
+            </div>
+          </motion.div>
+        </motion.form>
+
+        {/* Security Notice */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-xs text-medflow-primary/70 bg-medflow-primary/5 p-2 rounded-lg border border-medflow-primary/10"
+          transition={{ delay: 0.5 }}
+          className="mt-6 text-center text-xs text-medflow-text-muted"
         >
-          🤖 Asistență AI pentru autentificare va fi disponibilă în curând
+          <p>Conexiunea este securizată și datele sunt protejate conform GDPR</p>
         </motion.div>
-      </motion.div>
-
-      {/* Authentication Form */}
-      <motion.form 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
-        onSubmit={handleSubmit}
-        noValidate
-      >
-        {/* Error Display */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className={`flex items-center space-x-3 p-4 rounded-lg ${
-                rateLimited 
-                  ? 'bg-orange-500/20 border border-orange-400/30' 
-                  : 'bg-red-500/20 border border-red-400/30'
-              }`}
-              role="alert"
-              aria-live="polite"
-            >
-              <AlertTriangle 
-                className={`h-5 w-5 flex-shrink-0 ${
-                  rateLimited ? 'text-orange-600' : 'text-red-600'
-                }`} 
-                aria-hidden="true" 
-              />
-              <span className={`text-sm font-medium ${
-                rateLimited 
-                  ? 'text-orange-200' 
-                  : 'text-red-200'
-              }`}>
-                {error}
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Email Input */}
-        <ValidatedInput
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange('email')}
-          validateFn={validateEmail}
-          label="Adresa de email"
-          placeholder="medic@exemple.ro"
-          autoComplete="email"
-          icon="email"
-          required
-          disabled={loading || rateLimited}
-          aiSuggestions={true}
-          ariaLabel="Introduceți adresa de email pentru autentificare"
-        />
-
-        {/* Password Input */}
-        <ValidatedInput
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleInputChange('password')}
-          validateFn={validatePassword}
-          label="Parola"
-          placeholder="Introduceți parola"
-          autoComplete="current-password"
-          icon="lock"
-          showToggle={true}
-          required
-          disabled={loading || rateLimited}
-          ariaLabel="Introduceți parola pentru autentificare"
-        />
-
-        {/* Submit Button */}
-        <motion.button
-          type="submit"
-          disabled={loading || rateLimited}
-          className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
-          whileHover={{ scale: loading ? 1 : 1.02 }}
-          whileTap={{ scale: loading ? 1 : 0.98 }}
-        >
-          {loading ? (
-            <LoadingSpinner 
-              size="sm" 
-              text="Se autentifică..." 
-              className="text-white"
-            />
-          ) : (
-            <>
-              <LogIn className="h-5 w-5" aria-hidden="true" />
-              <span>Autentificare</span>
-            </>
-          )}
-        </motion.button>
-
-        {/* Footer Links */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 text-sm border-t border-white/10 pt-4"
-        >
-          <Link 
-            to="/reset" 
-            className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
-          >
-            Am uitat parola
-          </Link>
-          <div className="flex items-center space-x-2 text-medflow-text-secondary">
-            <span>Nu aveți cont?</span>
-            <Link 
-              to="/signup" 
-              className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
-            >
-              Înregistrați-vă
-            </Link>
-          </div>
-        </motion.div>
-      </motion.form>
-
-      {/* Security Notice */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 text-center text-xs text-medflow-text-muted"
-      >
-        <p>Conexiunea este securizată și datele sunt protejate conform GDPR</p>
-      </motion.div>
-    </motion.div>
+      </div>
+    </DesignWorkWrapper>
   )
 }

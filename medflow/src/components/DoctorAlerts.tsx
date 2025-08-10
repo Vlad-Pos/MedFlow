@@ -29,6 +29,7 @@ import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
 import { formatDistanceToNow } from 'date-fns'
 import { ro } from 'date-fns/locale'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface DoctorAlertsProps {
   className?: string
@@ -240,7 +241,8 @@ export default function DoctorAlerts({
    * Render full alert list
    */
   return (
-    <div className={`space-y-3 ${className}`}>
+    <DesignWorkWrapper componentName="DoctorAlerts">
+      <div className={`space-y-3 ${className}`}>
       <AnimatePresence>
         {alerts.map((alert) => {
           const colors = getAlertColors(alert)
@@ -448,6 +450,7 @@ export default function DoctorAlerts({
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </DesignWorkWrapper>
   )
 }

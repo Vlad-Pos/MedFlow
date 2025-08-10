@@ -59,8 +59,9 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
 import { showNotification } from './Notification'
-import { ConfirmationDialog } from './ConfirmationDialog'
+import ConfirmationDialog from './ConfirmationDialog'
 import { formatDateTime } from '../utils/dateUtils'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface SubmissionStatusManagerProps {
   batchId?: string
@@ -125,7 +126,7 @@ export default function SubmissionStatusManager({
       setNextRetryAt(statusData.nextRetryAt)
     } catch (error) {
       console.error('Error loading submission data:', error)
-      showNotification('Eroare la încărcarea datelor de trimitere', 'error')
+              showNotification.error('Eroare la încărcarea datelor de trimitere')
     } finally {
       setIsLoading(false)
     }
@@ -187,12 +188,12 @@ export default function SubmissionStatusManager({
 
     try {
       await retryFailedSubmission(batchId, user.uid, 'doctor')
-      showNotification('Reîncercarea a fost inițiată cu succes', 'success')
+              showNotification.success('Reîncercarea a fost inițiată cu succes')
       setRetryDialog({ isOpen: false, loading: false })
       loadSubmissionData()
     } catch (error) {
       console.error('Error retrying submission:', error)
-      showNotification('Eroare la reîncercarea trimiterii', 'error')
+              showNotification.error('Eroare la reîncercarea trimiterii')
       setRetryDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -203,12 +204,12 @@ export default function SubmissionStatusManager({
     try {
       await scheduleAutomaticSubmission()
       await processSubmissionQueue()
-      showNotification('Trimiterea automată a fost programată cu succes', 'success')
+              showNotification.success('Trimiterea automată a fost programată cu succes')
       setScheduleDialog({ isOpen: false, loading: false })
       loadStatistics()
     } catch (error) {
       console.error('Error scheduling submission:', error)
-      showNotification('Eroare la programarea trimiterii automate', 'error')
+              showNotification.error('Eroare la programarea trimiterii automate')
       setScheduleDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -279,362 +280,366 @@ export default function SubmissionStatusManager({
 
   if (isLoading && batchId) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Se încarcă statusul trimiterii...
-          </p>
+      <DesignWorkWrapper componentName="SubmissionStatusManager">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Se încarcă statusul trimiterii...
+            </p>
+          </div>
         </div>
-      </div>
+      </DesignWorkWrapper>
     )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
-      {/* Header with Submission Period Status */}
-      {showFullInterface && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Status Trimitere Guvern
-            </h2>
-            
-            <div className="flex items-center space-x-3">
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-                isWithinPeriod 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-              }`}>
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {isWithinPeriod ? 'Perioada de trimitere activă' : 'În afara perioadei de trimitere'}
-                </span>
-              </div>
+    <DesignWorkWrapper componentName="SubmissionStatusManager">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header with Submission Period Status */}
+        {showFullInterface && (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Status Trimitere Guvern
+              </h2>
               
-              {canSchedule && (
-                <button
-                  onClick={() => setScheduleDialog({ isOpen: true, loading: false })}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <Play className="w-4 h-4" />
-                  <span>Programează trimiterea</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Submission Period Info */}
-          {nextPeriod && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Perioada curentă/următoare:
-                </span>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {nextPeriod.start.toLocaleDateString('ro-RO')} - {nextPeriod.end.toLocaleDateString('ro-RO')}
-                </p>
-              </div>
-              
-              <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Status sistem:
-                </span>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {isWithinPeriod ? 'Acceptă trimiteri' : 'Trimiterea suspendată'}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Statistics Dashboard */}
-      {showFullInterface && submissionStats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Loturi</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {submissionStats.totalBatches}
-                </p>
-              </div>
-              <FileText className="w-8 h-8 text-blue-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">În așteptare</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {submissionStats.pendingSubmissions}
-                </p>
-              </div>
-              <Clock className="w-8 h-8 text-orange-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Trimise cu succes</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {submissionStats.successfulSubmissions}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Eșuate</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {submissionStats.failedSubmissions}
-                </p>
-              </div>
-              <XCircle className="w-8 h-8 text-red-500" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Reîncercări</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {submissionStats.retryingSubmissions}
-                </p>
-              </div>
-              <RotateCcw className="w-8 h-8 text-yellow-500" />
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Individual Batch Status */}
-      {batchId && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Status Lot: {batchId}
-              </h3>
-              
-              <span className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(submissionStatus)}`}>
-                {getStatusIcon(submissionStatus)}
-                <span>{getStatusText(submissionStatus)}</span>
-              </span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={loadSubmissionData}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                title="Actualizează status"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-
-              {canRetry && (
-                <button
-                  onClick={() => setRetryDialog({ isOpen: true, loading: false })}
-                  className="flex items-center space-x-2 px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Reîncearcă</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Receipt Information */}
-          {receipt && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-green-900">Confirmare Trimitere</h4>
-                  <div className="mt-2 text-sm text-green-800 space-y-1">
-                    <p><strong>Referință guvern:</strong> {receipt.governmentReference}</p>
-                    <p><strong>ID confirmare:</strong> {receipt.confirmationId}</p>
-                    <p><strong>Trimis la:</strong> {formatDateTime(receipt.submittedAt.toDate())}</p>
-                    <p><strong>Număr rapoarte:</strong> {receipt.reportCount}</p>
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  isWithinPeriod 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                }`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>
+                    {isWithinPeriod ? 'Perioada de trimitere activă' : 'În afara perioadei de trimitere'}
+                  </span>
                 </div>
                 
-                <button
-                  className="flex items-center space-x-2 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  title="Descarcă chitanța"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Descarcă</span>
-                </button>
+                {canSchedule && (
+                  <button
+                    onClick={() => setScheduleDialog({ isOpen: true, loading: false })}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Programează trimiterea</span>
+                  </button>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Next Retry Information */}
-          {nextRetryAt && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <Timer className="w-5 h-5 text-yellow-600" />
+            {/* Submission Period Info */}
+            {nextPeriod && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="font-medium text-yellow-900">Următoarea reîncercare programată</p>
-                  <p className="text-sm text-yellow-800">
-                    {formatDateTime(nextRetryAt)}
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Perioada curentă/următoare:
+                  </span>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {nextPeriod.start.toLocaleDateString('ro-RO')} - {nextPeriod.end.toLocaleDateString('ro-RO')}
+                  </p>
+                </div>
+                
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Status sistem:
+                  </span>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {isWithinPeriod ? 'Acceptă trimiteri' : 'Trimiterea suspendată'}
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Submission Log */}
-          <div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-4">Istoric Trimitere</h4>
-            
-            {submissionLog.length === 0 ? (
-              <div className="text-center py-8">
-                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  Nu există istoric pentru acest lot
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {submissionLog.map((entry) => (
-                  <motion.div
-                    key={entry.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
-                  >
-                    <div className={`p-2 rounded-full ${
-                      entry.error ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                    }`}>
-                      {getLogActionIcon(entry.action)}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {entry.details}
-                        </p>
-                        
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-gray-500">
-                            {formatDateTime(entry.timestamp.toDate())}
-                          </span>
-                          
-                          {entry.error && (
-                            <button
-                              onClick={() => setExpandedLogEntry(
-                                expandedLogEntry === entry.id ? null : entry.id
-                              )}
-                              className="text-red-600 hover:text-red-700"
-                              title="Vezi detalii eroare"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {entry.userId && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          De către: {entry.userRole === 'system' ? 'Sistem' : entry.userRole}
-                        </p>
-                      )}
-
-                      {/* Expanded Error Details */}
-                      <AnimatePresence>
-                        {expandedLogEntry === entry.id && entry.error && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-3 p-3 bg-red-50 border border-red-200 rounded"
-                          >
-                            <div className="text-sm">
-                              <p className="font-medium text-red-900">Detalii eroare:</p>
-                              <p className="text-red-800 mt-1">
-                                <strong>Cod:</strong> {entry.error.code}
-                              </p>
-                              <p className="text-red-800">
-                                <strong>Mesaj:</strong> {entry.error.message}
-                              </p>
-                              <p className="text-red-800">
-                                <strong>Recuperabil:</strong> {entry.error.recoverable ? 'Da' : 'Nu'}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Manual Retry Dialog */}
-      <ConfirmationDialog
-        isOpen={retryDialog.isOpen}
-        onClose={() => setRetryDialog({ isOpen: false, loading: false })}
-        onConfirm={handleManualRetry}
-        title="Confirmă reîncercarea trimiterii"
-        message="Ești sigur că vrei să reîncerci trimiterea acestui lot? Procesul va fi adăugat în coada de trimitere cu prioritate înaltă."
-        confirmText="Reîncearcă trimiterea"
-        cancelText="Anulează"
-        type="warning"
-        loading={retryDialog.loading}
-      />
+        {/* Statistics Dashboard */}
+        {showFullInterface && submissionStats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Loturi</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {submissionStats.totalBatches}
+                  </p>
+                </div>
+                <FileText className="w-8 h-8 text-blue-500" />
+              </div>
+            </motion.div>
 
-      {/* Schedule Submission Dialog */}
-      <ConfirmationDialog
-        isOpen={scheduleDialog.isOpen}
-        onClose={() => setScheduleDialog({ isOpen: false, loading: false })}
-        onConfirm={handleScheduleAutoSubmission}
-        title="Programează trimiterea automată"
-        message="Ești sigur că vrei să programezi trimiterea automată pentru toate loturile pregătite? Această acțiune va procesa coada de trimitere."
-        confirmText="Programează trimiterea"
-        cancelText="Anulează"
-        type="primary"
-        loading={scheduleDialog.loading}
-      />
-    </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">În așteptare</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {submissionStats.pendingSubmissions}
+                  </p>
+                </div>
+                <Clock className="w-8 h-8 text-orange-500" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Trimise cu succes</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {submissionStats.successfulSubmissions}
+                  </p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Eșuate</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {submissionStats.failedSubmissions}
+                  </p>
+                </div>
+                <XCircle className="w-8 h-8 text-red-500" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Reîncercări</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {submissionStats.retryingSubmissions}
+                  </p>
+                </div>
+                <RotateCcw className="w-8 h-8 text-yellow-500" />
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Individual Batch Status */}
+        {batchId && (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Status Lot: {batchId}
+                </h3>
+                
+                <span className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(submissionStatus)}`}>
+                  {getStatusIcon(submissionStatus)}
+                  <span>{getStatusText(submissionStatus)}</span>
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={loadSubmissionData}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Actualizează status"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+
+                {canRetry && (
+                  <button
+                    onClick={() => setRetryDialog({ isOpen: true, loading: false })}
+                    className="flex items-center space-x-2 px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Reîncearcă</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Receipt Information */}
+            {receipt && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-green-900">Confirmare Trimitere</h4>
+                    <div className="mt-2 text-sm text-green-800 space-y-1">
+                      <p><strong>Referință guvern:</strong> {receipt.governmentReference}</p>
+                      <p><strong>ID confirmare:</strong> {receipt.confirmationId}</p>
+                      <p><strong>Trimis la:</strong> {formatDateTime(receipt.submittedAt.toDate())}</p>
+                      <p><strong>Număr rapoarte:</strong> {receipt.reportCount}</p>
+                    </div>
+                  </div>
+                  
+                  <button
+                    className="flex items-center space-x-2 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    title="Descarcă chitanța"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Descarcă</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Next Retry Information */}
+            {nextRetryAt && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Timer className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="font-medium text-yellow-900">Următoarea reîncercare programată</p>
+                    <p className="text-sm text-yellow-800">
+                      {formatDateTime(nextRetryAt)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Submission Log */}
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-4">Istoric Trimitere</h4>
+              
+              {submissionLog.length === 0 ? (
+                <div className="text-center py-8">
+                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Nu există istoric pentru acest lot
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {submissionLog.map((entry) => (
+                    <motion.div
+                      key={entry.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                    >
+                      <div className={`p-2 rounded-full ${
+                        entry.error ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {getLogActionIcon(entry.action)}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {entry.details}
+                          </p>
+                          
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-gray-500">
+                              {formatDateTime(entry.timestamp.toDate())}
+                            </span>
+                            
+                            {entry.error && (
+                              <button
+                                onClick={() => setExpandedLogEntry(
+                                  expandedLogEntry === entry.id ? null : entry.id
+                                )}
+                                className="text-red-600 hover:text-red-700"
+                                title="Vezi detalii eroare"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {entry.userId && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            De către: {entry.userRole === 'system' ? 'Sistem' : entry.userRole}
+                          </p>
+                        )}
+
+                        {/* Expanded Error Details */}
+                        <AnimatePresence>
+                          {expandedLogEntry === entry.id && entry.error && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-3 p-3 bg-red-50 border border-red-200 rounded"
+                            >
+                              <div className="text-sm">
+                                <p className="font-medium text-red-900">Detalii eroare:</p>
+                                <p className="text-red-800 mt-1">
+                                  <strong>Cod:</strong> {entry.error.code}
+                                </p>
+                                <p className="text-red-800">
+                                  <strong>Mesaj:</strong> {entry.error.message}
+                                </p>
+                                <p className="text-red-800">
+                                  <strong>Recuperabil:</strong> {entry.error.recoverable ? 'Da' : 'Nu'}
+                                </p>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Manual Retry Dialog */}
+        <ConfirmationDialog
+          isOpen={retryDialog.isOpen}
+          onClose={() => setRetryDialog({ isOpen: false, loading: false })}
+          onConfirm={handleManualRetry}
+          title="Confirmă reîncercarea trimiterii"
+          message="Ești sigur că vrei să reîncerci trimiterea acestui lot? Procesul va fi adăugat în coada de trimitere cu prioritate înaltă."
+          confirmText="Reîncearcă trimiterea"
+          cancelText="Anulează"
+          type="warning"
+          loading={retryDialog.loading}
+        />
+
+        {/* Schedule Submission Dialog */}
+        <ConfirmationDialog
+          isOpen={scheduleDialog.isOpen}
+          onClose={() => setScheduleDialog({ isOpen: false, loading: false })}
+          onConfirm={handleScheduleAutoSubmission}
+          title="Programează trimiterea automată"
+          message="Ești sigur că vrei să programezi trimiterea automată pentru toate loturile pregătite? Această acțiune va procesa coada de trimitere."
+          confirmText="Programează trimiterea"
+          cancelText="Anulează"
+          type="primary"
+          loading={scheduleDialog.loading}
+        />
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }

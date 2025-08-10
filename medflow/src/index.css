@@ -4,58 +4,60 @@
 
 /* Core visual style inspired by n8n.io */
 :root {
-  /* n8n.io-inspired Dark Theme Colors */
-  --medflow-gradient-primary: linear-gradient(135deg, #1d1f21, #2a2d31);
+  /* MedFlow Brand Colors - Enhanced contrast for dark theme */
+  --medflow-brand-1: #A18AB2;  /* Lightest - for primary text and highlights */
+  --medflow-brand-2: #9280A5;  /* Light - for secondary text and accents */
+  --medflow-brand-3: #847697;  /* Medium - for tertiary text and borders */
+  --medflow-brand-4: #756C8A;  /* Medium-dark - for surfaces and backgrounds */
+  --medflow-brand-5: #66627D;  /* Dark - for elevated surfaces */
+  --medflow-brand-6: #58586F;  /* Darker - for deep backgrounds */
+  --medflow-brand-7: #494E62;  /* Darkest - for deepest backgrounds */
+  
+  /* Enhanced contrast gradients using brand colors */
+  --medflow-gradient-primary: linear-gradient(135deg, var(--medflow-brand-7), var(--medflow-brand-6));
+  --medflow-gradient-secondary: linear-gradient(135deg, var(--medflow-brand-6), var(--medflow-brand-5));
+  --medflow-gradient-accent: linear-gradient(135deg, var(--medflow-brand-1), var(--medflow-brand-2));
+  --medflow-gradient-surface: linear-gradient(135deg, var(--medflow-brand-5), var(--medflow-brand-4));
+  
+  /* Dark theme backgrounds with brand colors */
   --medflow-dark-bg: #0f0f10;
-  --medflow-surface-dark: #1a1b1e;
-  --medflow-surface-elevated: #24262a;
-  --medflow-accent-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
-  --medflow-text-glow: rgba(255, 255, 255, 0.9);
+  --medflow-surface-dark: var(--medflow-brand-7);
+  --medflow-surface-elevated: var(--medflow-brand-6);
   
-  /* Neon accent colors inspired by n8n */
-  --medflow-neon-primary: #ff7e5f;
-  --medflow-neon-secondary: #feb47b;
-  --medflow-neon-blue: #4a9eff;
-  --medflow-neon-purple: #b084cc;
+  /* High contrast text colors for dark backgrounds */
+  --medflow-text-primary: #FFFFFF;      /* Pure white for maximum contrast */
+  --medflow-text-secondary: #F8FAFC;    /* Very light gray for secondary text */
+  --medflow-text-tertiary: #E2E8F0;    /* Light gray for tertiary text */
+  --medflow-text-muted: #CBD5E1;       /* Medium gray for muted text */
   
-  /* ACCENT: Enhanced contrast lotus logo color - buttons, icons, interactive states */
-  --medflow-accent: 169 144 187;
-  --medflow-accent-hover: 189 163 209;
-  --medflow-accent-dark: 148 125 163;
-  
-  /* TEXT: Enhanced contrast light colors for dark backgrounds */
-  --medflow-text-primary: #FFFFFF;
-  --medflow-text-secondary: #F1F5F9;
-  --medflow-text-muted: #D1D5DB;
-  
-  /* SUPPORTING: Enhanced contrast dark neutrals */
-  --medflow-surface: 42 48 70;
-  --medflow-surface-elevated: 57 63 84;
+  /* Brand accent colors for interactive elements */
+  --medflow-accent: 161 138 178;       /* RGB values for brand-1 */
+  --medflow-accent-hover: 146 128 151; /* RGB values for brand-2 */
+  --medflow-accent-dark: 132 118 151;  /* RGB values for brand-3 */
   
   /* Legacy variables maintained for compatibility */
-  --medflow-background: #32384E;
-  --medflow-primary: #9F86B1;
-  --medflow-secondary: #8A7399;
+  --medflow-background: var(--medflow-brand-6);
+  --medflow-primary: var(--medflow-brand-1);
+  --medflow-secondary: var(--medflow-brand-2);
   
   /* Legacy compatibility */
-  --medflow-blue: #3B82F6; /* blue-500 */
-  --medflow-green: #10B981; /* emerald-500 */
+  --medflow-blue: #3B82F6;
+  --medflow-green: #10B981;
   --medflow-white: #FFFFFF;
   
   /* Enhanced MedFlow gradients */
   --medflow-gradient: var(--medflow-gradient-primary);
-  --medflow-gradient-subtle: linear-gradient(135deg, rgba(159, 134, 177, 0.1) 0%, rgba(138, 115, 153, 0.1) 100%);
+  --medflow-gradient-subtle: linear-gradient(135deg, rgba(161, 138, 178, 0.1) 0%, rgba(146, 128, 165, 0.1) 100%);
   --medflow-gradient-dark: var(--medflow-gradient-primary);
   
-  /* Dark theme base colors */
-  --medflow-bg-primary: rgba(50, 56, 78, 0.95);
-  --medflow-bg-secondary: rgba(65, 71, 92, 0.9);
-  --medflow-bg-tertiary: rgba(93, 93, 117, 0.8);
-  --medflow-text-primary: #FFFFFF;
-  --medflow-text-secondary: #F1F5F9;
-  --medflow-text-tertiary: #D1D5DB;
-  --medflow-border: rgba(255, 255, 255, 0.15);
-  --medflow-border-hover: var(--medflow-accent);
+  /* Dark theme base colors with brand integration */
+  --medflow-bg-primary: rgba(73, 78, 98, 0.95);    /* brand-7 with transparency */
+  --medflow-bg-secondary: rgba(88, 88, 111, 0.9);   /* brand-6 with transparency */
+  --medflow-bg-tertiary: rgba(102, 98, 125, 0.8);   /* brand-5 with transparency */
+  
+  /* High contrast borders using brand colors */
+  --medflow-border: rgba(161, 138, 178, 0.25);      /* brand-1 with transparency */
+  --medflow-border-hover: var(--medflow-brand-1);
   
   /* Responsive spacing */
   --spacing-xs: 0.5rem;
@@ -75,11 +77,11 @@
   --sal: env(safe-area-inset-left);
   --sar: env(safe-area-inset-right);
   
-  /* Shadows and effects */
-  --medflow-shadow-sm: 0 1px 2px 0 rgba(158, 133, 176, 0.05);
-  --medflow-shadow: 0 4px 6px -1px rgba(158, 133, 176, 0.1), 0 2px 4px -1px rgba(158, 133, 176, 0.06);
-  --medflow-shadow-lg: 0 10px 15px -3px rgba(158, 133, 176, 0.1), 0 4px 6px -2px rgba(158, 133, 176, 0.05);
-  --medflow-shadow-xl: 0 20px 25px -5px rgba(158, 133, 176, 0.1), 0 10px 10px -5px rgba(158, 133, 176, 0.04);
+  /* Shadows and effects with brand colors */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(161, 138, 178, 0.1);
+  --medflow-shadow: 0 4px 6px -1px rgba(161, 138, 178, 0.15), 0 2px 4px -1px rgba(161, 138, 178, 0.1);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(161, 138, 178, 0.15), 0 4px 6px -2px rgba(161, 138, 178, 0.1);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(161, 138, 178, 0.15), 0 10px 10px -5px rgba(161, 138, 178, 0.1);
   
   /* Animation timing */
   --medflow-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);

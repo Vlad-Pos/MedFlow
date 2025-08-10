@@ -27,6 +27,7 @@ import { PatientFlagGDPRData, PatientFlagSummary } from '../types/patientFlaggin
 import LoadingSpinner from './LoadingSpinner'
 import { format } from 'date-fns'
 import { ro } from 'date-fns/locale'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface GDPRComplianceManagerProps {
   patientId: string
@@ -379,7 +380,8 @@ export default function GDPRComplianceManager({
   }
   
   return (
-    <div className={`space-y-6 ${className}`}>
+    <DesignWorkWrapper componentName="GDPRComplianceManager">
+      <div className={`space-y-6 ${className}`}>
       {/* GDPR Status Overview */}
       <div className="bg-white border rounded-lg p-6">
         <div className="flex items-center mb-4">
@@ -550,6 +552,7 @@ export default function GDPRComplianceManager({
           </div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </DesignWorkWrapper>
   )
 }

@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface LazyImageProps {
   src: string
@@ -51,48 +52,50 @@ export default function LazyImage({
   }
 
   return (
-    <div className={`relative overflow-hidden ${className}`} ref={imgRef}>
-      {/* Placeholder */}
-      <motion.img
-        src={placeholder}
-        alt=""
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-          loaded ? 'opacity-0' : 'opacity-100'
-        }`}
-        style={{
-          filter: 'blur(20px)',
-          background: 'linear-gradient(135deg, #1a1b1e, #24262a)'
-        }}
-      />
-
-      {/* Actual image */}
-      {inView && (
+    <DesignWorkWrapper componentName="LazyImage">
+      <div className={`relative overflow-hidden ${className}`} ref={imgRef}>
+        {/* Placeholder */}
         <motion.img
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
-            loaded ? 'opacity-100' : 'opacity-0'
+          src={placeholder}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+            loaded ? 'opacity-0' : 'opacity-100'
           }`}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ 
-            opacity: loaded ? 1 : 0,
-            scale: loaded ? 1 : 1.1
+          style={{
+            filter: 'blur(20px)',
+            background: 'linear-gradient(135deg, #1a1b1e, #24262a)'
           }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
         />
-      )}
 
-      {/* Loading indicator */}
-      {!loaded && inView && (
-        <motion.div 
-          className="absolute inset-0 flex items-center justify-center"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <div className="w-8 h-8 border-2 border-[#ff7e5f] border-t-transparent rounded-full animate-spin" />
-        </motion.div>
-      )}
-    </div>
+        {/* Actual image */}
+        {inView && (
+          <motion.img
+            src={src}
+            alt={alt}
+            onLoad={handleLoad}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${
+              loaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ 
+              opacity: loaded ? 1 : 0,
+              scale: loaded ? 1 : 1.1
+            }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          />
+        )}
+
+        {/* Loading indicator */}
+        {!loaded && inView && (
+          <motion.div 
+            className="absolute inset-0 flex items-center justify-center"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <div className="w-8 h-8 border-2 border-[#ff7e5f] border-t-transparent rounded-full animate-spin" />
+          </motion.div>
+        )}
+      </div>
+    </DesignWorkWrapper>
   )
 }

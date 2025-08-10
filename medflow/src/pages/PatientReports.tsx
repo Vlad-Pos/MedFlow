@@ -44,6 +44,7 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import { staggerContainer, staggerItem, cardVariants, fadeInVariants } from '../utils/animations'
 import LoadingSpinner from '../components/LoadingSpinner'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PatientReport {
   id: string
@@ -231,12 +232,8 @@ export default function PatientReports() {
   }
 
   return (
-    <motion.section
-      variants={fadeInVariants}
-      initial="initial"
-      animate="animate"
-        className="space-y-6"
-      >
+    <DesignWorkWrapper componentName="PatientReports">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         {/* Header */}
       <motion.div variants={staggerItem} className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -642,6 +639,6 @@ export default function PatientReports() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.section>
+    </DesignWorkWrapper>
   )
 }

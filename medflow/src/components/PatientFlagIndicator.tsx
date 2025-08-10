@@ -24,6 +24,7 @@ import { PatientFlagSummary, PatientFlag } from '../types/patientFlagging'
 import PatientFlaggingService from '../services/patientFlagging'
 import { formatDistanceToNow } from 'date-fns'
 import { ro } from 'date-fns/locale'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PatientFlagIndicatorProps {
   patientId: string
@@ -247,28 +248,30 @@ export default function PatientFlagIndicator({
    */
   if (mode === 'badge') {
     return (
-      <div className={`relative inline-flex ${className}`}>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border cursor-pointer ${getFlagColor()}`}
-          onClick={() => showTooltip && setShowTooltipState(!showTooltipState)}
-        >
-          <Flag className="w-3 h-3 mr-1" />
-          <span>{flagSummary.activeFlags}</span>
-        </motion.div>
-        
-        <AnimatePresence>
-          {showTooltipState && (
-            <FlagTooltip
-              summary={flagSummary}
-              onViewDetails={handleViewDetails}
-              onClose={() => setShowTooltipState(false)}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+      <DesignWorkWrapper componentName="PatientFlagIndicator">
+        <div className={`relative inline-flex ${className}`}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border cursor-pointer ${getFlagColor()}`}
+            onClick={() => showTooltip && setShowTooltipState(!showTooltipState)}
+          >
+            <Flag className="w-3 h-3 mr-1" />
+            <span>{flagSummary.activeFlags}</span>
+          </motion.div>
+          
+          <AnimatePresence>
+            {showTooltipState && (
+              <FlagTooltip
+                summary={flagSummary}
+                onViewDetails={handleViewDetails}
+                onClose={() => setShowTooltipState(false)}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      </DesignWorkWrapper>
     )
   }
   
@@ -277,32 +280,34 @@ export default function PatientFlagIndicator({
    */
   if (mode === 'inline') {
     return (
-      <div className={`relative inline-flex items-center ${className}`}>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium border cursor-pointer ${getFlagColor()}`}
-          onClick={() => showTooltip && setShowTooltipState(!showTooltipState)}
-        >
-          <Flag className="w-4 h-4 mr-2" />
-          <span className="mr-2">{flagSummary.activeFlags} semnalizări</span>
+      <DesignWorkWrapper componentName="PatientFlagIndicator">
+        <div className={`relative inline-flex items-center ${className}`}>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium border cursor-pointer ${getFlagColor()}`}
+            onClick={() => showTooltip && setShowTooltipState(!showTooltipState)}
+          >
+            <Flag className="w-4 h-4 mr-2" />
+            <span className="mr-2">{flagSummary.activeFlags} semnalizări</span>
+            
+            {flagSummary.riskLevel === 'high' && (
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+            )}
+          </motion.div>
           
-          {flagSummary.riskLevel === 'high' && (
-            <AlertTriangle className="w-4 h-4 text-red-600" />
-          )}
-        </motion.div>
-        
-        <AnimatePresence>
-          {showTooltipState && (
-            <FlagTooltip
-              summary={flagSummary}
-              onViewDetails={handleViewDetails}
-              onClose={() => setShowTooltipState(false)}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+          <AnimatePresence>
+            {showTooltipState && (
+              <FlagTooltip
+                summary={flagSummary}
+                onViewDetails={handleViewDetails}
+                onClose={() => setShowTooltipState(false)}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      </DesignWorkWrapper>
     )
   }
   
@@ -310,61 +315,63 @@ export default function PatientFlagIndicator({
    * Render full mode (detailed view)
    */
   return (
-    <div className={`${className}`}>
-      <div className={`p-4 border rounded-lg ${getFlagColor()}`}>
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white/50 rounded-full">
-              <Flag className="w-5 h-5" />
+    <DesignWorkWrapper componentName="PatientFlagIndicator">
+      <div className={`${className}`}>
+        <div className={`p-4 border rounded-lg ${getFlagColor()}`}>
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-white/50 rounded-full">
+                <Flag className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-semibold">{patientName}</h4>
+                <p className="text-sm opacity-75">Pacient semnalizat</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-semibold">{patientName}</h4>
-              <p className="text-sm opacity-75">Pacient semnalizat</p>
+            
+            {flagSummary.riskLevel === 'high' && (
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            )}
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-lg font-bold">{flagSummary.activeFlags}</div>
+              <div className="text-xs opacity-75">Active</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold">{flagSummary.totalFlags}</div>
+              <div className="text-xs opacity-75">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold">{flagSummary.resolvedFlags}</div>
+              <div className="text-xs opacity-75">Rezolvate</div>
             </div>
           </div>
           
-          {flagSummary.riskLevel === 'high' && (
-            <AlertTriangle className="w-6 h-6 text-red-600" />
+          {flagSummary.lastFlagDate && (
+            <div className="flex items-center text-sm opacity-75 mb-3">
+              <Clock className="w-4 h-4 mr-2" />
+              <span>
+                Ultima semnalizare: {formatDistanceToNow(flagSummary.lastFlagDate.toDate(), { 
+                  locale: ro, 
+                  addSuffix: true 
+                })}
+              </span>
+            </div>
+          )}
+          
+          {onViewDetails && (
+            <button
+              onClick={() => onViewDetails(patientId)}
+              className="w-full flex items-center justify-center px-3 py-2 bg-white/20 hover:bg-white/30 text-sm font-medium rounded transition-colors"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Vezi istoric complet
+            </button>
           )}
         </div>
-        
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center">
-            <div className="text-lg font-bold">{flagSummary.activeFlags}</div>
-            <div className="text-xs opacity-75">Active</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold">{flagSummary.totalFlags}</div>
-            <div className="text-xs opacity-75">Total</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold">{flagSummary.resolvedFlags}</div>
-            <div className="text-xs opacity-75">Rezolvate</div>
-          </div>
-        </div>
-        
-        {flagSummary.lastFlagDate && (
-          <div className="flex items-center text-sm opacity-75 mb-3">
-            <Clock className="w-4 h-4 mr-2" />
-            <span>
-              Ultima semnalizare: {formatDistanceToNow(flagSummary.lastFlagDate.toDate(), { 
-                locale: ro, 
-                addSuffix: true 
-              })}
-            </span>
-          </div>
-        )}
-        
-        {onViewDetails && (
-          <button
-            onClick={() => onViewDetails(patientId)}
-            className="w-full flex items-center justify-center px-3 py-2 bg-white/20 hover:bg-white/30 text-sm font-medium rounded transition-colors"
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            Vezi istoric complet
-          </button>
-        )}
       </div>
-    </div>
+    </DesignWorkWrapper>
   )
 }

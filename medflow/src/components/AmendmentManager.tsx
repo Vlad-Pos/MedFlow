@@ -48,6 +48,7 @@ import LoadingSpinner from './LoadingSpinner'
 import { showNotification } from './Notification'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { formatDateTime } from '../utils/dateUtils'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface AmendmentManagerProps {
   report: PatientReport
@@ -314,7 +315,8 @@ export default function AmendmentManager({
   ]
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden max-w-6xl w-full max-h-[90vh]">
+    <DesignWorkWrapper componentName="AmendmentManager">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden max-w-6xl w-full max-h-[90vh]">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
         <div className="flex items-center justify-between">
@@ -760,6 +762,6 @@ export default function AmendmentManager({
           />
         </div>
       </ConfirmationDialog>
-    </div>
+    </DesignWorkWrapper>
   )
 }

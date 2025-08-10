@@ -57,6 +57,7 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
 import { showNotification } from './Notification'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PatientReportFormProps {
   appointmentId: string
@@ -406,7 +407,8 @@ export default function PatientReportForm({
   const hasWarnings = validation?.warnings.length && validation.warnings.length > 0
 
   return (
-    <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+    <DesignWorkWrapper componentName="PatientReportForm">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-medflow-primary to-medflow-secondary p-6 text-white">
         <div className="flex items-center justify-between">
@@ -651,7 +653,8 @@ export default function PatientReportForm({
           </motion.div>
         </AnimatePresence>
       </div>
-    </div>
+      </div>
+    </DesignWorkWrapper>
   )
 }
 

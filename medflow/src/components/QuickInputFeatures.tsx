@@ -28,6 +28,7 @@ import {
   Settings
 } from 'lucide-react'
 import { showNotification } from './Notification'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface QuickInputFeaturesProps {
   onTextInsert: (text: string) => void
@@ -362,206 +363,208 @@ export default function QuickInputFeatures({
   ]
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        {/* Voice Recognition Button */}
-        {voiceSupported && (
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={isVoiceActive ? stopVoiceRecognition : startVoiceRecognition}
-              disabled={isListening && !isVoiceActive}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                isVoiceActive
-                  ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={isVoiceActive ? 'Oprește înregistrarea' : 'Începe înregistrarea vocală'}
-            >
-              {isListening ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                  <MicOff className="w-4 h-4" />
-                </div>
-              ) : (
-                <Mic className="w-4 h-4" />
-              )}
-              <span className="text-sm">
-                {isListening ? 'Ascult...' : 'Voce'}
-              </span>
-            </button>
+    <DesignWorkWrapper componentName="QuickInputFeatures">
+      <div className={`relative ${className}`}>
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          {/* Voice Recognition Button */}
+          {voiceSupported && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={isVoiceActive ? stopVoiceRecognition : startVoiceRecognition}
+                disabled={isListening && !isVoiceActive}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                  isVoiceActive
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={isVoiceActive ? 'Oprește înregistrarea' : 'Începe înregistrarea vocală'}
+              >
+                {isListening ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
+                    <MicOff className="w-4 h-4" />
+                  </div>
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
+                <span className="text-sm">
+                  {isListening ? 'Ascult...' : 'Voce'}
+                </span>
+              </button>
 
-            {/* Language Toggle */}
-            <button
-              onClick={() => setVoiceSettings(prev => ({
-                ...prev,
-                language: prev.language === 'ro-RO' ? 'en-US' : 'ro-RO'
-              }))}
-              className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-              title="Schimbă limba"
-            >
-              {voiceSettings.language === 'ro-RO' ? 'RO' : 'EN'}
-            </button>
-          </div>
-        )}
-
-        {/* Templates Button */}
-        <button
-          onClick={() => setShowTemplates(!showTemplates)}
-          className="flex items-center space-x-2 px-3 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors"
-          title="Deschide șabloanele"
-        >
-          <Template className="w-4 h-4" />
-          <span className="text-sm">Șabloane</span>
-        </button>
-
-        {/* Current transcript display */}
-        {transcript && (
-          <div className="flex-1 text-sm text-gray-600 dark:text-gray-400 italic">
-            "{transcript}"
-          </div>
-        )}
-      </div>
-
-      {/* Voice Recognition Feedback */}
-      <AnimatePresence>
-        {isListening && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg z-10"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <span className="text-sm text-blue-700 dark:text-blue-300">
-                Vorbește acum... Apăsați din nou pentru a opri.
-              </span>
+              {/* Language Toggle */}
+              <button
+                onClick={() => setVoiceSettings(prev => ({
+                  ...prev,
+                  language: prev.language === 'ro-RO' ? 'en-US' : 'ro-RO'
+                }))}
+                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                title="Schimbă limba"
+              >
+                {voiceSettings.language === 'ro-RO' ? 'RO' : 'EN'}
+              </button>
             </div>
-            {transcript && (
-              <div className="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                <strong>Text recunoscut:</strong> {transcript}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
 
-      {/* Templates Modal */}
-      <AnimatePresence>
-        {showTemplates && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowTemplates(false)}
+          {/* Templates Button */}
+          <button
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="flex items-center space-x-2 px-3 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors"
+            title="Deschide șabloanele"
           >
+            <Template className="w-4 h-4" />
+            <span className="text-sm">Șabloane</span>
+          </button>
+
+          {/* Current transcript display */}
+          {transcript && (
+            <div className="flex-1 text-sm text-gray-600 dark:text-gray-400 italic">
+              "{transcript}"
+            </div>
+          )}
+        </div>
+
+        {/* Voice Recognition Feedback */}
+        <AnimatePresence>
+          {isListening && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full left-0 right-0 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg z-10"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Șabloane medicale
-                </h3>
-                <button
-                  onClick={() => setShowTemplates(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Search and Filters */}
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex flex-col space-y-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Caută șabloane..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-700 dark:text-white"
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => {
-                      const Icon = category.icon
-                      return (
-                        <button
-                          key={category.id}
-                          onClick={() => setSelectedCategory(category.id)}
-                          className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm transition-colors ${
-                            selectedCategory === category.id
-                              ? 'bg-medflow-primary text-white'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                          <span>{category.name}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
+                <span className="text-sm text-blue-700 dark:text-blue-300">
+                  Vorbește acum... Apăsați din nou pentru a opri.
+                </span>
               </div>
-
-              {/* Templates List */}
-              <div className="p-6 overflow-y-auto max-h-96">
-                <div className="grid gap-3">
-                  {getFilteredTemplates().map((template) => (
-                    <motion.div
-                      key={template.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                      onClick={() => insertTemplate(template)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                            {template.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {template.content}
-                          </p>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300">
-                              {template.category}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              Folosit {template.frequency} ori
-                            </span>
-                          </div>
-                        </div>
-                        <button className="ml-4 p-2 text-medflow-primary hover:bg-medflow-primary/10 rounded-lg transition-colors">
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  {getFilteredTemplates().length === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      Nu s-au găsit șabloane pentru criteriile de căutare.
-                    </div>
-                  )}
+              {transcript && (
+                <div className="mt-2 text-sm text-blue-600 dark:text-blue-400">
+                  <strong>Text recunoscut:</strong> {transcript}
                 </div>
-              </div>
+              )}
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </AnimatePresence>
+
+        {/* Templates Modal */}
+        <AnimatePresence>
+          {showTemplates && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+              onClick={() => setShowTemplates(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Șabloane medicale
+                  </h3>
+                  <button
+                    onClick={() => setShowTemplates(false)}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Search and Filters */}
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex flex-col space-y-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Caută șabloane..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((category) => {
+                        const Icon = category.icon
+                        return (
+                          <button
+                            key={category.id}
+                            onClick={() => setSelectedCategory(category.id)}
+                            className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm transition-colors ${
+                              selectedCategory === category.id
+                                ? 'bg-medflow-primary text-white'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span>{category.name}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Templates List */}
+                <div className="p-6 overflow-y-auto max-h-96">
+                  <div className="grid gap-3">
+                    {getFilteredTemplates().map((template) => (
+                      <motion.div
+                        key={template.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                        onClick={() => insertTemplate(template)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                              {template.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                              {template.content}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-gray-600 dark:text-gray-300">
+                                {template.category}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                Folosit {template.frequency} ori
+                              </span>
+                            </div>
+                          </div>
+                          <button className="ml-4 p-2 text-medflow-primary hover:bg-medflow-primary/10 rounded-lg transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+
+                    {getFilteredTemplates().length === 0 && (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        Nu s-au găsit șabloane pentru criteriile de căutare.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </DesignWorkWrapper>
   )
 }

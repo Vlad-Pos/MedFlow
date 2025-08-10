@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { buttonVariants, bounceVariants } from '../utils/animations'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface AnimatedButtonProps {
   children: ReactNode
@@ -56,51 +57,53 @@ export default function AnimatedButton({
   }
 
   return (
-    <motion.button
-      type={type}
-      onClick={handleClick}
-      disabled={disabled || loading}
-      variants={buttonVariants}
-      whileHover="hover"
-      whileTap="tap"
-      className={baseClasses}
-      whileFocus={{ scale: 1.02 }}
-    >
-      {loading ? (
-        <motion.div
-          variants={bounceVariants}
-          animate="animate"
-          className="flex items-center"
-        >
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-          Se încarcă...
-        </motion.div>
-      ) : (
-        <>
-          {icon && iconPosition === 'left' && (
-            <motion.div
-              className="mr-2"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
-              {icon}
-            </motion.div>
-          )}
-          <span>{children}</span>
-          {icon && iconPosition === 'right' && (
-            <motion.div
-              className="ml-2"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
-              {icon}
-            </motion.div>
-          )}
-        </>
-      )}
-    </motion.button>
+    <DesignWorkWrapper componentName="AnimatedButton">
+      <motion.button
+        type={type}
+        onClick={handleClick}
+        disabled={disabled || loading}
+        variants={buttonVariants}
+        whileHover="hover"
+        whileTap="tap"
+        className={baseClasses}
+        whileFocus={{ scale: 1.02 }}
+      >
+        {loading ? (
+          <motion.div
+            variants={bounceVariants}
+            animate="animate"
+            className="flex items-center"
+          >
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+            Se încarcă...
+          </motion.div>
+        ) : (
+          <>
+            {icon && iconPosition === 'left' && (
+              <motion.div
+                className="mr-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                {icon}
+              </motion.div>
+            )}
+            <span>{children}</span>
+            {icon && iconPosition === 'right' && (
+              <motion.div
+                className="ml-2"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                {icon}
+              </motion.div>
+            )}
+          </>
+        )}
+      </motion.button>
+    </DesignWorkWrapper>
   )
 }
 

@@ -1,6 +1,7 @@
 import { motion, type Transition } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { pageVariants, pageTransition } from '../utils/animations'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -9,16 +10,18 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children, className = '' }: PageTransitionProps) {
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition as Transition}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="PageTransition">
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition as Transition}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }
 
@@ -72,14 +75,16 @@ export function AnimatedPage({
   const selectedAnimation = animations[animation]
 
   return (
-    <motion.div
-      initial={selectedAnimation.initial}
-      animate={selectedAnimation.animate}
-      exit={selectedAnimation.exit}
-      transition={selectedAnimation.transition}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <DesignWorkWrapper componentName="AnimatedPage">
+      <motion.div
+        initial={selectedAnimation.initial}
+        animate={selectedAnimation.animate}
+        exit={selectedAnimation.exit}
+        transition={selectedAnimation.transition}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    </DesignWorkWrapper>
   )
 }

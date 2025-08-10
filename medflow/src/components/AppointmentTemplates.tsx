@@ -40,6 +40,7 @@ import {
 } from 'lucide-react'
 import { staggerContainer, staggerItem, cardVariants } from '../utils/animations'
 import { useAuth } from '../providers/AuthProvider'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface AppointmentTemplate {
   id: string
@@ -298,12 +299,13 @@ export default function AppointmentTemplates({
   }
 
   return (
-    <motion.div
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-      className="space-y-6"
-    >
+    <DesignWorkWrapper componentName="AppointmentTemplates">
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="space-y-6"
+      >
       {/* Header */}
       <motion.div variants={staggerItem} className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -565,5 +567,6 @@ export default function AppointmentTemplates({
         </div>
       </motion.div>
     </motion.div>
+    </DesignWorkWrapper>
   )
 }

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface ContrastEnhancerProps {
   children: ReactNode
@@ -23,9 +24,11 @@ export default function ContrastEnhancer({
   }
 
   return (
-    <div className={`${getContrastClasses()} ${className}`}>
-      {children}
-    </div>
+    <DesignWorkWrapper componentName="ContrastEnhancer">
+      <div className={`${getContrastClasses()} ${className}`}>
+        {children}
+      </div>
+    </DesignWorkWrapper>
   )
 }
 
