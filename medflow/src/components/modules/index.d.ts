@@ -5,3 +5,4 @@ export { default as Pricing } from './Pricing';
 export { default as Contact } from './Contact';
 export { default as Footer } from './Footer';
 export * from './ui';
+export * from './calendar';
