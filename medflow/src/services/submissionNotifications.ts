@@ -29,10 +29,8 @@ import {
 import { db } from './firebase'
 import {
   SubmissionStatus,
-  SubmissionLogEntry,
-  SubmissionBatch
-} from '../types/patientReports'
-import { showNotification } from '../components/Notification'
+  } from '../types/patientReports'
+import { showNotification } from './notificationService'
 import { isDemoMode } from '../utils/demo'
 
 // ==========================================
@@ -64,7 +62,7 @@ export interface SubmissionNotification {
   type: 'submission_success' | 'submission_failure' | 'submission_retry' | 'submission_scheduled' | 'period_reminder' | 'manual_action_required'
   title: string
   message: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
   read: boolean
   sent: boolean
   sentAt?: Timestamp
@@ -113,9 +111,9 @@ export interface SMSNotification {
 // DEMO DATA
 // ==========================================
 
-let demoNotifications: SubmissionNotification[] = []
-let demoPreferences: NotificationPreferences[] = []
-let demoNotificationSubscribers: ((notification: SubmissionNotification) => void)[] = []
+const demoNotifications: SubmissionNotification[] = []
+const demoPreferences: NotificationPreferences[] = []
+const demoNotificationSubscribers: ((notification: SubmissionNotification) => void)[] = []
 
 function notifyDemoSubscribers(notification: SubmissionNotification) {
   demoNotificationSubscribers.forEach(callback => callback(notification))
@@ -127,7 +125,8 @@ function notifyDemoSubscribers(notification: SubmissionNotification) {
                             notification.type.includes('retry') ? 'warning' :
                             'info'
     
-    showNotification(notification.message, notificationType)
+    // Note: showNotification is imported from notificationService at the top of this file
+    showNotification[notificationType](notification.message)
   }
 }
 
@@ -250,7 +249,7 @@ export async function createSubmissionNotification(
   type: SubmissionNotification['type'],
   batchId: string,
   submissionStatus: SubmissionStatus,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, unknown>
 ): Promise<string> {
   try {
     const preferences = await getNotificationPreferences(userId)
@@ -287,7 +286,7 @@ export async function createSubmissionNotification(
       
       batchId,
       submissionStatus,
-      governmentReference: additionalData?.governmentReference,
+      governmentReference: additionalData?.governmentReference as string | undefined,
       
       priority,
       urgent: priority === 'critical' || type === 'submission_failure',
@@ -335,7 +334,7 @@ function generateNotificationContent(
   type: SubmissionNotification['type'],
   status: SubmissionStatus,
   batchId: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ): { title: string; message: string; priority: SubmissionNotification['priority'] } {
   switch (type) {
     case 'submission_success':
@@ -355,7 +354,7 @@ function generateNotificationContent(
     case 'submission_retry':
       return {
         title: 'Reîncercare trimitere programată',
-        message: `Lotul ${batchId} va fi încercat din nou la ${data?.nextRetryAt ? new Date(data.nextRetryAt).toLocaleString('ro-RO') : 'în curând'}.`,
+        message: `Lotul ${batchId} va fi încercat din nou la ${data?.nextRetryAt ? new Date(data.nextRetryAt as string | number | Date).toLocaleString('ro-RO') : 'în curând'}.`,
         priority: 'high'
       }
 
@@ -786,7 +785,7 @@ export function setupNotificationTriggers(): void {
 
   // Store interval for cleanup
   if (typeof window !== 'undefined') {
-    (window as any).__medflowNotificationTriggers = {
+    (window as unknown as Record<string, unknown>).__medflowNotificationTriggers = {
       reminderInterval
     }
   }
@@ -797,10 +796,10 @@ export function setupNotificationTriggers(): void {
  */
 export function cleanupNotificationTriggers(): void {
   if (typeof window !== 'undefined') {
-    const triggers = (window as any).__medflowNotificationTriggers
+    const triggers = (window as unknown as Record<string, unknown>).__medflowNotificationTriggers as { reminderInterval: number } | undefined
     if (triggers) {
       clearInterval(triggers.reminderInterval)
-      delete (window as any).__medflowNotificationTriggers
+      delete (window as unknown as Record<string, unknown>).__medflowNotificationTriggers
     }
   }
 }

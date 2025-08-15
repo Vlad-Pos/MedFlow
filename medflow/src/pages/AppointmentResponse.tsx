@@ -27,15 +27,12 @@ import {
   Stethoscope,
   AlertTriangle,
   ThumbsUp,
-  ThumbsDown,
   MessageSquare,
   Heart,
   Shield
 } from 'lucide-react'
 import { fadeInVariants, cardVariants } from '../utils/animations'
 import LoadingSpinner from '../components/LoadingSpinner'
-import DesignWorkWrapper from '../DesignWorkWrapper'
-
 interface AppointmentInfo {
   id: string
   patientName: string
@@ -155,8 +152,8 @@ export default function AppointmentResponse() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
             Se încarcă informațiile programării...
           </p>
         </div>
@@ -377,8 +374,7 @@ export default function AppointmentResponse() {
   }
 
   return (
-    <DesignWorkWrapper componentName="AppointmentResponse">
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-2xl mx-auto px-4">
           <motion.div
             variants={fadeInVariants}
@@ -544,6 +540,5 @@ export default function AppointmentResponse() {
         </motion.div>
       </div>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

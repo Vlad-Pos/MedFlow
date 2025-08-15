@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, CheckCircle, Loader } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export default function EarlyAccessForm() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -34,8 +32,7 @@ export default function EarlyAccessForm() {
 
   if (submitted) {
     return (
-      <DesignWorkWrapper componentName="EarlyAccessForm">
-        <motion.div
+      <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center p-6 bg-green-500/20 border border-green-400/30 rounded-xl"
@@ -46,13 +43,11 @@ export default function EarlyAccessForm() {
             Vă mulțumim pentru interes! Veți fi contactat când platforma va fi disponibilă pentru testare.
           </p>
         </motion.div>
-      </DesignWorkWrapper>
-    )
+      )
   }
 
   return (
-    <DesignWorkWrapper componentName="EarlyAccessForm">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -95,6 +90,5 @@ export default function EarlyAccessForm() {
           Nu vom partaja datele dumneavoastră cu terțe părți.
         </p>
       </form>
-    </DesignWorkWrapper>
-  )
+    )
 }

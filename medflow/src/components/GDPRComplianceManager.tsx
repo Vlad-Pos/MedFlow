@@ -19,21 +19,19 @@ import {
   CheckCircle,
   FileText,
   Lock,
-  Clock,
-  User,
   Settings
 } from 'lucide-react'
 import { PatientFlagGDPRData, PatientFlagSummary } from '../types/patientFlagging'
 import LoadingSpinner from './LoadingSpinner'
+import { MedFlowLoader } from './ui'
 import { format } from 'date-fns'
 import { ro } from 'date-fns/locale'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { Timestamp } from 'firebase/firestore'
 interface GDPRComplianceManagerProps {
   patientId: string
   patientName: string
   className?: string
-  onDataExported?: (data: any) => void
+  onDataExported?: (data: Record<string, unknown>) => void
   onDataDeleted?: () => void
 }
 
@@ -125,21 +123,24 @@ export default function GDPRComplianceManager({
       const mockGdprData: PatientFlagGDPRData = {
         patientId,
         consentToFlagging: true,
-        consentDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) as any, // 30 days ago
+        consentDate: Timestamp.fromDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // 30 days ago
         consentWithdrawn: false,
+        withdrawalDate: undefined,
         dataAccessRequests: [
           {
-            requestDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) as any, // 15 days ago
-            fulfilledDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) as any, // 14 days ago
-            requestType: 'access'
+            requestDate: Timestamp.fromDate(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)), // 15 days ago
+            fulfilledDate: Timestamp.fromDate(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)), // 14 days ago
+            requestType: 'access' as const
           }
         ],
         erasureRequested: false,
+        erasureDate: undefined,
+        erasureReason: undefined,
         legalBasis: 'legitimate_interest',
-        retentionExpiry: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000) as any, // 2 years from now
-        autoDeleteScheduled: true,
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) as any,
-        lastUpdated: new Date() as any
+        retentionExpiry: Timestamp.fromDate(new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000)), // 2 years from now
+        autoDeleteScheduled: false,
+        createdAt: Timestamp.fromDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+        lastUpdated: Timestamp.now()
       }
       
       setGdprData(mockGdprData)
@@ -155,7 +156,7 @@ export default function GDPRComplianceManager({
         riskLevel: 'low',
         consentToTracking: true,
         canBeContacted: true,
-        lastUpdated: new Date() as any
+        lastUpdated: Timestamp.now()
       }
       
       setFlagSummary(mockFlagSummary)
@@ -258,11 +259,11 @@ export default function GDPRComplianceManager({
         dataAccessRequests: [
           ...gdprData.dataAccessRequests,
           {
-            requestDate: new Date() as any,
+            requestDate: Timestamp.now(),
             requestType: 'rectification' as const
           }
         ],
-        lastUpdated: new Date() as any
+        lastUpdated: Timestamp.now()
       }
       setGdprData(updatedData)
     }
@@ -325,11 +326,11 @@ export default function GDPRComplianceManager({
         dataAccessRequests: [
           ...gdprData.dataAccessRequests,
           {
-            requestDate: new Date() as any,
-            requestType: 'restrict' as any
+            requestDate: Timestamp.now(),
+            requestType: 'restrict' as const
           }
         ],
-        lastUpdated: new Date() as any
+        lastUpdated: Timestamp.now()
       }
       setGdprData(updatedData)
     }
@@ -350,7 +351,7 @@ export default function GDPRComplianceManager({
   if (loading) {
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
-        <LoadingSpinner size="lg" className="mr-3" />
+        <MedFlowLoader size="lg" />
         <span className="text-gray-600">Se încarcă datele de conformitate GDPR...</span>
       </div>
     )
@@ -380,8 +381,7 @@ export default function GDPRComplianceManager({
   }
   
   return (
-    <DesignWorkWrapper componentName="GDPRComplianceManager">
-      <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`}>
       {/* GDPR Status Overview */}
       <div className="bg-white border rounded-lg p-6">
         <div className="flex items-center mb-4">
@@ -553,6 +553,5 @@ export default function GDPRComplianceManager({
         )}
       </AnimatePresence>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

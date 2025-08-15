@@ -25,7 +25,6 @@ import {
   Calendar, 
   Shield, 
   CheckCircle,
-  Star,
   Clock,
   Award,
   TrendingUp,
@@ -42,12 +41,9 @@ import {
   Phone,
   Mail,
   Globe,
-  Download
-} from 'lucide-react'
+  } from 'lucide-react'
 import medflowLogo from '../assets/medflow-logo.svg'
 import { useAuth } from '../providers/AuthProvider'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export default function LandingEnhanced() {
   const { user } = useAuth()
   const { scrollY } = useScroll()
@@ -78,66 +74,34 @@ export default function LandingEnhanced() {
     {
       icon: Brain,
       title: '🤖 AI Medical Avansat',
-      description: 'Analiză inteligentă a simptomelor, sugestii de diagnostic și optimizare automată a programărilor folosind tehnologie AI de ultimă generație.',
+      description: 'Analiză inteligentă a simptomelor, sugestii de diagnostic și optimizare automată a programărilor folosind tehnologie AI de ultimă generație. Creștere de productivitate de până la 40%.',
       highlight: 'Nou!',
       color: 'medflow-primary',
       metrics: '+40% eficiență'
     },
     {
       icon: Calendar,
-      title: 'Programări Inteligente',
-      description: 'Sistem avansat de programări cu detectare conflicte, notificări automate și sincronizare în timp real cu calendare externe.',
+      title: 'Programări Inteligente cu AI',
+      description: 'Sistem avansat de programări cu detectare conflicte, notificări automate și sincronizare în timp real cu calendare externe. Transformați gestionarea programărilor dintr-o corvoadă în proces automat.',
       highlight: '',
       color: 'blue-600',
       metrics: '3h/zi economisit'
     },
     {
       icon: Users,
-      title: 'Gestionare Pacienți',
-      description: 'Evidență completă a pacienților cu istoric medical digital, documente securizate și acces rapid la informații critice.',
+      title: 'Gestionare Avansată Pacienți',
+      description: 'Evidență completă a pacienților cu istoric medical digital, documente securizate și acces rapid la informații critice. Dosare medicale complete cu căutare inteligentă multicriterii.',
       highlight: '',
       color: 'emerald-600',
       metrics: '100% digitalizat'
     },
     {
       icon: FileText,
-      title: 'Documente Medicale',
-      description: 'Upload securizat, organizare automată și analiză AI a documentelor medicale cu previzualizare și partajare controlată.',
-      highlight: '',
-      color: 'purple-600',
-      metrics: 'GDPR compliant'
-    },
-    {
-      icon: BarChart3,
-      title: 'Analiză și Rapoarte',
-      description: 'Dashboard-uri interactive cu statistici detaliate, rapoarte personalizabile și insights medicale pentru optimizarea practicii.',
-      highlight: '',
-      color: 'orange-600',
-      metrics: 'Insights în timp real'
-    },
-    {
-      icon: MessageCircle,
-      title: 'Comunicare Directă',
-      description: 'Chat securizat între medici și pacienți cu notificări în timp real, triaj medical automat și istoricul conversațiilor.',
-      highlight: '',
-      color: 'indigo-600',
-      metrics: '96% satisfacție'
-    },
-    {
-      icon: Shield,
-      title: 'Securitate GDPR',
-      description: 'Protecție completă a datelor medicale conform standardelor GDPR și HIPAA cu criptare end-to-end și audit complet.',
+      title: 'Documente Medicale Automate',
+      description: 'Generare automată de rapoarte medicale profesionale cu export în formate multiple standard. Creare instantanee pentru DSP, CNAS și toate autoritățile medicale relevante.',
       highlight: '',
       color: 'red-600',
-      metrics: 'ISO 27001 certificat'
-    },
-    {
-      icon: Zap,
-      title: 'Performanță Optimă',
-      description: 'Aplicație ultra-rapidă și responsivă, optimizată pentru toate dispozitivele cu timp de răspuns sub 100ms.',
-      highlight: '',
-      color: 'yellow-600',
-      metrics: '99.98% uptime'
+      metrics: 'Export profesional'
     }
   ]
 
@@ -187,7 +151,7 @@ export default function LandingEnhanced() {
   ]
 
   // Feature showcase data for interactive tabs
-  const featureShowcase = [
+  const showcaseData = [
     {
       title: '🤖 Analiză AI Medicală',
       description: 'Tehnologie AI avansată pentru analiza simptomelor, sugestii de diagnostic și optimizare automată a programărilor cu machine learning.',
@@ -221,6 +185,7 @@ export default function LandingEnhanced() {
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center"
         >
           <motion.div
@@ -251,8 +216,7 @@ export default function LandingEnhanced() {
   }
 
   return (
-    <DesignWorkWrapper componentName="LandingEnhanced">
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
         {/* Enhanced Navigation */}
         <motion.nav 
           initial={{ y: -100 }}
@@ -374,17 +338,21 @@ export default function LandingEnhanced() {
                   <span className="text-medflow-primary font-medium text-sm">🤖 Cu tehnologie AI medicală avansată</span>
                 </motion.div>
 
-                <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
-                  Viitorul
-                  <span className="bg-gradient-to-r from-medflow-primary to-medflow-secondary bg-clip-text text-transparent"> medicinei</span>
+                <h1 id="hero-title" className="text-5xl md:text-7xl font-extrabold text-white leading-[0.95] mb-8 tracking-tight">
+                  Revoluționăm
+                  <span className="bg-gradient-to-r from-[var(--medflow-brand-1)] via-[var(--medflow-brand-2)] to-[var(--medflow-brand-3)] bg-clip-text text-transparent"> medicina</span>
                   <br />
-                  începe aici
+                  <span className="text-4xl md:text-6xl font-bold text-gray-100">prin inteligența artificială</span>
                 </h1>
                 
-                <p className="text-xl text-gray-600 mt-6 leading-relaxed">
-                  Transformăm practica medicală prin <strong>tehnologie AI avansată</strong>. 
-                  Gestionați pacienții, programările și documentele medicale într-o singură platformă securizată GDPR.
-                </p>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-xl md:text-2xl text-white mb-10 leading-relaxed font-light max-w-2xl"
+                >
+                  Platforma medicală de ultimă generație care transformă radical modul în care conduceți cabinetul dumneavoastră. Interface medicală intuitivă, funcționalități de nivel enterprise, rezultate imediate și măsurabile.
+                </motion.p>
                 
                 {/* Key benefits */}
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -766,6 +734,5 @@ export default function LandingEnhanced() {
           </div>
         </footer>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

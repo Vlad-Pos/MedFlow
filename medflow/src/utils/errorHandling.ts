@@ -37,10 +37,17 @@ export interface MedFlowError {
   code?: string
   timestamp: Date
   userId?: string
-  context?: Record<string, any>
+  context?: Record<string, unknown>
   recoverable: boolean
   userActions?: string[]
   reportToAdmin: boolean
+}
+
+interface BasicErrorInfo {
+  message: string
+  severity: ErrorSeverity
+  category: ErrorCategory
+  userActions: string[]
 }
 
 // Romanian Error Messages for Medical Context
@@ -180,7 +187,7 @@ export class MedFlowErrorHandler {
   /**
    * Handle and classify any error
    */
-  handleError(error: any, context?: Record<string, any>, userId?: string): MedFlowError {
+  handleError(error: unknown, context?: Record<string, unknown>, userId?: string): MedFlowError {
     const medflowError = this.createMedFlowError(error, context, userId)
     
     // Log error
@@ -197,7 +204,7 @@ export class MedFlowErrorHandler {
   /**
    * Create structured MedFlow error from any error type
    */
-  private createMedFlowError(error: any, context?: Record<string, any>, userId?: string): MedFlowError {
+  private createMedFlowError(error: unknown, context?: Record<string, unknown>, userId?: string): MedFlowError {
     const errorId = this.generateErrorId()
     let errorInfo = this.getDefaultError()
     
@@ -206,8 +213,8 @@ export class MedFlowErrorHandler {
       errorInfo = this.mapFirebaseError(error)
     }
     // Handle known error codes
-    else if (typeof error === 'object' && error.code) {
-      errorInfo = this.mapErrorCode(error.code)
+    else if (typeof error === 'object' && error !== null && 'code' in error && typeof (error as { code: unknown }).code === 'string') {
+      errorInfo = this.mapErrorCode((error as { code: string }).code)
     }
     // Handle Error objects
     else if (error instanceof Error) {
@@ -233,8 +240,8 @@ export class MedFlowErrorHandler {
       category: errorInfo.category,
       severity: errorInfo.severity,
       message: errorInfo.message,
-      technicalMessage: error?.message || String(error),
-      code: error?.code,
+      technicalMessage: (error as { message?: string })?.message || String(error),
+      code: (error as { code?: string })?.code,
       timestamp: new Date(),
       userId,
       context,
@@ -247,27 +254,53 @@ export class MedFlowErrorHandler {
   /**
    * Map Firebase errors to medical context
    */
-  private mapFirebaseError(error: FirebaseError): any {
-    const errorCode = error.code
-    return MEDICAL_ERROR_MESSAGES[errorCode as keyof typeof MEDICAL_ERROR_MESSAGES] || this.getDefaultError()
+  private mapFirebaseError(error: unknown): BasicErrorInfo {
+    try {
+      const firebaseError = error as { code: string; message?: string }
+      const errorCode = firebaseError.code || 'unknown'
+      
+      if (errorCode in MEDICAL_ERROR_MESSAGES) {
+        const errorMessage = MEDICAL_ERROR_MESSAGES[errorCode as keyof typeof MEDICAL_ERROR_MESSAGES]
+        return {
+          message: errorMessage.message,
+          severity: errorMessage.severity,
+          category: errorMessage.category,
+          userActions: [...errorMessage.userActions] // Convert readonly to mutable
+        }
+      }
+      
+      return this.getDefaultError()
+    } catch {
+      return this.getDefaultError()
+    }
   }
 
   /**
    * Map custom error codes
    */
-  private mapErrorCode(code: string): any {
-    return MEDICAL_ERROR_MESSAGES[code as keyof typeof MEDICAL_ERROR_MESSAGES] || this.getDefaultError()
+  private mapErrorCode(code: string): BasicErrorInfo {
+    if (code in MEDICAL_ERROR_MESSAGES) {
+      const errorMessage = MEDICAL_ERROR_MESSAGES[code as keyof typeof MEDICAL_ERROR_MESSAGES]
+      return {
+        message: errorMessage.message,
+        severity: errorMessage.severity,
+        category: errorMessage.category,
+        userActions: [...errorMessage.userActions] // Convert readonly to mutable
+      }
+    }
+    
+    return this.getDefaultError()
   }
 
   /**
    * Get default error structure
    */
-  private getDefaultError() {
+  private getDefaultError(): BasicErrorInfo {
     return {
-      message: 'A apărut o eroare neașteptată în sistemul medical. Vă rugăm să încercați din nou.',
-      severity: 'medium' as ErrorSeverity,
-      category: 'unknown' as ErrorCategory,
-      userActions: ['Reîncărcați pagina', 'Încercați din nou', 'Contactați suportul dacă persistă']
+      message: 'A apărut o eroare neașteptată. Vă rugăm să încercați din nou.',
+      severity: 'medium',
+      category: 'unknown',
+      userActions: ['Reîncercați operația', 'Verificați conexiunea la internet', 'Contactați suportul']
     }
   }
 
@@ -362,7 +395,7 @@ export class MedFlowErrorHandler {
  * Convenience functions for easy error handling
  */
 
-export function handleMedicalError(error: any, context?: Record<string, any>, userId?: string): MedFlowError {
+export function handleMedicalError(error: unknown, context?: Record<string, unknown>, userId?: string): MedFlowError {
   return MedFlowErrorHandler.getInstance().handleError(error, context, userId)
 }
 
@@ -453,7 +486,7 @@ export function validateMedicalLicense(license: string): { isValid: boolean; err
   return { isValid: true }
 }
 
-export function validatePatientData(data: any): { isValid: boolean; errors: MedFlowError[] } {
+export function validatePatientData(data: { name?: string; symptoms?: string }): { isValid: boolean; errors: MedFlowError[] } {
   const errors: MedFlowError[] = []
   
   if (!data.name || data.name.length < 2) {

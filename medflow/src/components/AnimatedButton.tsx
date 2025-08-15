@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { buttonVariants, bounceVariants } from '../utils/animations'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface AnimatedButtonProps {
   children: ReactNode
   onClick?: () => void
@@ -57,8 +55,7 @@ export default function AnimatedButton({
   }
 
   return (
-    <DesignWorkWrapper componentName="AnimatedButton">
-      <motion.button
+    <motion.button
         type={type}
         onClick={handleClick}
         disabled={disabled || loading}
@@ -103,8 +100,7 @@ export default function AnimatedButton({
           </>
         )}
       </motion.button>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Specialized button components

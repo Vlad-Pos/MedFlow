@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState, ReactNode } from 'react'
+import { useRef, useState, ReactNode } from 'react'
 import { motion, PanInfo } from 'framer-motion'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface TouchGesturesProps {
   children: ReactNode
   onSwipeLeft?: () => void
@@ -55,7 +53,7 @@ export default function TouchGestures({
     }
   }
 
-  const handlePanEnd = (event: any, info: PanInfo) => {
+  const handlePanEnd = (_event: unknown, info: PanInfo) => {
     if (disabled) return
 
     const { offset } = info
@@ -116,8 +114,7 @@ export default function TouchGestures({
   }
 
   return (
-    <DesignWorkWrapper componentName="TouchGestures">
-      <motion.div
+    <motion.div
         ref={containerRef}
         className={className}
         onTap={handleTap}
@@ -132,8 +129,7 @@ export default function TouchGestures({
       >
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Swipeable card component
@@ -157,7 +153,7 @@ export function SwipeableCard({
     setIsDragging(true)
   }
 
-  const handleDrag = (event: any, info: PanInfo) => {
+  const handleDrag = (_event: unknown, info: PanInfo) => {
     const { offset } = info
     if (offset.x > 0) {
       setDragDirection('right')
@@ -166,7 +162,7 @@ export function SwipeableCard({
     }
   }
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     setIsDragging(false)
     setDragDirection(null)
 
@@ -181,8 +177,7 @@ export function SwipeableCard({
   }
 
   return (
-    <DesignWorkWrapper componentName="SwipeableCard">
-      <motion.div
+    <motion.div
         className={`relative ${className}`}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
@@ -198,8 +193,7 @@ export function SwipeableCard({
       >
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Pull to refresh component
@@ -217,7 +211,7 @@ export function PullToRefresh({
   const [isPulling, setIsPulling] = useState(false)
   const [pullDistance, setPullDistance] = useState(0)
 
-  const handlePan = (event: any, info: PanInfo) => {
+  const handlePan = (_event: unknown, info: PanInfo) => {
     const { offset } = info
     if (offset.y > 0) {
       setIsPulling(true)
@@ -225,7 +219,7 @@ export function PullToRefresh({
     }
   }
 
-  const handlePanEnd = (event: any, info: PanInfo) => {
+  const handlePanEnd = (_event: unknown, info: PanInfo) => {
     const { offset } = info
     if (offset.y > threshold) {
       onRefresh()
@@ -235,8 +229,7 @@ export function PullToRefresh({
   }
 
   return (
-    <DesignWorkWrapper componentName="PullToRefresh">
-      <motion.div
+    <motion.div
         className={className}
         onPan={handlePan}
         onPanEnd={handlePanEnd}
@@ -261,8 +254,7 @@ export function PullToRefresh({
         )}
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Pinch to zoom component
@@ -286,8 +278,7 @@ export function PinchToZoom({
   }
 
   return (
-    <DesignWorkWrapper componentName="PinchToZoom">
-      <motion.div
+    <motion.div
         className={`overflow-hidden ${className}`}
         onWheel={handleWheel}
         style={{ scale }}
@@ -296,7 +287,6 @@ export function PinchToZoom({
       >
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 

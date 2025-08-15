@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle, RefreshCw, Home, ArrowLeft, Bug } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface ErrorMessageProps {
   title?: string
   message: string
@@ -61,8 +59,7 @@ export default function ErrorMessage({
   const ErrorIcon = getErrorIcon()
 
   return (
-    <DesignWorkWrapper componentName="ErrorMessage">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className={`max-w-lg mx-auto text-center p-8 ${colors.bg} border ${colors.border} rounded-xl backdrop-blur-sm`}
@@ -131,6 +128,5 @@ export default function ErrorMessage({
           </div>
         )}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

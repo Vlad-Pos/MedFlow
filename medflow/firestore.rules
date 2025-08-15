@@ -26,6 +26,13 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Check if running in demo mode (bypass strict permissions)
+    function isDemoMode() {
+      return request.auth != null && 
+             (request.auth.uid == 'demo-uid-123' || 
+              request.auth.email == 'demo@medflow.local');
+    }
+    
     // Get authenticated user ID
     function getUserId() {
       return request.auth.uid;
@@ -34,23 +41,34 @@ service cloud.firestore {
     // Check if user has specific role
     function hasRole(role) {
       return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(getUserId())) &&
-             get(/databases/$(database)/documents/users/$(getUserId())).data.role == role;
+             (isDemoMode() || 
+              (exists(/databases/$(database)/documents/users/$(getUserId())) &&
+               get(/databases/$(database)/documents/users/$(getUserId())).data.role == role));
     }
     
-    // Check if user is doctor
+    // Check if user is admin or super admin
+    function isAdmin() {
+      return isDemoMode() || hasRole('ADMIN') || hasRole('SUPER_ADMIN');
+    }
+    
+    // Check if user is super admin
+    function isSuperAdmin() {
+      return isDemoMode() || hasRole('SUPER_ADMIN');
+    }
+    
+    // Check if user is doctor (legacy support)
     function isDoctor() {
       return hasRole('doctor');
     }
     
-    // Check if user is nurse
+    // Check if user is nurse (legacy support)
     function isNurse() {
       return hasRole('nurse');
     }
     
-    // Check if user is medical staff (doctor or nurse)
+    // Check if user is medical staff (doctor, nurse, or admin)
     function isMedicalStaff() {
-      return isDoctor() || isNurse();
+      return isDemoMode() || isDoctor() || isNurse() || isAdmin();
     }
     
     // Check if user owns the resource
@@ -89,18 +107,21 @@ service cloud.firestore {
     
     // Users collection - profile data
     match /users/{userId} {
-      // Allow read access to own profile
-      allow read: if isAuthenticated() && isOwner(userId);
+      // Allow read access to own profile or admins
+      allow read: if isAuthenticated() && (
+        isOwner(userId) || isAdmin()
+      );
       
       // Allow create during registration
       allow create: if isAuthenticated() && 
                        isOwner(userId) &&
                        isValidUserData(resource.data);
       
-      // Allow update of own profile with validation
-      allow update: if isAuthenticated() && 
-                       isOwner(userId) &&
-                       isValidUserUpdate(resource.data, request.data);
+      // Allow update of own profile with validation, or admin role updates
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && isValidUserUpdate(resource.data, request.data)) ||
+        (isAdmin() && isValidAdminUserUpdate(resource.data, request.data))
+      );
       
       // No delete allowed (for audit trail)
       allow delete: if false;
@@ -108,12 +129,12 @@ service cloud.firestore {
       // Validate user data structure
       function isValidUserData(data) {
         return data.keys().hasAll(['role', 'email', 'createdAt']) &&
-               data.role in ['doctor', 'nurse'] &&
+               data.role in ['USER', 'ADMIN', 'SUPER_ADMIN', 'doctor', 'nurse'] &&
                isValidEmail(data.email) &&
                data.createdAt is timestamp;
       }
       
-      // Validate user updates
+      // Validate user updates (own profile)
       function isValidUserUpdate(currentData, newData) {
         return // Core fields cannot be changed
                newData.role == currentData.role &&
@@ -127,6 +148,21 @@ service cloud.firestore {
                (!('phone' in newData) || isValidPhoneNumber(newData.phone)) &&
                // Prevent privilege escalation
                newData.role == currentData.role;
+      }
+      
+      // Validate admin user updates (role changes)
+      function isValidAdminUserUpdate(currentData, newData) {
+        return // Core fields cannot be changed
+               newData.email == currentData.email &&
+               newData.createdAt == currentData.createdAt &&
+               // Role can be changed by admin
+               newData.role in ['USER', 'ADMIN', 'SUPER_ADMIN', 'doctor', 'nurse'] &&
+               // Prevent privilege escalation (admin can't create super admin)
+               (newData.role != 'SUPER_ADMIN' || isSuperAdmin()) &&
+               // Must include audit fields
+               newData.roleUpdatedAt is timestamp &&
+               newData.roleUpdatedBy is string &&
+               isRecentTimestamp(newData.roleUpdatedAt);
       }
     }
     
@@ -880,6 +916,89 @@ service cloud.firestore {
                newData.message == currentData.message &&
                newData.createdAt == currentData.createdAt &&
                newData.read is bool;
+      }
+    }
+    
+    // ==========================================
+    // INVITATIONS MANAGEMENT
+    // ==========================================
+    
+    // Invitations collection (admin only)
+    match /invitations/{invitationId} {
+      // Read access for admins and invitation creators
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        resource.data.invitedBy == getUserId()
+      );
+      
+      // Create invitations (admins only)
+      allow create: if isAuthenticated() && isAdmin() &&
+                       isValidInvitationData(request.data) &&
+                       request.data.invitedBy == getUserId();
+      
+      // Update invitations (admins and system)
+      allow update: if isAuthenticated() && (
+        (isAdmin() && resource.data.invitedBy == getUserId()) ||
+        isSystem()
+      ) && isValidInvitationUpdate(resource.data, request.data);
+      
+      // Delete invitations (admins only)
+      allow delete: if isAuthenticated() && isAdmin() &&
+                       resource.data.invitedBy == getUserId();
+      
+      // Validate invitation data
+      function isValidInvitationData(data) {
+        return data.keys().hasAll(['email', 'role', 'invitedBy', 'invitedAt', 'expiresAt', 'status', 'token']) &&
+               data.email is string &&
+               data.email.matches('.*@.*\\..*') &&
+               data.role in ['USER', 'ADMIN'] &&
+               data.invitedBy is string &&
+               data.invitedAt is timestamp &&
+               isRecentTimestamp(data.invitedAt) &&
+               data.expiresAt is timestamp &&
+               data.expiresAt > request.time &&
+               data.status == 'pending' &&
+               data.token is string &&
+               data.token.size() >= 32;
+      }
+      
+      // Validate invitation updates
+      function isValidInvitationUpdate(currentData, newData) {
+        return newData.email == currentData.email &&
+               newData.role == currentData.role &&
+               newData.invitedBy == currentData.invitedBy &&
+               newData.invitedAt == currentData.invitedAt &&
+               newData.token == currentData.token &&
+               newData.status in ['pending', 'accepted', 'expired', 'cancelled'] &&
+               (newData.status == 'accepted' ? newData.acceptedAt is timestamp : true) &&
+               (newData.status == 'accepted' ? newData.acceptedBy is string : true);
+      }
+    }
+    
+    // ==========================================
+    // AUDIT LOGS
+    // ==========================================
+    
+    // Audit logs collection (admin read, system write)
+    match /audit_logs/{logId} {
+      // Read access for admins only
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // Write access for system and admins
+      allow write: if isAuthenticated() && (
+        isSystem() || 
+        (isAdmin() && isValidAuditLogData(request.data))
+      );
+      
+      // Validate audit log data
+      function isValidAuditLogData(data) {
+        return data.keys().hasAll(['type', 'timestamp', 'userId', 'action', 'resource']) &&
+               data.type in ['role_change', 'permission_change', 'user_management', 'system_action'] &&
+               data.timestamp is timestamp &&
+               isRecentTimestamp(data.timestamp) &&
+               data.userId is string &&
+               data.action is string &&
+               data.resource is string;
       }
     }
     

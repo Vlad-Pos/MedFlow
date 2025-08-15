@@ -209,7 +209,7 @@ export interface NotificationDeliveryStatus {
   
   // Provider-specific details
   providerMessageId?: string // Email/SMS provider message ID
-  providerResponse?: any
+  providerResponse?: Record<string, unknown>
   
   // Metadata
   createdAt: Timestamp

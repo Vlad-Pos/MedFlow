@@ -1,0 +1,71 @@
+/* WebsiteGradientBackground - Modern Medical SaaS Design */
+/* Inspired by n8n.io and Framer's sophisticated gradient systems */
+
+.website-gradient-bg {
+  /* Primary radial gradient - 50% coverage for focused center */
+  background: radial-gradient(circle at 50% 0%, 
+    #8A7A9F 0%, 
+    #7A48BF 25%, 
+    #100B1A 50%, 
+    #000000 100%);
+  
+  /* Firefox support */
+  background: -moz-radial-gradient(circle at 50% 0%, 
+    #8A7A9F 0%, 
+    #7A48BF 25%, 
+    #100B1A 50%, 
+    #000000 100%);
+  
+  /* Webkit support */
+  background: -webkit-radial-gradient(circle at 50% 0%, 
+    #8A7A9F 0%, 
+    #7A48BF 25%, 
+    #100B1A 50%, 
+    #000000 100%);
+  
+  /* IE fallback */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#8A7A9F', endColorstr='#000000', GradientType=1);
+  
+  /* Modern depth enhancement */
+  position: relative;
+}
+
+/* Subtle overlay for depth - like n8n.io */
+.website-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    /* Subtle top highlight */
+    linear-gradient(180deg, 
+      #8A7A9F 0%, 
+      transparent 20%),
+    /* Subtle bottom shadow */
+    linear-gradient(180deg, 
+      transparent 80%, 
+      #100B1A 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Content wrapper to ensure proper layering */
+.website-gradient-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Fallback for browsers that don't support gradients */
+@supports not (background: radial-gradient(circle, red, blue)) {
+  .website-gradient-bg {
+    background: linear-gradient(180deg, 
+      #8A7A9F 0%, 
+      #000000 100%);
+  }
+  
+  .website-gradient-bg::before {
+    display: none;
+  }
+}

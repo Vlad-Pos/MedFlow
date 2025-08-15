@@ -11,6 +11,11 @@
  * - Loading states and comprehensive error handling
  * - AI integration placeholders for future smart scheduling
  * 
+ * 💡 IMPORTANT: Before modifying this component, please read:
+ * - MedFlow/BRAND_IDENTITY.md (brand colors and styling)
+ * - MedFlow/DEVELOPMENT_GUIDE.md (component architecture)
+ * This ensures your changes maintain MedFlow's professional standards.
+ * 
  * @author MedFlow Team
  * @version 2.0
  */
@@ -25,8 +30,6 @@ import { isDemoMode, subscribeToDemoAppointments, addDemoAppointment, deleteDemo
 import { collection, onSnapshot, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface Appointment {
   id: string
   patientName: string
@@ -103,6 +106,25 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
     }
   }, [currentDate, view])
 
+  // Filter appointments for current date view - memoized
+  const filteredAppointments = useMemo(() => {
+    if (view === 'week') {
+      const start = startOfWeek(currentDate, { weekStartsOn: 1 })
+      const end = endOfWeek(currentDate, { weekStartsOn: 1 })
+      return appointments.filter(appt => {
+        const apptDate = new Date(appt.dateTime)
+        return apptDate >= start && apptDate <= end
+      })
+    } else {
+      const start = startOfMonth(currentDate)
+      const end = endOfMonth(currentDate)
+      return appointments.filter(appt => {
+        const apptDate = new Date(appt.dateTime)
+        return apptDate >= start && apptDate <= end
+      })
+    }
+  }, [appointments, currentDate, view])
+
   // Memoized appointment handlers
   const handleQuickAdd = useCallback(async () => {
     if (!user || !quickAddData.patientName.trim()) return
@@ -114,6 +136,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
       patientName: quickAddData.patientName.trim(),
       dateTime,
       symptoms: quickAddData.symptoms.trim() || 'Programare rapidă',
+      notes: quickAddData.symptoms.trim() || 'Programare rapidă',
       status: 'scheduled' as const
     }
 
@@ -191,10 +214,10 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
     setCalendarState(prev => ({ ...prev, loading: true, error: null }))
 
     if (isDemoMode()) {
-      const unsubscribe = subscribeToDemoAppointments((demoAppointments) => {
-        setAppointments(demoAppointments.map(appt => ({
+      const unsubscribe = subscribeToDemoAppointments((demoAppointments: any[]) => {
+        setAppointments(demoAppointments.map((appt: any) => ({
           ...appt,
-          dateTime: new Date(appt.dateTime?.toDate?.() || appt.dateTime)
+          dateTime: appt.dateTime
         })))
         setCalendarState(prev => ({ 
           ...prev, 
@@ -206,15 +229,12 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
       return unsubscribe
     }
 
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 })
-    const end = endOfWeek(currentDate, { weekStartsOn: 1 })
-    
+    // Create a broader query that gets all appointments for the doctor
+    // We'll filter by date in the component logic instead of in the query
     try {
       const q = query(
         collection(db, 'appointments'),
         where('doctorId', '==', user.uid),
-        where('dateTime', '>=', start),
-        where('dateTime', '<=', end),
         orderBy('dateTime', 'asc')
       )
       
@@ -224,7 +244,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
             const rows = snap.docs.map(d => ({
               id: d.id,
               ...d.data(),
-              dateTime: new Date(d.data().dateTime?.toDate?.() || d.data().dateTime)
+              dateTime: new Date(d.data().dateTime)
             })) as Appointment[]
             
             setAppointments(rows)
@@ -271,11 +291,10 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
         connectionStatus: 'disconnected'
       }))
     }
-  }, [user, currentDate])
+  }, [user]) // Removed currentDate dependency to fix infinite loop
 
   return (
-    <DesignWorkWrapper componentName="ModernCalendar">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Enhanced Header with MedFlow Branding */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex items-center space-x-4">
@@ -562,8 +581,8 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
           {calendarState.loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <LoadingSpinner size="lg" />
-                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                <div className="loader mb-4"></div>
+                <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
                   Se încarcă calendarul medical...
                 </p>
               </div>
@@ -571,7 +590,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
           ) : view === 'week' ? (
             <WeekView
               days={calendarData as Date[]}
-              appointments={appointments}
+              appointments={filteredAppointments}
               timeSlots={timeSlots}
               onAppointmentClick={onAppointmentClick}
               onTimeSlotClick={onTimeSlotClick}
@@ -584,7 +603,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
           ) : (
             <MonthView
               weeks={calendarData as Date[][]}
-              appointments={appointments}
+              appointments={filteredAppointments}
               onAppointmentClick={onAppointmentClick}
               onDeleteAppointment={handleDeleteAppointment}
               getStatusColor={getStatusColor}
@@ -595,8 +614,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
           )}
         </div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 })
 
 export default ModernCalendar

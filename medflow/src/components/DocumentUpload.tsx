@@ -29,12 +29,10 @@ import {
   Brain,
   Shield,
   FileCheck,
-  Trash2
-} from 'lucide-react'
+  } from 'lucide-react'
 import LoadingSpinner from './LoadingSpinner'
+import { MedFlowLoader } from './ui'
 import { useAuth } from '../providers/AuthProvider'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface DocumentUploadProps {
   appointmentId: string
   onUploadComplete?: (document: DocumentMetadata) => void
@@ -51,7 +49,7 @@ interface DocumentMetadata {
   fileName: string
   contentType: string
   size: number
-  createdAt: any
+  createdAt: Date
   scanResults?: {
     isValid: boolean
     fileType: string
@@ -336,8 +334,7 @@ export default function DocumentUpload({
   }, [])
 
   return (
-    <DesignWorkWrapper componentName="DocumentUpload">
-      <div className="space-y-4">
+    <div className="space-y-4">
       {/* Upload Area */}
       <motion.div
         className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
@@ -372,7 +369,7 @@ export default function DocumentUpload({
               className="space-y-4"
             >
               <div className="flex justify-center">
-                <LoadingSpinner size="lg" />
+                <MedFlowLoader size="lg" />
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-medflow-primary">
@@ -500,6 +497,5 @@ export default function DocumentUpload({
         </div>
       </div>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

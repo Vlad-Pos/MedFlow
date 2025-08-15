@@ -28,8 +28,6 @@ import {
   clearAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
-import DesignWorkWrapper from '../../../DesignWorkWrapper'
-
 export default function SignIn() {
   // Hooks
   const { signIn } = useAuth()
@@ -120,8 +118,7 @@ export default function SignIn() {
   }, [])
 
   return (
-    <DesignWorkWrapper componentName="SignIn">
-      <div className="min-h-screen bg-gradient-to-br from-medflow-primary/5 via-white to-medflow-secondary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-medflow-primary/5 via-white to-medflow-secondary/5 flex items-center justify-center p-4">
         {/* Header Section */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
@@ -287,6 +284,5 @@ export default function SignIn() {
           <p>Conexiunea este securizată și datele sunt protejate conform GDPR</p>
         </motion.div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

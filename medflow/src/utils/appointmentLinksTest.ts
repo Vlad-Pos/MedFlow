@@ -12,6 +12,7 @@ import AppointmentLinksService from '../services/appointmentLinks'
 import AvailableSlotsService from '../services/availableSlots'
 import NotificationSenderService from '../services/notificationSender'
 import { AppointmentWithNotifications } from '../types/notifications'
+import { Timestamp } from 'firebase/firestore'
 
 /**
  * Test data and utilities for appointment links integration
@@ -42,8 +43,8 @@ export class AppointmentLinksTestUtils {
         confirmationReceived: false,
         optedOut: false
       },
-      createdAt: new Date() as any,
-      updatedAt: new Date() as any
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
     }
   }
   
@@ -318,12 +319,12 @@ export class AppointmentLinksTestUtils {
    */
   static async runCompleteTest(): Promise<{
     success: boolean
-    results: Record<string, any>
+    results: Record<string, unknown>
     summary: string
   }> {
     console.log('🚀 Starting MedFlow Appointment Links Integration Test...\n')
     
-    const results: Record<string, any> = {}
+    const results: any = {}
     let passedTests = 0
     let totalTests = 0
     
@@ -379,7 +380,7 @@ export class AppointmentLinksTestUtils {
  * Browser console helper for manual testing
  */
 if (typeof window !== 'undefined') {
-  (window as any).testMedFlowLinks = AppointmentLinksTestUtils.runCompleteTest
+  (window as unknown as Record<string, unknown>).testMedFlowLinks = AppointmentLinksTestUtils.runCompleteTest
   console.log('🔗 MedFlow Links Test Suite loaded. Run: testMedFlowLinks()')
 }
 

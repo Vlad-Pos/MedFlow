@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, User, Phone, Mail, Calendar, MapPin } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { User, Phone, Mail, Calendar, MapPin } from 'lucide-react'
 interface Patient {
   id: string
   name: string
@@ -121,10 +119,9 @@ export default function PatientSearch({
   }
 
   return (
-    <DesignWorkWrapper componentName="PatientSearch">
-      <div className={`relative ${className}`}>
+    <div className={`relative ${className}`}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-medflow-text-muted w-5 h-5" />
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-medflow-text-muted w-5 h-5" />
           <input
             type="text"
             value={query}
@@ -226,6 +223,5 @@ export default function PatientSearch({
           )}
         </AnimatePresence>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

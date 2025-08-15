@@ -13,7 +13,7 @@
  * @version 2.0
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore'
 import { db } from '../services/firebase'
@@ -22,14 +22,13 @@ import { useAuth } from '../providers/AuthProvider'
 import ModernCalendar from '../components/ModernCalendar'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { motion, AnimatePresence } from 'framer-motion'
-import { StatsCard } from '../components/AnimatedCard'
+import { FastStatsCard, MedFlowLoader, SimpleLoader } from '../components/ui'
 import DoctorAlerts from '../components/DoctorAlerts'
 import SmartRecommendations from '../components/SmartRecommendations'
 import { staggerContainer, staggerItem } from '../utils/animations'
-import { Calendar, CheckCircle, Clock, XCircle, TrendingUp, Brain, AlertTriangle, Activity, Info, Play, ExternalLink, Search } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, TrendingUp, Brain, AlertTriangle, Activity, Info, Play, ExternalLink, Search } from 'lucide-react'
 import PatientSearch from '../components/PatientSearch'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { useFeatureAnalytics } from '../hooks/useFeatureAnalytics'
 interface Appointment {
   id: string
   patientName: string
@@ -42,39 +41,68 @@ interface Appointment {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [fallbackActive, setFallbackActive] = useState(false)
-  const [indexLink, setIndexLink] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
-  
-  // AI analytics placeholder (for future implementation)
-  const [aiInsights] = useState({
-    enabled: false, // Will be enabled when AI analytics are implemented
-    trendAnalysis: false,
-    patientInsights: false,
-    scheduleOptimization: false
-  })
+  const [fallbackActive, setFallbackActive] = useState(false)
+  const [indexLink, setIndexLink] = useState<string | null>(null)
 
+  // Feature Analytics Hook - Track user interactions and feature usage
+  const analytics = useFeatureAnalytics(
+    'dashboard',
+    'Dashboard',
+    { category: 'core', trackPageView: true, trackUserInteraction: true }
+  )
+
+  // Track successful dashboard load
   useEffect(() => {
-    if (!user) {
-      setLoading(false)
-      return
+    if (!loading && !error && appointments.length > 0) {
+      analytics.trackSuccess('dashboard_loaded', {
+        appointmentCount: appointments.length,
+        userId: user?.uid,
+        hasData: true
+      })
     }
+  }, [loading, error, appointments.length, analytics, user])
+
+  // Utility function to safely convert dateTime to Date
+  const safeConvertToDate = useCallback((dateTime: Date | string | any): Date => {
+    if (dateTime instanceof Date) {
+      return dateTime
+    }
+    if (typeof dateTime === 'string') {
+      return new Date(dateTime)
+    }
+    // Handle Firestore Timestamp objects
+    if (dateTime && typeof dateTime === 'object' && 'toDate' in dateTime) {
+      return dateTime.toDate()
+    }
+    return new Date()
+  }, [])
+
+  // Load appointments
+  useEffect(() => {
+    if (!user) return
 
     setLoading(true)
     setError(null)
 
     if (isDemoMode()) {
-      const unsubscribe = subscribeToDemoAppointments((demoAppointments) => {
-        setAppointments(demoAppointments.map(appt => ({
+      const unsubscribe = subscribeToDemoAppointments((demoAppointments: any[]) => {
+        setAppointments(demoAppointments.map((appt: any) => ({
           ...appt,
-          dateTime: new Date(appt.dateTime?.toDate?.() || appt.dateTime)
+          dateTime: safeConvertToDate(appt.dateTime)
         })))
         setFallbackActive(false)
         setIndexLink(null)
         setLoading(false)
+        
+        // Track demo mode data loading
+        analytics.trackDataLoading('demo_appointments', true, {
+          appointmentCount: demoAppointments.length,
+          mode: 'demo'
+        })
       })
       return unsubscribe
     }
@@ -91,11 +119,18 @@ export default function Dashboard() {
         (snap) => {
           try {
             const rows: Appointment[] = snap.docs.map((d) => {
-              const data = d.data() as any
+              const data = d.data() as {
+                patientName: string
+                dateTime: Date | string
+                symptoms: string
+                notes?: string
+                status: 'scheduled' | 'completed' | 'no_show'
+                doctorId: string
+              }
               return {
                 id: d.id,
                 patientName: data.patientName,
-                dateTime: new Date(data.dateTime?.toDate?.() || data.dateTime),
+                dateTime: safeConvertToDate(data.dateTime),
                 symptoms: data.symptoms,
                 notes: data.notes,
                 status: data.status,
@@ -107,10 +142,22 @@ export default function Dashboard() {
             setAppointments(rows)
             setLoading(false)
             setError(null)
+            
+            // Track successful data loading
+            analytics.trackDataLoading('appointments', true, {
+              appointmentCount: rows.length,
+              userId: user.uid
+            })
           } catch (processingError) {
             console.error('Dashboard: Error processing appointment data:', processingError)
             setError('Eroare la procesarea datelor programărilor')
             setLoading(false)
+            
+            // Track data processing error
+            analytics.trackError('data_processing_error', 'Error processing appointment data', {
+              error: processingError,
+              userId: user.uid
+            })
           }
         },
         (firebaseError) => {
@@ -118,6 +165,13 @@ export default function Dashboard() {
           setFallbackActive(true)
           setError('Eroare la conectarea cu baza de date. Se afișează date de demonstrație.')
           setLoading(false)
+          
+          // Track Firebase connection error
+          analytics.trackError('firebase_connection_error', 'Firestore snapshot error', {
+            error: firebaseError,
+            userId: user.uid,
+            fallbackActive: true
+          })
           
           try {
             const msg: string = (firebaseError?.message || '') as string
@@ -132,14 +186,28 @@ export default function Dashboard() {
       setError('Eroare la configurarea sincronizării datelor')
       setLoading(false)
     }
-  }, [user])
+  }, [user, safeConvertToDate])
 
   const handleAppointmentClick = (appointment: Appointment) => {
+    // Track appointment interaction
+    analytics.trackInteraction('appointment_click', {
+      appointmentId: appointment.id,
+      appointmentStatus: appointment.status,
+      patientName: appointment.patientName
+    })
+    
     navigate(`/appointments?edit=${appointment.id}`)
   }
 
   const handleTimeSlotClick = (date: Date) => {
     const iso = new Date(date.getTime() - date.getTimezoneOffset()*60000).toISOString().slice(0,16)
+    
+    // Track time slot selection
+    analytics.trackInteraction('time_slot_click', {
+      selectedDate: date.toISOString(),
+      timeSlot: iso
+    })
+    
     navigate(`/appointments?new=${encodeURIComponent(iso)}`)
   }
 
@@ -160,10 +228,10 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-medflow-text-secondary">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-medflow-text-secondary">
             Se încarcă dashboard-ul medical...
           </p>
         </div>
@@ -172,8 +240,7 @@ export default function Dashboard() {
   }
 
   return (
-    <DesignWorkWrapper componentName="Dashboard">
-      <motion.section
+    <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -191,14 +258,14 @@ export default function Dashboard() {
           </div>
           
           {/* AI Insights Placeholder */}
-          {aiInsights.enabled && (
+          {/* aiInsights.enabled && (
             <div className="flex items-center space-x-2 px-4 py-2 bg-medflow-primary/10 rounded-lg border border-medflow-primary/20">
               <Brain className="w-4 h-4 text-medflow-primary" />
               <span className="text-sm text-medflow-primary font-medium">
                 Analiză AI activă
               </span>
             </div>
-          )}
+          ) */}
         </div>
 
         {/* Error State */}
@@ -231,109 +298,107 @@ export default function Dashboard() {
           className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
         >
           <motion.div variants={staggerItem}>
-            <StatsCard
+            <FastStatsCard
               title="Programări astăzi"
               value={todaysAppointments.length}
               icon={<Calendar className="w-6 h-6" />}
-              className="bg-gradient-to-br from-medflow-accent/20 to-medflow-accent/10 text-medflow-text-primary shadow-lg border border-medflow-accent/20 backdrop-blur-sm"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <StatsCard
+            <FastStatsCard
               title="Consultații finalizate"
               value={completedAppointments.length}
               icon={<CheckCircle className="w-6 h-6" />}
-              className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg hover:shadow-xl"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <StatsCard
+            <FastStatsCard
               title="În așteptare"
               value={scheduledAppointments.length}
               icon={<Clock className="w-6 h-6" />}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl"
             />
           </motion.div>
 
           <motion.div variants={staggerItem}>
-            <StatsCard
+            <FastStatsCard
               title="Rata de finalizare"
               value={`${completionRate}%`}
               icon={<TrendingUp className="w-6 h-6" />}
-              className="bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg hover:shadow-xl"
             />
           </motion.div>
         </motion.div>
 
+
+
         {/* AI Analytics Placeholder */}
-        {aiInsights.enabled && (
+        {/* aiInsights.enabled && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-xl p-6"
+            className="bg-[var(--medflow-brand-1)]/5 border border-[var(--medflow-brand-1)]/10 rounded-xl p-6"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <Brain className="w-6 h-6 text-medflow-primary" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <Brain className="w-6 h-6 text-[var(--medflow-brand-1)]" />
+              <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)]">
                 Analiză AI și Tendințe
               </h3>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="bg-[var(--medflow-surface-elevated)] rounded-lg p-4 border border-[var(--medflow-border)]">
                 <div className="flex items-center space-x-2">
-                  <Activity className="w-4 h-4 text-medflow-primary" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Activity className="w-4 h-4 text-[var(--medflow-brand-1)]" />
+                  <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">
                     Activitate săptămână
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-[var(--medflow-text-tertiary)] mt-1">
                   🤖 Analiză tendințe de programări va fi disponibilă aici
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="bg-[var(--medflow-surface-elevated)] rounded-lg p-4 border border-[var(--medflow-border)]">
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="w-4 h-4 text-medflow-primary" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <TrendingUp className="w-4 h-4 text-[var(--medflow-brand-1)]" />
+                  <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">
                     Predicții ocupare
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-[var(--medflow-text-tertiary)] mt-1">
                   🤖 Predicții AI pentru orele optime vor fi afișate aici
                 </p>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="bg-[var(--medflow-surface-elevated)] rounded-lg p-4 border border-[var(--medflow-border)]">
                 <div className="flex items-center space-x-2">
-                  <Brain className="w-4 h-4 text-medflow-primary" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Brain className="w-4 h-4 text-[var(--medflow-brand-1)]" />
+                  <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">
                     Insights pacienți
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-[var(--medflow-text-tertiary)] mt-1">
                   🤖 Analiză comportament pacienți va fi disponibilă aici
                 </p>
               </div>
             </div>
           </motion.div>
-        )}
+        ) */}
 
         {/* Alerts */}
         {fallbackActive && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg bg-amber-500/20 border border-amber-400/30 p-4"
+            className="rounded-lg bg-[var(--medflow-brand-2)]/20 border border-[var(--medflow-brand-2)]/30 p-4"
           >
             <div className="flex items-start">
-              <svg className="w-5 h-5 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-[var(--medflow-brand-2)] mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-amber-200">
+                <h3 className="text-sm font-medium text-[var(--medflow-text-primary)]">
                   Nu s-au putut încărca datele reale din Firestore
                 </h3>
-                <div className="mt-2 text-sm text-amber-200">
+                <div className="mt-2 text-sm text-[var(--medflow-text-primary)]">
                   Se afișează date de exemplu.
                   {indexLink && (
                     <div className="mt-1">
@@ -350,17 +415,17 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 dark:bg-blue-900/20 dark:border-blue-800"
+            className="bg-[var(--medflow-brand-2)]/20 border border-[var(--medflow-brand-2)]/30 rounded-xl p-6 mb-8"
           >
             <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-800/30 rounded-full flex items-center justify-center">
-                <Play className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="flex-shrink-0 w-12 h-12 bg-[var(--medflow-brand-2)]/30 rounded-full flex items-center justify-center">
+                <Play className="w-6 h-6 text-[var(--medflow-brand-2)]" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] mb-2">
                   Mod demonstrație activ
                 </h3>
-                <p className="text-blue-800 dark:text-blue-300 mb-4 leading-relaxed">
+                <p className="text-[var(--medflow-text-secondary)] mb-4 leading-relaxed">
                   Explorați funcționalitățile MedFlow cu date simulate în siguranță. 
                   Toate acțiunile sunt temporare și nu afectează date reale. 
                   Această versiune demonstrează capabilitățile actuale ale platformei.
@@ -368,12 +433,12 @@ export default function Dashboard() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link 
                     to="/signup"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                    className="inline-flex items-center px-4 py-2 bg-[var(--medflow-brand-1)] hover:bg-[var(--medflow-brand-2)] text-[var(--medflow-text-primary)] font-medium rounded-lg transition-colors"
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Începeți cu date reale
                   </Link>
-                  <button className="inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 font-medium rounded-lg transition-colors">
+                  <button className="inline-flex items-center px-4 py-2 border border-[var(--medflow-brand-2)]/50 text-[var(--medflow-brand-2)] hover:bg-[var(--medflow-brand-2)]/20 font-medium rounded-lg transition-colors">
                     <Info className="w-4 h-4 mr-2" />
                     Aflați mai multe despre demo
                   </button>
@@ -387,14 +452,14 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/10 overflow-hidden"
+          className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl shadow-sm border border-[var(--medflow-border)] overflow-hidden"
         >
-          <div className="p-6 border-b border-white/10">
-            <h2 className="text-xl font-semibold text-medflow-text-primary flex items-center space-x-2">
-              <Search className="w-5 h-5 text-medflow-accent" />
+          <div className="p-6 border-b border-[var(--medflow-border)]">
+            <h2 className="text-xl font-semibold text-[var(--medflow-text-primary)] flex items-center space-x-2">
+              <Search className="w-5 h-5 text-[var(--medflow-brand-1)]" />
               <span>Căutare rapidă pacient</span>
             </h2>
-            <p className="text-sm text-medflow-text-muted mt-1">
+            <p className="text-sm text-[var(--medflow-text-tertiary)] mt-1">
               Găsiți rapid un pacient pentru programare sau consultare istoric
             </p>
           </div>
@@ -414,7 +479,7 @@ export default function Dashboard() {
          <motion.div
            initial={{ opacity: 0, y: 10 }}
            animate={{ opacity: 1, y: 0 }}
-           className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/10 overflow-hidden"
+           className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl shadow-sm border border-[var(--medflow-border)] overflow-hidden"
          >
            <div className="p-6">
              <SmartRecommendations 
@@ -429,10 +494,10 @@ export default function Dashboard() {
          <div className="grid gap-6 lg:grid-cols-3">
            {/* Doctor Alerts */}
            <div className="lg:col-span-1">
-             <div className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/10 overflow-hidden">
-               <div className="p-6 border-b border-white/10">
-                 <h2 className="text-xl font-semibold text-medflow-text-primary flex items-center">
-                   <AlertTriangle className="w-5 h-5 mr-2 text-orange-500" />
+             <div className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl shadow-sm border border-[var(--medflow-border)] overflow-hidden">
+               <div className="p-6 border-b border-[var(--medflow-border)]">
+                 <h2 className="text-xl font-semibold text-[var(--medflow-text-primary)] flex items-center">
+                   <AlertTriangle className="w-5 h-5 mr-2 text-[var(--medflow-brand-2)]" />
                    Alerte și Notificări
                  </h2>
                </div>
@@ -448,9 +513,9 @@ export default function Dashboard() {
            
            {/* Modern Calendar */}
            <div className="lg:col-span-2">
-             <div className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl shadow-sm border border-white/10 overflow-hidden">
-               <div className="p-6 border-b border-white/10">
-                 <h2 className="text-xl font-semibold text-medflow-text-primary">
+             <div className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl shadow-sm border border-[var(--medflow-border)] overflow-hidden">
+               <div className="p-6 border-b border-[var(--medflow-border)]">
+                 <h2 className="text-xl font-semibold text-[var(--medflow-text-primary)]">
                    Calendar Programări
                  </h2>
                </div>
@@ -464,6 +529,5 @@ export default function Dashboard() {
            </div>
          </div>
       </motion.section>
-    </DesignWorkWrapper>
-  )
+    )
 }

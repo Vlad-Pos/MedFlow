@@ -1,7 +1,6 @@
-import { motion, type Transition } from 'framer-motion'
+import { motion, type Transition, type TargetAndTransition } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { pageVariants, pageTransition } from '../utils/animations'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -10,8 +9,7 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children, className = '' }: PageTransitionProps) {
   return (
-    <DesignWorkWrapper componentName="PageTransition">
-      <motion.div
+    <motion.div
         initial="initial"
         animate="in"
         exit="out"
@@ -21,8 +19,7 @@ export default function PageTransition({ children, className = '' }: PageTransit
       >
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Animated page wrapper with different entrance animations
@@ -35,7 +32,12 @@ export function AnimatedPage({
   className?: string
   animation?: 'fade' | 'slide-left' | 'slide-right' | 'scale' | 'bounce'
 }) {
-  const animations: Record<string, { initial: any; animate: any; exit: any; transition: Transition }> = {
+  const animations: Record<string, { 
+    initial: TargetAndTransition; 
+    animate: TargetAndTransition; 
+    exit: TargetAndTransition; 
+    transition: Transition 
+  }> = {
     fade: {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
@@ -75,8 +77,7 @@ export function AnimatedPage({
   const selectedAnimation = animations[animation]
 
   return (
-    <DesignWorkWrapper componentName="AnimatedPage">
-      <motion.div
+    <motion.div
         initial={selectedAnimation.initial}
         animate={selectedAnimation.animate}
         exit={selectedAnimation.exit}
@@ -85,6 +86,5 @@ export function AnimatedPage({
       >
         {children}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -18,34 +18,26 @@ import { useState, useEffect, useCallback } from 'react'
 import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
+import { withDemoMode, withDemoModeQuery, withDemoModeWrite, getDemoUserData } from '../utils/demoFirebase'
 import { useAuth } from '../providers/AuthProvider'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   User, 
-  Mail, 
   Lock, 
   Save, 
   Edit3, 
-  Check, 
   X, 
   AlertTriangle,
   CheckCircle,
   Shield,
   Stethoscope,
-  MapPin,
-  Phone,
-  Calendar,
   Brain,
   Settings,
   Eye,
   EyeOff,
-  Building,
-  GraduationCap
-} from 'lucide-react'
+  } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import NotificationPreferences from '../components/NotificationPreferences'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface UserProfile {
   displayName: string
   email: string
@@ -114,14 +106,39 @@ export default function ProfileEnhanced() {
 
       setLoading(true)
       try {
-        // Get additional profile data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        const userData = userDoc.exists() ? userDoc.data() : {}
+        // Demo mode mock data
+        const demoUserData = {
+          specialization: 'Cardiologie',
+          licenseNumber: 'CAR123456',
+          clinic: 'Clinica MedFlow',
+          phone: '+40 721 234 567',
+          address: 'Strada Medicilor 123, București',
+          experience: 15,
+          education: 'Universitatea de Medicină și Farmacie Carol Davila',
+          certifications: ['Cardiologie Intervențională', 'Ecocardiografie', 'ECG'],
+          workingHours: { start: '08:00', end: '18:00' },
+          preferences: {
+            notifications: true,
+            darkMode: false,
+            language: 'ro',
+            aiAssistance: true
+          }
+        }
+
+        // Get additional profile data from Firestore or use demo data
+        const userData = await withDemoMode(
+          async () => {
+            const userDoc = await getDoc(doc(db, 'users', user.uid))
+            return userDoc.exists() ? userDoc.data() : {}
+          },
+          demoUserData,
+          'loadProfile'
+        )
 
         setProfile({
           displayName: user.displayName || '',
           email: user.email || '',
-          role: user.role || 'doctor',
+          role: (user.role as 'doctor' | 'nurse') || 'doctor',
           specialization: userData.specialization || '',
           licenseNumber: userData.licenseNumber || '',
           clinic: userData.clinic || '',
@@ -151,16 +168,19 @@ export default function ProfileEnhanced() {
   }, [user])
 
   // Handle profile field changes
-  const handleProfileChange = useCallback((field: keyof UserProfile, value: any) => {
+  const handleProfileChange = useCallback((field: keyof UserProfile, value: string | number | boolean | string[] | { start: string; end: string }) => {
     setProfile(prev => ({ ...prev, [field]: value }))
   }, [])
 
   // Handle nested preference changes
-  const handlePreferenceChange = useCallback((field: string, value: any) => {
+  const handlePreferenceChange = useCallback((field: string, value: boolean | string) => {
     setProfile(prev => ({
       ...prev,
       preferences: {
-        ...prev.preferences,
+        notifications: prev.preferences?.notifications ?? true,
+        darkMode: prev.preferences?.darkMode ?? false,
+        language: prev.preferences?.language ?? 'ro',
+        aiAssistance: prev.preferences?.aiAssistance ?? false,
         [field]: value
       }
     }))
@@ -181,11 +201,17 @@ export default function ProfileEnhanced() {
       }
 
       // Update Firestore user document
-      const userDocRef = doc(db, 'users', user.uid)
-      await updateDoc(userDocRef, {
-        ...profile,
-        updatedAt: new Date()
-      })
+      await withDemoModeWrite(
+        async () => {
+          const userDocRef = doc(db, 'users', user.uid)
+          await updateDoc(userDocRef, {
+            ...profile,
+            updatedAt: new Date()
+          })
+        },
+        undefined,
+        'saveProfile'
+      )
 
       // Refresh user data in context
       await refreshUserData?.()
@@ -227,11 +253,11 @@ export default function ProfileEnhanced() {
 
       setSuccess('Parola a fost schimbată cu succes!')
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error changing password:', err)
-      if (err.code === 'auth/wrong-password') {
+      if (err && typeof err === 'object' && 'code' in err && err.code === 'auth/wrong-password') {
         setError('Parola curentă este incorectă')
-      } else if (err.code === 'auth/weak-password') {
+      } else if (err && typeof err === 'object' && 'code' in err && err.code === 'auth/weak-password') {
         setError('Parola nouă este prea slabă')
       } else {
         setError('Eroare la schimbarea parolei')
@@ -263,8 +289,8 @@ export default function ProfileEnhanced() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
             Se încarcă profilul...
           </p>
         </div>
@@ -273,8 +299,7 @@ export default function ProfileEnhanced() {
   }
 
   return (
-    <DesignWorkWrapper componentName="ProfileEnhanced">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -310,7 +335,7 @@ export default function ProfileEnhanced() {
                   disabled={saving}
                   className="flex items-center space-x-2 px-4 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors disabled:opacity-50"
                 >
-                  {saving ? <LoadingSpinner size="sm" /> : <Save className="w-4 h-4" />}
+                  {saving ? <div className="loader"></div> : <Save className="w-4 h-4" />}
                   <span>Salvează</span>
                 </motion.button>
               </>
@@ -379,7 +404,7 @@ export default function ProfileEnhanced() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as 'personal' | 'professional' | 'security' | 'preferences')}
                     className={`flex items-center space-x-2 px-6 py-4 font-medium text-sm whitespace-nowrap transition-colors ${
                       activeTab === tab.id
                         ? 'border-b-2 border-medflow-primary text-medflow-primary'
@@ -567,7 +592,10 @@ export default function ProfileEnhanced() {
                     <input
                       type="time"
                       value={profile.workingHours?.start || '08:00'}
-                      onChange={(e) => handleProfileChange('workingHours', { ...profile.workingHours, start: e.target.value })}
+                      onChange={(e) => handleProfileChange('workingHours', { 
+                        start: e.target.value, 
+                        end: profile.workingHours?.end || '18:00' 
+                      })}
                       disabled={!editMode}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
@@ -580,7 +608,10 @@ export default function ProfileEnhanced() {
                     <input
                       type="time"
                       value={profile.workingHours?.end || '18:00'}
-                      onChange={(e) => handleProfileChange('workingHours', { ...profile.workingHours, end: e.target.value })}
+                      onChange={(e) => handleProfileChange('workingHours', { 
+                        start: profile.workingHours?.start || '08:00', 
+                        end: e.target.value 
+                      })}
                       disabled={!editMode}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
@@ -701,7 +732,7 @@ export default function ProfileEnhanced() {
                       disabled={saving || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                       className="flex items-center space-x-2 px-6 py-3 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {saving ? <LoadingSpinner size="sm" /> : <Lock className="w-4 h-4" />}
+                      {saving ? <div className="loader"></div> : <Lock className="w-4 h-4" />}
                       <span>Schimbă parola</span>
                     </motion.button>
                   </div>
@@ -785,6 +816,5 @@ export default function ProfileEnhanced() {
           </div>
         </div>
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

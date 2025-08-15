@@ -15,14 +15,9 @@ import {
   AlertTriangle, 
   Calendar, 
   Clock, 
-  User, 
   Eye,
   CheckCircle,
-  XCircle,
-  FileText,
   Search,
-  Filter,
-  Download,
   RefreshCw,
   MessageSquare
 } from 'lucide-react'
@@ -32,8 +27,7 @@ import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
 import { format } from 'date-fns'
 import { ro } from 'date-fns/locale'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { Timestamp } from 'firebase/firestore'
 interface PatientFlaggingHistoryProps {
   patientId?: string
   className?: string
@@ -245,9 +239,9 @@ export default function PatientFlaggingHistory({
       )
       
       // Update local state
-      setFlags(prev => prev.map(flag => 
-        flag.id === flagId 
-          ? { ...flag, status: 'resolved', resolvedAt: new Date() as any, resolutionNotes }
+      setFlags(prev => prev.map(flag =>
+        flag.id === flagId
+          ? { ...flag, status: 'resolved', resolvedAt: Timestamp.now(), resolutionNotes }
           : flag
       ))
       
@@ -287,7 +281,7 @@ export default function PatientFlaggingHistory({
   }
   
   /**
-   * Filter flags based on search and filters
+   * flags based on search and filters
    */
   const filteredFlags = flags.filter(flag => {
     if (searchTerm && !flag.patientName.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -311,8 +305,12 @@ export default function PatientFlaggingHistory({
   if (loading) {
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
-        <LoadingSpinner size="lg" className="mr-3" />
-        <span className="text-gray-600">Se încarcă istoricul semnalizărilor...</span>
+        <div className="text-center">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+            Se încarcă istoricul semnalizărilor...
+          </p>
+        </div>
       </div>
     )
   }
@@ -332,8 +330,7 @@ export default function PatientFlaggingHistory({
   }
   
   return (
-    <DesignWorkWrapper componentName="PatientFlaggingHistory">
-      <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`}>
       {/* Summary (if viewing specific patient) */}
       {summary && (
         <div className="bg-white border rounded-lg p-6">
@@ -405,10 +402,10 @@ export default function PatientFlaggingHistory({
               />
             </div>
             
-            {/* Severity Filter */}
+            {/* Severity */}
             <select
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value as any)}
+              onChange={(e) => setSeverityFilter(e.target.value as FlagSeverity | 'all')}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Toate severitățile</option>
@@ -417,10 +414,10 @@ export default function PatientFlaggingHistory({
               <option value="low">Severitate scăzută</option>
             </select>
             
-            {/* Status Filter */}
+            {/* Status */}
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as FlagStatus | 'all')}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Toate statusurile</option>
@@ -503,7 +500,7 @@ export default function PatientFlaggingHistory({
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-2" />
                           <span>
-                            Programare: {format(flag.appointmentDateTime.toDate(), 'dd MMM yyyy HH:mm', { locale: ro })}
+                            Programare: {format(flag.appointmentDateTime?.toDate(), 'dd MMM yyyy HH:mm', { locale: ro })}
                           </span>
                         </div>
                       )}
@@ -522,7 +519,7 @@ export default function PatientFlaggingHistory({
                           <span className="font-medium text-green-800">Rezolvat</span>
                           {flag.resolvedAt && (
                             <span className="ml-2 text-sm text-green-600">
-                              ({format(flag.resolvedAt.toDate(), 'dd MMM yyyy', { locale: ro })})
+                              ({format(flag.resolvedAt?.toDate(), 'dd MMM yyyy', { locale: ro })})
                             </span>
                           )}
                         </div>
@@ -571,6 +568,5 @@ export default function PatientFlaggingHistory({
         />
       )}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

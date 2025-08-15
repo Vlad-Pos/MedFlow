@@ -5,22 +5,18 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface LazyImageProps {
   src: string
   alt: string
   className?: string
   placeholder?: string
-  quality?: number
 }
 
 export default function LazyImage({ 
   src, 
   alt, 
   className = '', 
-  placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmMGYwZjAiLz48L3N2Zz4=',
-  quality = 85
+  placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNmMGYwZjAiLz48L3N2Zz4='
 }: LazyImageProps) {
   const [loaded, setLoaded] = useState(false)
   const [inView, setInView] = useState(false)
@@ -52,8 +48,7 @@ export default function LazyImage({
   }
 
   return (
-    <DesignWorkWrapper componentName="LazyImage">
-      <div className={`relative overflow-hidden ${className}`} ref={imgRef}>
+    <div className={`relative overflow-hidden ${className}`} ref={imgRef}>
         {/* Placeholder */}
         <motion.img
           src={placeholder}
@@ -63,7 +58,7 @@ export default function LazyImage({
           }`}
           style={{
             filter: 'blur(20px)',
-            background: 'linear-gradient(135deg, #1a1b1e, #24262a)'
+            background: 'linear-gradient(135deg, var(--medflow-brand-6), var(--medflow-brand-7))'
           }}
         />
 
@@ -96,6 +91,5 @@ export default function LazyImage({
           </motion.div>
         )}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

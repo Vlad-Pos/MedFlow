@@ -61,7 +61,7 @@ export interface ChatbotResponse {
 export interface MedicalDocumentAnalysis {
   documentType: 'lab_result' | 'prescription' | 'medical_report' | 'image' | 'other'
   confidence: number
-  extractedData: Record<string, any>
+  extractedData: Record<string, unknown>
   medicalRelevance: number
   suggestedActions: string[]
   flaggedConcerns: string[]
@@ -207,7 +207,7 @@ export class AIService {
    */
   async suggestAppointmentSlots(
     doctorId: string,
-    patientPreferences: any = {},
+    patientPreferences: Record<string, unknown> = {},
     urgencyLevel: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
   ): Promise<AppointmentSuggestion[]> {
     if (!this.initialized) {
@@ -239,7 +239,7 @@ export class AIService {
 
     // Generate suggestions based on urgency
     const daysAhead = urgencyLevel === 'urgent' ? 1 : urgencyLevel === 'high' ? 2 : 7
-    const preferredHours = patientPreferences.preferredHours || [9, 10, 11, 14, 15, 16]
+    const preferredHours = (patientPreferences.preferredHours as number[]) || [9, 10, 11, 14, 15, 16]
 
     for (let day = 1; day <= daysAhead; day++) {
       for (const hour of preferredHours.slice(0, 2)) {
@@ -252,7 +252,7 @@ export class AIService {
           confidence: urgencyLevel === 'urgent' ? 0.95 : 0.80,
           reasoning: `🤖 AI: Slot optim pentru ${urgencyLevel === 'urgent' ? 'urgență medicală' : 'consultație de rutină'}`,
           duration: urgencyLevel === 'urgent' ? 15 : 30,
-          priority: urgencyLevel as any,
+          priority: urgencyLevel as 'low' | 'medium' | 'high',
           conflicts: []
         })
       }
@@ -272,7 +272,7 @@ export class AIService {
    */
   async processChatbotMessage(
     message: string,
-    conversationHistory: any[] = []
+    conversationHistory: Record<string, unknown>[] = []
   ): Promise<ChatbotResponse> {
     if (!this.initialized) {
       throw new Error('AI Service not initialized')
@@ -413,7 +413,7 @@ export class AIService {
    * @integration-point OpenAI for medical summarization
    * @integration-point Claude for clinical reasoning
    */
-  async generateMedicalSummary(patientHistory: any[]): Promise<string> {
+  async generateMedicalSummary(patientHistory: Record<string, unknown>[]): Promise<string> {
     if (!this.initialized) {
       throw new Error('AI Service not initialized')
     }

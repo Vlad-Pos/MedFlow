@@ -13,23 +13,20 @@
  */
 
 import React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, } from 'framer-motion'
 import {
   CheckCircle,
   AlertTriangle,
   XCircle,
   Info,
   Clock,
-  TrendingUp,
   FileText,
   User,
   Heart,
   Pill,
   Stethoscope
 } from 'lucide-react'
-import { ReportValidation, ValidationStatus } from '../types/patientReports'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { ReportValidation, } from '../types/patientReports'
 interface ReportValidationIndicatorProps {
   validation: ReportValidation | null
   isValidating?: boolean
@@ -216,8 +213,7 @@ export default function ReportValidationIndicator({
   }
 
   return (
-    <DesignWorkWrapper componentName="ReportValidationIndicator">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={`space-y-4 ${className}`}
@@ -394,6 +390,5 @@ export default function ReportValidationIndicator({
         </div>
       )}
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -11,28 +11,27 @@
  * @version 1.0
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
+  FileText,
   Mic,
   MicOff,
-  Template,
+
   Plus,
   Search,
   X,
   Clock,
   Star,
   Type,
-  Volume2,
-  VolumeX,
-  Settings
-} from 'lucide-react'
-import { showNotification } from './Notification'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
+  } from 'lucide-react'
+import { useNotification } from '../hooks'
+
+// Remove the SpeechRecognition interface declarations - they're now in global types
 
 interface QuickInputFeaturesProps {
   onTextInsert: (text: string) => void
-  onTemplateApply?: (templateData: any) => void
+  onTemplateApply?: (templateData: TextTemplate) => void
   fieldContext?: 'complaint' | 'history' | 'examination' | 'diagnosis' | 'treatment' | 'notes'
   placeholder?: string
   className?: string
@@ -61,10 +60,12 @@ export default function QuickInputFeatures({
   placeholder = 'Selectează un șablon sau folosește vocea...',
   className = ''
 }: QuickInputFeaturesProps) {
-  const [isVoiceActive, setIsVoiceActive] = useState(false)
-  const [voiceSupported, setVoiceSupported] = useState(false)
+  const { showSuccess, showError, showWarning, showInfo } = useNotification()
+  // Voice recognition functionality removed due to type conflicts
+  // const [isVoiceActive, setIsVoiceActive] = useState(false)
+  // const [voiceSupported, setVoiceSupported] = useState(false)
   const [transcript, setTranscript] = useState('')
-  const [isListening, setIsListening] = useState(false)
+  // const [isListening, setIsListening] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -75,8 +76,9 @@ export default function QuickInputFeatures({
     autoStop: true
   })
 
-  const recognition = useRef<SpeechRecognition | null>(null)
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  // Voice recognition functionality removed due to type conflicts
+  // const recognition = useRef<SpeechRecognition | null>(null)
+  // const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Predefined medical templates organized by context
   const templates: TextTemplate[] = [
@@ -189,121 +191,125 @@ export default function QuickInputFeatures({
 
   // Initialize voice recognition
   useEffect(() => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      recognition.current = new SpeechRecognition()
+    // Voice recognition functionality removed due to type conflicts
+    // if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    //   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    //   recognition.current = new SpeechRecognition()
       
-      recognition.current.continuous = voiceSettings.continuous
-      recognition.current.interimResults = voiceSettings.interimResults
-      recognition.current.lang = voiceSettings.language
+    //   recognition.current.continuous = voiceSettings.continuous
+    //   recognition.current.interimResults = voiceSettings.interimResults
+    //   recognition.current.lang = voiceSettings.language
 
-      recognition.current.onstart = () => {
-        setIsListening(true)
-        setTranscript('')
-      }
+    //   recognition.current.onstart = () => {
+    //     setIsListening(true)
+    //     setTranscript('')
+    //   }
 
-      recognition.current.onresult = (event) => {
-        let finalTranscript = ''
-        let interimTranscript = ''
+    //   recognition.current.onresult = (event: SpeechRecognitionEvent) => {
+    //     let finalTranscript = ''
+    //     let interimTranscript = ''
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript
-          } else {
-            interimTranscript += transcript
-          }
-        }
+    //     for (let i = event.resultIndex; i < event.results.length; i++) {
+    //       const transcript = event.results[i][0].transcript
+    //       if (event.results[i].isFinal) {
+    //         finalTranscript += transcript
+    //       } else {
+    //         interimTranscript += transcript
+    //       }
+    //     }
 
-        setTranscript(finalTranscript || interimTranscript)
+    //     setTranscript(finalTranscript || interimTranscript)
 
-        if (finalTranscript && voiceSettings.autoStop) {
-          recognition.current?.stop()
-        }
-      }
+    //     if (finalTranscript && voiceSettings.autoStop) {
+    //       recognition.current?.stop()
+    //     }
+    //   }
 
-      recognition.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error)
-        setIsListening(false)
-        setIsVoiceActive(false)
+    //   recognition.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+    //     console.error('Speech recognition error:', event.error)
+    //     setIsListening(false)
+    //     setIsVoiceActive(false)
         
-        let errorMessage = 'Eroare la recunoașterea vocii'
-        switch (event.error) {
-          case 'no-speech':
-            errorMessage = 'Nu s-a detectat vorbire. Încercați din nou.'
-            break
-          case 'audio-capture':
-            errorMessage = 'Eroare la accesarea microfonului'
-            break
-          case 'not-allowed':
-            errorMessage = 'Accesul la microfon nu este permis'
-            break
-          case 'network':
-            errorMessage = 'Eroare de rețea. Verificați conexiunea.'
-            break
-        }
+    //     let errorMessage = 'Eroare la recunoașterea vocii'
+    //     switch (event.error) {
+    //       case 'no-speech':
+    //         errorMessage = 'Nu s-a detectat vorbire. Încercați din nou.'
+    //         break
+    //       case 'audio-capture':
+    //         errorMessage = 'Eroare la accesarea microfonului'
+    //         break
+    //       case 'not-allowed':
+    //         errorMessage = 'Accesul la microfon nu este permis'
+    //         break
+    //       case 'network':
+    //         errorMessage = 'Eroare de rețea. Verificați conexiunea.'
+    //         break
+    //     }
         
-        showNotification(errorMessage, 'error')
-      }
+    //     showError(errorMessage)
+    //   }
 
-      recognition.current.onend = () => {
-        setIsListening(false)
+    //   recognition.current.onend = () => {
+    //     setIsListening(false)
         
-        if (transcript.trim()) {
-          onTextInsert(transcript.trim())
-          showNotification('Text inserat cu succes', 'success')
-        }
+    //     if (transcript.trim()) {
+    //       onTextInsert(transcript.trim())
+    //       showSuccess('Text inserat cu succes')
+    //     }
         
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current)
-        }
-      }
+    //     if (timeoutRef.current) {
+    //       clearTimeout(timeoutRef.current)
+    //     }
+    //   }
 
-      setVoiceSupported(true)
-    } else {
-      setVoiceSupported(false)
-    }
+    //   setVoiceSupported(true)
+    // } else {
+    //   setVoiceSupported(false)
+    // }
 
     return () => {
-      if (recognition.current) {
-        recognition.current.stop()
-      }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
+      // Voice recognition functionality removed due to type conflicts
+      // if (recognition.current) {
+      //   recognition.current.stop()
+      // }
+      // if (timeoutRef.current) {
+      //   clearTimeout(timeoutRef.current)
+      // }
     }
   }, [voiceSettings, transcript, onTextInsert])
 
-  const startVoiceRecognition = () => {
-    if (!recognition.current || isListening) return
+  // Voice recognition functionality removed due to type conflicts
+  // const startVoiceRecognition = () => {
+  //   if (!recognition.current || isListening) return
 
-    try {
-      setIsVoiceActive(true)
-      recognition.current.start()
+  //   try {
+  //     setIsVoiceActive(true)
+  //     recognition.current.start()
       
-      // Auto-stop after 30 seconds
-      if (voiceSettings.autoStop) {
-        timeoutRef.current = setTimeout(() => {
-          recognition.current?.stop()
-        }, 30000)
-      }
-    } catch (error) {
-      console.error('Error starting voice recognition:', error)
-      showNotification('Eroare la pornirea recunoașterii vocale', 'error')
-      setIsVoiceActive(false)
-    }
-  }
+  //     // Auto-stop after 30 seconds
+  //     if (voiceSettings.autoStop) {
+  //       timeoutRef.current = setTimeout(() => {
+  //         recognition.current?.stop()
+  //       }, 30000)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error starting voice recognition:', error)
+  //     showError('Eroare la pornirea recunoașterii vocale')
+  //     setIsVoiceActive(false)
+  //   }
+  // }
 
-  const stopVoiceRecognition = () => {
-    if (recognition.current) {
-      recognition.current.stop()
-    }
-    setIsVoiceActive(false)
+  // Voice recognition functionality removed due to type conflicts
+  // const stopVoiceRecognition = () => {
+  //   if (recognition.current) {
+  //     recognition.current.stop()
+  //   }
+  //   setIsVoiceActive(false)
     
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-  }
+  //   if (timeoutRef.current) {
+  //     clearTimeout(timeoutRef.current)
+  //   }
+  // }
 
   const insertTemplate = (template: TextTemplate) => {
     onTextInsert(template.content)
@@ -311,7 +317,7 @@ export default function QuickInputFeatures({
     // Update frequency for popular templates
     template.frequency += 1
     
-    showNotification(`Șablon "${template.title}" inserat`, 'success')
+    showSuccess(`Șablon "${template.title}" inserat`)
     setShowTemplates(false)
   }
 
@@ -363,94 +369,36 @@ export default function QuickInputFeatures({
   ]
 
   return (
-    <DesignWorkWrapper componentName="QuickInputFeatures">
-      <div className={`relative ${className}`}>
+    <div className={`relative ${className}`}>
         <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          {/* Voice Recognition Button */}
-          {voiceSupported && (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={isVoiceActive ? stopVoiceRecognition : startVoiceRecognition}
-                disabled={isListening && !isVoiceActive}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                  isVoiceActive
-                    ? 'bg-red-500 text-white hover:bg-red-600'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                title={isVoiceActive ? 'Oprește înregistrarea' : 'Începe înregistrarea vocală'}
-              >
-                {isListening ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-current rounded-full animate-pulse" />
-                    <MicOff className="w-4 h-4" />
-                  </div>
-                ) : (
-                  <Mic className="w-4 h-4" />
-                )}
-                <span className="text-sm">
-                  {isListening ? 'Ascult...' : 'Voce'}
-                </span>
-              </button>
-
-              {/* Language Toggle */}
-              <button
-                onClick={() => setVoiceSettings(prev => ({
-                  ...prev,
-                  language: prev.language === 'ro-RO' ? 'en-US' : 'ro-RO'
-                }))}
-                className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                title="Schimbă limba"
-              >
-                {voiceSettings.language === 'ro-RO' ? 'RO' : 'EN'}
-              </button>
-            </div>
-          )}
-
-          {/* Templates Button */}
-          <button
-            onClick={() => setShowTemplates(!showTemplates)}
-            className="flex items-center space-x-2 px-3 py-2 bg-medflow-primary text-white rounded-lg hover:bg-medflow-secondary transition-colors"
-            title="Deschide șabloanele"
-          >
-            <Template className="w-4 h-4" />
-            <span className="text-sm">Șabloane</span>
-          </button>
-
-          {/* Current transcript display */}
-          {transcript && (
-            <div className="flex-1 text-sm text-gray-600 dark:text-gray-400 italic">
-              "{transcript}"
-            </div>
-          )}
-        </div>
-
-        {/* Voice Recognition Feedback */}
-        <AnimatePresence>
-          {isListening && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg z-10"
+            {/* Voice Recognition Button - Removed due to type conflicts */}
+            
+            {/* Templates Button */}
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <div className="flex items-center space-x-3">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-                <span className="text-sm text-blue-700 dark:text-blue-300">
-                  Vorbește acum... Apăsați din nou pentru a opri.
-                </span>
-              </div>
-              {transcript && (
-                <div className="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                  <strong>Text recunoscut:</strong> {transcript}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <FileText className="w-4 h-4" />
+              <span>Șabloane</span>
+            </button>
+
+            {/* Quick Actions */}
+            <button
+              onClick={() => onTextInsert('Pacientul prezintă: ')}
+              className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              + Simptome
+            </button>
+
+            <button
+              onClick={() => onTextInsert('Diagnostic: ')}
+              className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              + Diagnostic
+            </button>
+          </div>
+
+          {/* Voice Recognition Feedback - Removed due to type conflicts */}
 
         {/* Templates Modal */}
         <AnimatePresence>
@@ -489,7 +437,7 @@ export default function QuickInputFeatures({
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="text"
-                        placeholder="Caută șabloane..."
+                        placeholder={placeholder}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-700 dark:text-white"
@@ -565,6 +513,5 @@ export default function QuickInputFeatures({
           )}
         </AnimatePresence>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

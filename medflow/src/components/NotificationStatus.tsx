@@ -8,7 +8,7 @@
  * @version 1.0
  */
 
-import { useState, useEffect } from 'react'
+import { useState, } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Bell, 
@@ -22,9 +22,7 @@ import {
   CheckCircle2,
   XCircle
 } from 'lucide-react'
-import { AppointmentWithNotifications, NotificationChannel } from '../types/notifications'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { AppointmentWithNotifications, } from '../types/notifications'
 interface NotificationStatusProps {
   appointment: AppointmentWithNotifications
   className?: string
@@ -190,8 +188,7 @@ export default function NotificationStatus({
   }
   
   return (
-    <DesignWorkWrapper componentName="NotificationStatus">
-      <div className={`bg-white rounded-lg border ${className}`}>
+    <div className={`bg-white rounded-lg border ${className}`}>
         {/* Header */}
         <div 
           className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -331,6 +328,5 @@ export default function NotificationStatus({
           </div>
         </motion.div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

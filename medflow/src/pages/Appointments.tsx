@@ -13,7 +13,7 @@
  * @version 2.0
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query, where, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { isDemoMode, subscribeToDemoAppointments, deleteDemoAppointment } from '../utils/demo'
@@ -24,6 +24,7 @@ import ModernCalendar from '../components/ModernCalendar'
 import AppointmentTemplates from '../components/AppointmentTemplates'
 import { DeleteAppointmentDialog, CompleteAppointmentDialog } from '../components/ConfirmationDialog'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { MedFlowLoader, SimpleLoader } from '../components/ui'
 import NotificationStatus from '../components/NotificationStatus'
 import PatientFlagIndicator from '../components/PatientFlagIndicator'
 import { Link, useLocation } from 'react-router-dom'
@@ -31,9 +32,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, List, Plus, FileText, User, XCircle, Edit, CheckCircle, Clock, AlertTriangle, ClipboardList, Files, Search } from 'lucide-react'
 import { formatDateTime } from '../utils/dateUtils'
 import PatientSearch from '../components/PatientSearch'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
+import { AppointmentWithNotifications } from '../types/notifications'
+import { Timestamp } from 'firebase/firestore'
 
-interface DocMeta { id: string; fileUrl: string; fileName: string; contentType: string; createdAt?: any }
+interface DocMeta { id: string; fileUrl: string; fileName: string; contentType: string; createdAt?: Date | string }
 
 interface Appointment {
   id: string
@@ -45,6 +47,20 @@ interface Appointment {
   notes?: string
   status: 'scheduled' | 'completed' | 'no_show' | 'confirmed' | 'declined'
   doctorId: string
+}
+
+interface DeleteDialogState {
+  isOpen: boolean
+  appointmentId: string | null
+  patientName: string | null
+  loading: boolean
+}
+
+interface CompleteDialogState {
+  isOpen: boolean
+  appointmentId: string | null
+  patientName: string | null
+  loading: boolean
 }
 
 export default function Appointments() {
@@ -59,30 +75,49 @@ export default function Appointments() {
   const location = useLocation()
   
   // Enhanced state for confirmation dialogs
-  const [deleteDialog, setDeleteDialog] = useState<{
-    isOpen: boolean
-    appointmentId: string | null
-    patientName: string | null
-    loading: boolean
-  }>({
+  const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
     isOpen: false,
     appointmentId: null,
     patientName: null,
     loading: false
   })
   
-  const [completeDialog, setCompleteDialog] = useState<{
-    isOpen: boolean
-    appointmentId: string | null
-    patientName: string | null
-    loading: boolean
-  }>({
+  const [completeDialog, setCompleteDialog] = useState<CompleteDialogState>({
     isOpen: false,
     appointmentId: null,
     patientName: null,
     loading: false
   })
 
+  // Utility function to safely convert dateTime to Date
+  const safeConvertToDate = useCallback((dateTime: Date | string | any): Date => {
+    if (dateTime instanceof Date) {
+      return dateTime
+    }
+    if (typeof dateTime === 'string') {
+      return new Date(dateTime)
+    }
+    // Handle Firestore Timestamp objects
+    if (dateTime && typeof dateTime === 'object' && 'toDate' in dateTime) {
+      return dateTime.toDate()
+    }
+    return new Date()
+  }, [])
+
+  // Utility function to convert Appointment to AppointmentWithNotifications
+  const convertToAppointmentWithNotifications = useCallback((appointment: Appointment): AppointmentWithNotifications => {
+    return {
+      ...appointment,
+      notifications: {
+        firstNotification: { sent: false },
+        secondNotification: { sent: false },
+        confirmationReceived: false,
+        optedOut: false
+      },
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    }
+  }, [])
 
   // Initialize edit/new from query params
   useEffect(() => {
@@ -105,20 +140,15 @@ export default function Appointments() {
     }
   }, [location.search])
 
+  // Load appointments
   useEffect(() => {
-    if (!user) {
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    setError(null)
+    if (!user) return
 
     if (isDemoMode()) {
-      const unsubscribe = subscribeToDemoAppointments((demoAppointments) => {
-        setAppointments(demoAppointments.map(appt => ({
+      const unsubscribe = subscribeToDemoAppointments((demoAppointments: any[]) => {
+        setAppointments(demoAppointments.map((appt: any) => ({
           ...appt,
-          dateTime: new Date(appt.dateTime?.toDate?.() || appt.dateTime)
+          dateTime: safeConvertToDate(appt.dateTime)
         })))
         setLoading(false)
       })
@@ -138,7 +168,7 @@ export default function Appointments() {
             const rows = snap.docs.map(d => ({
               id: d.id,
               ...d.data(),
-              dateTime: new Date(d.data().dateTime?.toDate?.() || d.data().dateTime)
+              dateTime: safeConvertToDate(d.data().dateTime)
             })) as Appointment[]
             setAppointments(rows)
             setLoading(false)
@@ -161,7 +191,7 @@ export default function Appointments() {
       setError('Eroare la configurarea sincronizării datelor')
       setLoading(false)
     }
-  }, [user])
+  }, [user, safeConvertToDate])
 
   // Listen for docs per appointment
   useEffect(() => {
@@ -173,7 +203,10 @@ export default function Appointments() {
     for (const appt of appointments) {
       const q = query(collection(db, 'documents'), where('appointmentId', '==', appt.id), orderBy('createdAt', 'desc'))
       const unsub = onSnapshot(q, (snap) => {
-        const d = snap.docs.map(dd => ({ id: dd.id, ...(dd.data() as any) }))
+        const d = snap.docs.map(dd => {
+          const data = dd.data() as DocMeta
+          return { ...data, id: dd.id }
+        })
         setDocs(prev => ({ ...prev, [appt.id]: d }))
       })
       unsubs.push(unsub)
@@ -314,10 +347,10 @@ export default function Appointments() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-medflow-text-secondary">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-medflow-text-secondary">
             Se încarcă programările...
           </p>
         </div>
@@ -326,8 +359,7 @@ export default function Appointments() {
   }
 
   return (
-    <DesignWorkWrapper componentName="Appointments">
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -364,11 +396,16 @@ export default function Appointments() {
                   <span>Listă</span>
                 </button>
                 <button
-                  onClick={() => setView('templates')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    view === 'templates'
-                      ? 'bg-medflow-accent text-white'
-                      : 'text-medflow-text-secondary hover:text-medflow-text-primary'
+                  key={view}
+                  onClick={() => setView(view)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    view === 'calendar'
+                      ? 'bg-[var(--medflow-brand-1)] text-[var(--medflow-text-primary)]'
+                      : view === 'list'
+                      ? 'bg-[var(--medflow-brand-2)] text-[var(--medflow-text-primary)]'
+                      : view === 'templates'
+                      ? 'bg-[var(--medflow-brand-3)] text-[var(--medflow-text-primary)]'
+                      : 'text-[var(--medflow-text-secondary)] hover:text-[var(--medflow-text-primary)]'
                   }`}
                 >
                   <Files className="w-4 h-4" />
@@ -378,7 +415,7 @@ export default function Appointments() {
             </div>
             
             <button 
-              className="flex items-center space-x-2 px-4 py-2 bg-medflow-accent text-white rounded-lg hover:bg-medflow-accent-hover transition-colors shadow-md hover:shadow-lg"
+              className="flex items-center space-x-2 px-4 py-2 bg-[var(--medflow-brand-1)] text-[var(--medflow-text-primary)] rounded-lg hover:bg-[var(--medflow-brand-2)] transition-colors shadow-md hover:shadow-lg"
               onClick={() => { setSelectedId(undefined); setCreatingAt(new Date().toISOString().slice(0,16)) }}
             >
               <Plus className="w-4 h-4" />
@@ -409,9 +446,9 @@ export default function Appointments() {
           </AnimatePresence>
 
           {/* Patient Search for New Appointments */}
-          <div className="bg-medflow-surface/60 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold text-medflow-text-primary mb-4 flex items-center space-x-2">
-              <Search className="w-5 h-5 text-medflow-accent" />
+          <div className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm border border-[var(--medflow-border)] rounded-xl p-6 mb-6">
+            <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] mb-4 flex items-center space-x-2">
+              <Search className="w-5 h-5 text-[var(--medflow-brand-1)]" />
               <span>Programare pentru pacient existent</span>
             </h3>
             <PatientSearch 
@@ -423,7 +460,7 @@ export default function Appointments() {
               }}
               placeholder="Căutați pacient pentru a crea programare..."
             />
-            <p className="text-sm text-medflow-text-muted mt-2">
+            <p className="text-sm text-[var(--medflow-text-tertiary)] mt-2">
               Selectați un pacient existent pentru a pre-completa informațiile de contact în formularul de programare.
             </p>
           </div>
@@ -449,22 +486,22 @@ export default function Appointments() {
               />
             ) : (
               <div className="space-y-4">
-                <div className="bg-medflow-surface/60 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg overflow-hidden">
+                <div className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl border border-[var(--medflow-border)] shadow-lg overflow-hidden">
                   <div className="space-y-1">
                     {appointments.map((appointment) => (
                       <motion.div
                         key={appointment.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center justify-between p-4 hover:bg-medflow-surface/80 transition-colors border-b border-white/10 last:border-b-0"
+                        className="flex items-center justify-between p-4 hover:bg-[var(--medflow-surface-elevated)]/80 transition-colors border-b border-[var(--medflow-border)] last:border-b-0"
                       >
                         <div className="flex items-center space-x-4 flex-1 min-w-0">
-                          <div className="w-12 h-12 bg-medflow-primary/10 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-medflow-primary" />
+                          <div className="w-12 h-12 bg-[var(--medflow-brand-1)]/10 rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-[var(--medflow-brand-1)]" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-3 mb-1">
-                              <h3 className="font-semibold text-medflow-text-primary truncate">
+                              <h3 className="font-semibold text-[var(--medflow-text-primary)] truncate">
                                 {appointment.patientName}
                               </h3>
                               <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
@@ -484,7 +521,7 @@ export default function Appointments() {
                             {/* Notification Status Indicator */}
                             <div className="mt-2">
                               <NotificationStatus 
-                                appointment={appointment as any} 
+                                appointment={convertToAppointmentWithNotifications(appointment)} 
                                 compact={true}
                               />
                             </div>
@@ -630,7 +667,7 @@ export default function Appointments() {
                           {doc.fileName}
                         </a>
                         <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                          {formatDateTime(doc.createdAt?.toDate?.() || doc.createdAt)}
+                          {formatDateTime(safeConvertToDate(doc.createdAt))}
                         </span>
                       </motion.div>
                     ))}
@@ -668,6 +705,5 @@ export default function Appointments() {
           loading={completeDialog.loading}
         />
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

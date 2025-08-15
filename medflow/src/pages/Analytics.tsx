@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
+import { useEffect, useState, useCallback } from 'react'
+import { collection, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { isDemoMode } from '../utils/demo'
 import { useAuth } from '../providers/AuthProvider'
 import { formatDate } from '../utils/dateUtils'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface AppointmentStats {
   total: number
   scheduled: number
@@ -25,13 +23,13 @@ interface Appointment {
   id: string
   patientName: string
   status: 'scheduled' | 'completed' | 'no_show'
-  dateTime: any
+  dateTime: Date | string
   doctorId?: string
 }
 
 export default function Analytics() {
   const { user } = useAuth()
-  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<AppointmentStats>({
     total: 0,
     scheduled: 0,
@@ -40,70 +38,76 @@ export default function Analytics() {
     completionRate: 0
   })
   const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([])
-  const [loading, setLoading] = useState(true)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+
+  // Utility function to safely convert dateTime to Date
+  const safeConvertToDate = useCallback((dateTime: Date | string): Date => {
+    if (dateTime instanceof Date) {
+      return dateTime
+    }
+    if (typeof dateTime === 'string') {
+      return new Date(dateTime)
+    }
+    // Fallback for Timestamp objects
+    if (dateTime && typeof dateTime === 'object' && 'toDate' in dateTime) {
+      return (dateTime as any).toDate()
+    }
+    return new Date()
+  }, [])
 
   useEffect(() => {
     if (!user) return
 
+    // Demo data for development
     if (isDemoMode()) {
-      // Demo analytics data
-      const demoAppointments: Appointment[] = [
-        { id: '1', patientName: 'Ion Popescu', status: 'scheduled', dateTime: new Date() },
-        { id: '2', patientName: 'Maria Ionescu', status: 'completed', dateTime: new Date(Date.now() - 86400000) },
-        { id: '3', patientName: 'George Enache', status: 'no_show', dateTime: new Date(Date.now() - 172800000) },
-        { id: '4', patientName: 'Ana Dumitrescu', status: 'completed', dateTime: new Date(Date.now() - 259200000) },
-        { id: '5', patientName: 'Vasile Popa', status: 'scheduled', dateTime: new Date(Date.now() + 86400000) },
-        { id: '6', patientName: 'Elena Marin', status: 'completed', dateTime: new Date(Date.now() - 345600000) },
-      ]
-      
-      setAppointments(demoAppointments)
-      
-      // Calculate demo stats
-      const total = demoAppointments.length
-      const scheduled = demoAppointments.filter(a => a.status === 'scheduled').length
-      const completed = demoAppointments.filter(a => a.status === 'completed').length
-      const noShow = demoAppointments.filter(a => a.status === 'no_show').length
-      const completionRate = total > 0 ? Math.round((completed / (completed + noShow)) * 100) : 0
-      
-      setStats({ total, scheduled, completed, noShow, completionRate })
-      
-      // Demo monthly stats
-      const demoMonthlyStats = [
-        { month: 'Ianuarie 2024', appointments: 45, completed: 38, revenue: 2850 },
-        { month: 'Februarie 2024', appointments: 52, completed: 47, revenue: 3525 },
-        { month: 'Martie 2024', appointments: 48, completed: 42, revenue: 3150 },
-        { month: 'Aprilie 2024', appointments: 55, completed: 49, revenue: 3675 },
-        { month: 'Mai 2024', appointments: 51, completed: 45, revenue: 3375 },
-        { month: 'Iunie 2024', appointments: 58, completed: 52, revenue: 3900 },
+      const demoStats: AppointmentStats = {
+        total: 156,
+        scheduled: 23,
+        completed: 133,
+        noShow: 8,
+        completionRate: 85
+      }
+      setStats(demoStats)
+
+      const demoMonthlyStats: MonthlyStats[] = [
+        { month: 'Ianuarie 2024', appointments: 28, completed: 24, revenue: 1800 },
+        { month: 'Februarie 2024', appointments: 31, completed: 27, revenue: 2025 },
+        { month: 'Martie 2024', appointments: 29, completed: 25, revenue: 1875 },
+        { month: 'Aprilie 2024', appointments: 26, completed: 22, revenue: 1650 },
+        { month: 'Mai 2024', appointments: 30, completed: 26, revenue: 1950 },
+        { month: 'Iunie 2024', appointments: 22, completed: 19, revenue: 1425 }
       ]
       setMonthlyStats(demoMonthlyStats)
       setLoading(false)
       return
     }
 
-    // Real Firebase data
+    // Real data from Firestore
     const q = query(
       collection(db, 'appointments'),
       where('doctorId', '==', user.uid),
-      orderBy('dateTime', 'desc')
+      orderBy('dateTime', 'desc'),
+      limit(100)
     )
-    
-    const unsub = onSnapshot(q, (snap) => {
-      const rows = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Appointment[]
-      setAppointments(rows)
-      
-      // Calculate real stats
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const rows: Appointment[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Appointment))
+
+      // Calculate stats
       const total = rows.length
-      const scheduled = rows.filter(a => a.status === 'scheduled').length
-      const completed = rows.filter(a => a.status === 'completed').length
-      const noShow = rows.filter(a => a.status === 'no_show').length
-      const completionRate = total > 0 ? Math.round((completed / (completed + noShow)) * 100) : 0
-      
+      const scheduled = rows.filter(row => row.status === 'scheduled').length
+      const completed = rows.filter(row => row.status === 'completed').length
+      const noShow = rows.filter(row => row.status === 'no_show').length
+      const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+
       setStats({ total, scheduled, completed, noShow, completionRate })
       
       // Calculate monthly stats from real data
-      const monthlyData = rows.reduce((acc: Record<string, any>, appointment) => {
-        const date = new Date(appointment.dateTime?.toDate?.() || appointment.dateTime)
+      const monthlyData = rows.reduce((acc: Record<string, { appointments: number; completed: number; revenue: number }>, appointment) => {
+        const date = safeConvertToDate(appointment.dateTime)
         const monthKey = date.toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' })
         
         if (!acc[monthKey]) {
@@ -119,7 +123,7 @@ export default function Analytics() {
         return acc
       }, {})
       
-      const monthlyStats = Object.entries(monthlyData).map(([month, data]: [string, any]) => ({
+      const monthlyStats = Object.entries(monthlyData).map(([month, data]: [string, { appointments: number; completed: number; revenue: number }]) => ({
         month,
         appointments: data.appointments,
         completed: data.completed,
@@ -127,11 +131,12 @@ export default function Analytics() {
       })).slice(0, 6) // Last 6 months
       
       setMonthlyStats(monthlyStats)
+      setAppointments(rows) // Set appointments for the recent appointments section
       setLoading(false)
     })
     
     return () => unsub()
-  }, [user])
+  }, [user, safeConvertToDate])
 
   if (loading) {
     return (
@@ -142,12 +147,11 @@ export default function Analytics() {
   }
 
   return (
-    <DesignWorkWrapper componentName="Analytics">
-      <section className="space-y-6">
+    <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Analitica și Rapoarte</h2>
+          <h2 className="text-2xl font-semibold text-[var(--medflow-text-primary)]">Analitica și Rapoarte</h2>
           {isDemoMode() && (
-            <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/20">
+            <div className="rounded-md bg-[var(--medflow-brand-2)]/20 p-3 text-sm text-[var(--medflow-brand-2)] border border-[var(--medflow-brand-2)]/30">
               Mod demo - date de exemplu
             </div>
           )}
@@ -155,71 +159,62 @@ export default function Analytics() {
 
         {/* Key Metrics */}
         <div className="grid gap-4 md:grid-cols-4">
-          <div className="card">
-            <div className="text-sm text-gray-600 dark:text-gray-300">Total Programări</div>
-            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+          <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+            <div className="text-sm text-[var(--medflow-text-tertiary)]">Total Programări</div>
+            <div className="text-2xl font-bold text-[var(--medflow-brand-1)]">{stats.total}</div>
           </div>
-          <div className="card">
-            <div className="text-sm text-gray-600 dark:text-gray-300">Programate</div>
-            <div className="text-2xl font-bold text-yellow-600">{stats.scheduled}</div>
+          <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+            <div className="text-sm text-[var(--medflow-text-tertiary)]">Programate</div>
+            <div className="text-2xl font-bold text-[var(--medflow-brand-2)]">{stats.scheduled}</div>
           </div>
-          <div className="card">
-            <div className="text-sm text-gray-600 dark:text-gray-300">Finalizate</div>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+          <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+            <div className="text-sm text-[var(--medflow-text-tertiary)]">Finalizate</div>
+            <div className="text-2xl font-bold text-[var(--medflow-brand-3)]">{stats.completed}</div>
           </div>
-          <div className="card">
-            <div className="text-sm text-gray-600 dark:text-gray-300">Rata de Finalizare</div>
-            <div className="text-2xl font-bold text-emerald-600">{stats.completionRate}%</div>
+          <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+            <div className="text-sm text-[var(--medflow-text-tertiary)]">Rata de Finalizare</div>
+            <div className="text-2xl font-bold text-[var(--medflow-brand-4)]">
+              {stats.completionRate}%
+            </div>
           </div>
         </div>
 
-        {/* Monthly Performance */}
-        <div className="card">
-          <h3 className="mb-4 text-lg font-semibold">Performanța Lunară</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="px-4 py-2 text-left">Luna</th>
-                  <th className="px-4 py-2 text-left">Programări</th>
-                  <th className="px-4 py-2 text-left">Finalizate</th>
-                  <th className="px-4 py-2 text-left">Venit (RON)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyStats.map((month, index) => (
-                  <tr key={index} className="border-b border-gray-100 dark:border-gray-800">
-                    <td className="px-4 py-3">{month.month}</td>
-                    <td className="px-4 py-3">{month.appointments}</td>
-                    <td className="px-4 py-3">{month.completed}</td>
-                    <td className="px-4 py-3 font-medium">{month.revenue.toLocaleString('ro-RO')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Monthly Chart */}
+        <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+          <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] mb-4">Evoluția lunară</h3>
+          <div className="h-64 flex items-end justify-between space-x-2">
+            {monthlyStats.map((month, index) => (
+              <div key={month.month} className="flex flex-col items-center space-y-2">
+                <div 
+                  className="w-8 bg-gradient-to-t from-[var(--medflow-brand-1)] to-[var(--medflow-brand-2)] rounded-t"
+                  style={{ height: `${(month.appointments / Math.max(...monthlyStats.map(m => m.appointments))) * 200}px` }}
+                ></div>
+                <span className="text-xs text-[var(--medflow-text-tertiary)]">{month.month}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Recent Appointments */}
-        <div className="card">
-          <h3 className="mb-4 text-lg font-semibold">Programări Recente</h3>
+        <div className="card bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)]">
+          <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] mb-4">Programări recente</h3>
           <div className="space-y-3">
-            {appointments.slice(0, 10).map((appointment) => (
-              <div key={appointment.id} className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+            {appointments.slice(0, 5).map((appointment) => (
+              <div key={appointment.id} className="flex items-center justify-between p-3 bg-[var(--medflow-surface-dark)] rounded-lg">
                 <div>
-                  <div className="font-medium">{appointment.patientName}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">
-                    {formatDate(appointment.dateTime?.toDate?.() || appointment.dateTime)}
+                  <div className="font-medium text-[var(--medflow-text-primary)]">{appointment.patientName}</div>
+                  <div className="text-sm text-[var(--medflow-text-tertiary)]">
+                    {formatDate(appointment.dateTime)}
                   </div>
                 </div>
-                <div className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20' :
-                  appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/20' :
-                  'bg-red-100 text-red-800 dark:bg-red-900/20'
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                  appointment.status === 'scheduled' ? 'bg-[var(--medflow-brand-2)]/20 text-[var(--medflow-brand-2)]' :
+                  appointment.status === 'completed' ? 'bg-[var(--medflow-brand-3)]/20 text-[var(--medflow-brand-3)]' :
+                  'bg-red-100 text-red-800'
                 }`}>
-                  {appointment.status === 'scheduled' ? 'Programat' :
-                   appointment.status === 'completed' ? 'Finalizat' : 'Nu s-a prezentat'}
-                </div>
+                  {appointment.status === 'scheduled' ? 'Programată' :
+                   appointment.status === 'completed' ? 'Finalizată' : 'Nu s-a prezentat'}
+                </span>
               </div>
             ))}
           </div>
@@ -228,8 +223,8 @@ export default function Analytics() {
         {/* Insights */}
         <div className="grid gap-4 md:grid-cols-2">
           <div className="card">
-            <h3 className="mb-3 text-lg font-semibold">Insights</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="mb-3 text-lg font-semibold text-[var(--medflow-text-primary)]">Insights</h3>
+            <ul className="space-y-2 text-sm text-[var(--medflow-text-primary)]">
               <li>• Rata de finalizare: {stats.completionRate}%</li>
               <li>• Programări active: {stats.scheduled}</li>
               <li>• Pacienți care nu s-au prezentat: {stats.noShow}</li>
@@ -238,8 +233,8 @@ export default function Analytics() {
             </ul>
           </div>
           <div className="card">
-            <h3 className="mb-3 text-lg font-semibold">Recomandări</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="mb-3 text-lg font-semibold text-[var(--medflow-text-primary)]">Recomandări</h3>
+            <ul className="space-y-2 text-sm text-[var(--medflow-text-primary)]">
               {stats.completionRate < 80 && (
                 <li className="text-amber-600">• Îmbunătățiți rata de finalizare prin follow-up</li>
               )}
@@ -254,6 +249,5 @@ export default function Analytics() {
           </div>
         </div>
       </section>
-    </DesignWorkWrapper>
-  )
+    )
 }

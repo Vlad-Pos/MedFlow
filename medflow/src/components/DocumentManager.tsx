@@ -30,17 +30,12 @@ import {
   AlertTriangle,
   CheckCircle,
   Brain,
-  Share2,
-  Lock,
   FileCheck,
-  MoreVertical,
   ExternalLink
 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
 import { formatDateTime } from '../utils/dateUtils'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface DocumentData {
   id: string
   appointmentId: string
@@ -49,7 +44,7 @@ interface DocumentData {
   fileName: string
   contentType: string
   size: number
-  createdAt: any
+  createdAt: Date
   scanResults?: {
     isValid: boolean
     fileType: string
@@ -255,8 +250,7 @@ export default function DocumentManager({
   }
 
   return (
-    <DesignWorkWrapper componentName="DocumentManager">
-      <div className="space-y-4">
+    <div className="space-y-4">
       {/* Documents List */}
       <div className={`space-y-3 ${compact ? 'space-y-2' : ''}`}>
         <AnimatePresence>
@@ -290,7 +284,7 @@ export default function DocumentManager({
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                           <div className="flex items-center space-x-1">
                             <Calendar className="w-3 h-3" />
-                            <span>{formatDateTime(document.createdAt?.toDate?.() || document.createdAt)}</span>
+                            <span>{formatDateTime(document.createdAt)}</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <User className="w-3 h-3" />
@@ -407,7 +401,7 @@ export default function DocumentManager({
                       {selectedDoc.fileName}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formatFileSize(selectedDoc.size)} • {formatDateTime(selectedDoc.createdAt?.toDate?.() || selectedDoc.createdAt)}
+                      {formatFileSize(selectedDoc.size)} • {formatDateTime(selectedDoc.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -512,6 +506,5 @@ export default function DocumentManager({
         )}
       </AnimatePresence>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

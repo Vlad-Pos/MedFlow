@@ -19,7 +19,6 @@ import {
   doc,
   addDoc,
   updateDoc,
-  deleteDoc,
   getDoc,
   getDocs,
   query,
@@ -29,7 +28,6 @@ import {
   serverTimestamp,
   Timestamp,
   runTransaction,
-  writeBatch,
   Transaction
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -44,7 +42,7 @@ import {
   PatientReport
 } from '../types/patientReports'
 import { isDemoMode } from '../utils/demo'
-import { showNotification } from '../components/Notification'
+import { showNotification } from './notificationService'
 
 // ==========================================
 // CONSTANTS AND CONFIGURATION
@@ -88,18 +86,18 @@ const DEFAULT_GOVERNMENT_CONFIG: GovernmentSubmissionConfig = {
 // DEMO DATA AND SIMULATION
 // ==========================================
 
-let demoSubmissionBatches: SubmissionBatch[] = []
-let demoSubmissionQueue: SubmissionQueue[] = []
-let demoSubmissionReceipts: SubmissionReceipt[] = []
-let demoSubmissionLogs: SubmissionLogEntry[] = []
-let demoSubmissionSubscribers: ((data: any) => void)[] = []
+const demoSubmissionBatches: SubmissionBatch[] = []
+const demoSubmissionQueue: SubmissionQueue[] = []
+const demoSubmissionReceipts: SubmissionReceipt[] = []
+const demoSubmissionLogs: SubmissionLogEntry[] = []
+const demoSubmissionSubscribers: ((data: Record<string, unknown>) => void)[] = []
 
-function notifyDemoSubscribers(data: any) {
+function notifyDemoSubscribers(data: Record<string, unknown>) {
   demoSubmissionSubscribers.forEach(callback => callback(data))
 }
 
 // Simulate government API response
-function simulateGovernmentApiCall(data: any): Promise<{
+function simulateGovernmentApiCall(data: Record<string, unknown>): Promise<{
   success: boolean
   governmentReference?: string
   confirmationId?: string
@@ -177,7 +175,7 @@ function createSubmissionLogEntry(
   userId?: string,
   userRole?: 'doctor' | 'nurse' | 'admin' | 'system',
   error?: SubmissionLogEntry['error'],
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Omit<SubmissionLogEntry, 'id'> {
   return {
     timestamp: Timestamp.now(),
@@ -198,7 +196,7 @@ function createSubmissionLogEntry(
 /**
  * Anonymizes patient data for government submission
  */
-function anonymizePatientData(reports: PatientReport[]): any[] {
+function anonymizePatientData(reports: PatientReport[]): Record<string, unknown>[] {
   return reports.map(report => ({
     // Patient identifier (hashed for privacy)
     patientHash: hashPatientId(report.patientId),
@@ -207,7 +205,7 @@ function anonymizePatientData(reports: PatientReport[]): any[] {
     diagnosis: {
       primary: report.diagnosis.primary,
       secondary: report.diagnosis.secondary || [],
-      icdCodes: report.diagnosis.icdCodes || []
+      icdCodes: (report.diagnosis as { icdCodes?: string[] }).icdCodes || []
     },
     
     prescribedMedications: report.prescribedMedications.map(med => ({
@@ -251,7 +249,7 @@ function hashPatientId(patientId: string): string {
 /**
  * Encrypts submission data (placeholder for real encryption)
  */
-async function encryptSubmissionData(data: any): Promise<{
+async function encryptSubmissionData(data: Record<string, unknown>): Promise<{
   encryptedData: string
   encryptionDetails: {
     algorithm: string
@@ -615,8 +613,18 @@ export async function submitBatchToGovernment(
     // Anonymize patient data for government submission
     const anonymizedData = anonymizePatientData(reports)
     
+    // Convert array to single object for encryption
+    const dataForEncryption = {
+      reports: anonymizedData,
+      metadata: {
+        batchId,
+        reportCount: reports.length,
+        submissionTime: new Date().toISOString()
+      }
+    }
+    
     // Encrypt data
-    const { encryptedData, encryptionDetails } = await encryptSubmissionData(anonymizedData)
+    const { encryptedData, encryptionDetails } = await encryptSubmissionData(dataForEncryption)
     
     // Prepare submission payload
     const submissionPayload = {
@@ -791,7 +799,7 @@ export async function getSubmissionStatus(batchId: string): Promise<{
       const receipt = demoSubmissionReceipts.find(r => r.batchId === batchId)
       
       return {
-        status: batch.status,
+        status: batch.status as SubmissionStatus,
         submissionLog: batch.submissionLog,
         receipt,
         nextRetryAt: batch.nextRetryAt?.toDate()
@@ -816,7 +824,7 @@ export async function getSubmissionStatus(batchId: string): Promise<{
     const receipt = receiptSnapshot.docs[0]?.data() as SubmissionReceipt
 
     return {
-      status: batchData.status,
+      status: batchData.status as SubmissionStatus,
       submissionLog: batchData.submissionLog,
       receipt,
       nextRetryAt: batchData.nextRetryAt?.toDate()
@@ -835,12 +843,12 @@ export function subscribeToSubmissionUpdates(
   callback: (status: SubmissionStatus, logEntry?: SubmissionLogEntry) => void
 ): () => void {
   if (isDemoMode()) {
-    const subscriber = (data: any) => {
+    const subscriber = (data: Record<string, unknown>) => {
       if (data.batchId === batchId) {
         const batch = demoSubmissionBatches.find(b => b.id === batchId)
         if (batch) {
           const latestLog = batch.submissionLog[batch.submissionLog.length - 1]
-          callback(batch.status, latestLog)
+          callback(batch.status as SubmissionStatus, latestLog)
         }
       }
     }
@@ -990,7 +998,7 @@ export function startSubmissionScheduler(): void {
 
   // Store intervals for cleanup
   if (typeof window !== 'undefined') {
-    (window as any).__medflowSubmissionScheduler = {
+    (window as unknown as Record<string, unknown>).__medflowSubmissionScheduler = {
       schedulerInterval,
       queueInterval
     }
@@ -1002,11 +1010,11 @@ export function startSubmissionScheduler(): void {
  */
 export function stopSubmissionScheduler(): void {
   if (typeof window !== 'undefined') {
-    const scheduler = (window as any).__medflowSubmissionScheduler
+    const scheduler = (window as unknown as Record<string, unknown>).__medflowSubmissionScheduler as { schedulerInterval: number; queueInterval: number } | undefined
     if (scheduler) {
       clearInterval(scheduler.schedulerInterval)
       clearInterval(scheduler.queueInterval)
-      delete (window as any).__medflowSubmissionScheduler
+      delete (window as unknown as Record<string, unknown>).__medflowSubmissionScheduler
     }
   }
 }

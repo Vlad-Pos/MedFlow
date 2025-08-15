@@ -1,6 +1,4 @@
 import { ReactNode } from 'react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface ContrastEnhancerProps {
   children: ReactNode
   level?: 'normal' | 'high' | 'maximum'
@@ -24,12 +22,10 @@ export default function ContrastEnhancer({
   }
 
   return (
-    <DesignWorkWrapper componentName="ContrastEnhancer">
-      <div className={`${getContrastClasses()} ${className}`}>
+    <div className={`${getContrastClasses()} ${className}`}>
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Hook for applying contrast enhancements based on user preferences

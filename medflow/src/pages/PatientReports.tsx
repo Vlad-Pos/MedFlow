@@ -20,19 +20,13 @@ import {
   Download, 
   Plus,
   Search,
-  Filter,
   Calendar,
   User,
-  Edit,
-  Trash2,
   Eye,
   Share2,
   Brain,
-  Printer,
-  Mail,
   ChevronDown,
   CheckCircle,
-  Clock,
   AlertTriangle,
   Stethoscope,
   Heart,
@@ -44,8 +38,6 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import { staggerContainer, staggerItem, cardVariants, fadeInVariants } from '../utils/animations'
 import LoadingSpinner from '../components/LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface PatientReport {
   id: string
   patientName: string
@@ -168,7 +160,7 @@ export default function PatientReports() {
   const [selectedReport, setSelectedReport] = useState<PatientReport | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  // Filter reports based on search and filters
+  // reports based on search and filters
   useEffect(() => {
     let filtered = reports
 
@@ -232,8 +224,7 @@ export default function PatientReports() {
   }
 
   return (
-    <DesignWorkWrapper componentName="PatientReports">
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         {/* Header */}
       <motion.div variants={staggerItem} className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -363,7 +354,12 @@ export default function PatientReports() {
       >
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <LoadingSpinner size="lg" />
+            <div className="text-center">
+              <div className="loader mb-4"></div>
+              <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+                Se încarcă rapoartele...
+              </p>
+            </div>
           </div>
         ) : filteredReports.length === 0 ? (
           <div className="text-center py-12">
@@ -640,6 +636,5 @@ export default function PatientReports() {
         )}
       </AnimatePresence>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

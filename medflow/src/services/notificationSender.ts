@@ -22,8 +22,7 @@ import {
   NotificationChannel,
   NotificationTemplateData,
   NotificationDeliveryStatus,
-  RomanianNotificationContent
-} from '../types/notifications'
+  } from '../types/notifications'
 import PatientNotificationPreferencesService from './notificationPreferences'
 import { format } from 'date-fns'
 import { ro } from 'date-fns/locale'
@@ -465,11 +464,11 @@ export class NotificationSenderService {
     try {
       const statusRef = doc(db, 'notificationDeliveryStatus', deliveryStatusId)
       
-      const updateData: any = {
-        status: success ? 'delivered' : 'failed',
-        lastAttemptAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }
+          const updateData: Record<string, unknown> = {
+      status: success ? 'delivered' : 'failed',
+      lastAttemptAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }
       
       if (success) {
         updateData.deliveredAt = serverTimestamp()
@@ -477,7 +476,7 @@ export class NotificationSenderService {
         updateData.errorMessage = errorMessage || 'Unknown error'
       }
       
-      await updateDoc(statusRef, updateData)
+      await updateDoc(statusRef, updateData as any)
     } catch (error) {
       console.error('Error updating delivery status:', error)
     }

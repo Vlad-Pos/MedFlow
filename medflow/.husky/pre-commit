@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running MedFlow Quality Assurance Checks..."
+
+# Run quality checks
+npm run quality:pre-commit
+
+# If quality checks fail, prevent commit
+if [ $? -ne 0 ]; then
+  echo "❌ Quality checks failed. Commit blocked."
+  echo "🔧 Please fix quality issues before committing."
+  exit 1
+fi
+
+echo "✅ Quality checks passed. Proceeding with commit."

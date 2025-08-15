@@ -1,3 +1,16 @@
+/**
+ * 🏥 MedFlow - Tailwind CSS Configuration
+ * 
+ * 💡 AI Agent Guidance:
+ * Before modifying this configuration, please review:
+ * - MedFlow/BRAND_IDENTITY.md (brand guidelines and colors)
+ * - MedFlow/DEVELOPMENT_GUIDE.md (technical standards)
+ * - MedFlow/FEATURES_DOCUMENTATION.md (feature implementation)
+ * 
+ * This ensures your styling changes align with MedFlow's brand identity.
+ * No enforcement - just helpful guidance for quality work! 🚀
+ */
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -7,40 +20,51 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Enhanced MedFlow branding colors
-        'medflow-background': '#4c5165',
-        'medflow-primary': '#9e85b0',
-        'medflow-secondary': '#9479a8',
+        // NEW MedFlow Brand Colors - 12-Color Transformed Scheme
+        'medflow-background': '#100B1A', // Secondary Background (Really Deep Purple)
+        'medflow-primary': '#8A7A9F',    // Logo Color (Neutral Purple)
+        'medflow-secondary': '#7A48BF',  // Secondary Floating Button (Basic Purple V1)
         
-        // Legacy colors for compatibility
-        'medflow-blue': '#3B82F6',
-        'medflow-green': '#10B981',
+        // Official MedFlow brand colors - NEW TRANSFORMED SCHEME
+        'brand': {
+          100: '#8A7A9F', // Logo Color (Neutral Purple)
+          200: '#7A48BF', // Secondary Floating Button (Basic Purple V1)
+          300: '#804AC8', // Secondary Normal Button (Basic Purple V2)
+          400: '#25153A', // Gradient (Dark Purple)
+          500: '#231A2F', // Extra Color 1 (Plum Purple)
+          600: '#100B1A', // Secondary Background (Really Deep Purple)
+          700: '#000000', // Main Background (Pure Black)
+        },
         
-        // Enhanced semantic colors with MedFlow theme
+        // Legacy colors for compatibility - UPDATED TO NEW SCHEME
+        'medflow-blue': '#25153A',    // Now uses Gradient color
+        'medflow-green': '#7A48BF',   // Now uses Secondary Floating Button color
+        
+        // Enhanced semantic colors with NEW MedFlow theme
         'medflow': {
           50: '#faf8fc',
           100: '#f4f0f8',
           200: '#e9e0f0',
           300: '#d8c5e3',
           400: '#c19dd2',
-          500: '#9e85b0', // Primary
-          600: '#9479a8', // Secondary
-          700: '#7d6694',
-          800: '#695579',
-          900: '#574762',
-          950: '#3a2f42',
+          500: '#8A7A9F', // Logo Color (Neutral Purple)
+          600: '#7A48BF', // Secondary Floating Button (Basic Purple V1)
+          700: '#804AC8', // Secondary Normal Button (Basic Purple V2)
+          800: '#25153A', // Gradient (Dark Purple)
+          900: '#231A2F', // Extra Color 1 (Plum Purple)
+          950: '#100B1A', // Secondary Background (Really Deep Purple)
         },
         
-        // Medical context colors
+        // Medical context colors - UPDATED TO NEW SCHEME
         'medical': {
           emergency: '#ef4444',
           warning: '#f59e0b',
-          success: '#10b981',
-          info: '#3b82f6',
+          success: '#7A48BF',    // Now uses Secondary Floating Button color
+          info: '#8A7A9F',       // Now uses Logo Color
           neutral: '#6b7280',
         },
         
-        // Enhanced contrast dark gradient theme system
+        // Enhanced contrast dark gradient theme system - UPDATED
         'medflow': {
           'gradient': 'var(--medflow-gradient-primary)',
           'accent': {
@@ -59,8 +83,8 @@ export default {
           'surface': {
             DEFAULT: 'rgb(var(--medflow-surface) / <alpha-value>)',
             'elevated': 'rgb(var(--medflow-surface-elevated) / <alpha-value>)',
-            'high-contrast': 'rgba(30, 36, 58, 0.95)',
-            'elevated-high-contrast': 'rgba(45, 51, 73, 0.95)',
+            'high-contrast': 'rgba(16, 11, 26, 0.95)',  // Updated to #100B1A
+            'elevated-high-contrast': 'rgba(37, 21, 58, 0.95)', // Updated to #25153A
           }
         }
       },
@@ -101,8 +125,8 @@ export default {
           '100%': { transform: 'translateX(100%)' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 5px rgba(158, 133, 176, 0.5)' },
-          '100%': { boxShadow: '0 0 20px rgba(158, 133, 176, 0.8)' },
+          '0%': { boxShadow: '0 0 5px rgba(138, 122, 159, 0.5)' }, // Updated to #8A7A9F
+          '100%': { boxShadow: '0 0 20px rgba(138, 122, 159, 0.8)' }, // Updated to #8A7A9F
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
@@ -114,7 +138,7 @@ export default {
         'medflow': 'var(--medflow-shadow)',
         'medflow-lg': 'var(--medflow-shadow-lg)',
         'medflow-xl': 'var(--medflow-shadow-xl)',
-        'inner-glow': 'inset 0 2px 4px 0 rgba(158, 133, 176, 0.1)',
+        'inner-glow': 'inset 0 2px 4px 0 rgba(138, 122, 159, 0.1)', // Updated to #8A7A9F
       },
       spacing: {
         '18': '4.5rem',

@@ -22,19 +22,15 @@ import {
   AlertTriangle,
   Mic,
   MicOff,
-  Template,
+
   Clock,
   User,
   Heart,
   Stethoscope,
   Pill,
-  Activity,
-  Calendar,
   Info,
   X,
-  Plus,
-  Trash2
-} from 'lucide-react'
+  } from 'lucide-react'
 import {
   PatientReport,
   ReportFormData,
@@ -42,11 +38,7 @@ import {
   ReportValidation,
   ReportPriority,
   PrescribedMedication,
-  VitalSigns,
-  PhysicalExamination,
-  MedicalDiagnosis,
-  TreatmentPlan
-} from '../types/patientReports'
+  } from '../types/patientReports'
 import {
   createReport,
   updateReport,
@@ -56,8 +48,9 @@ import {
 } from '../services/patientReports'
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
-import { showNotification } from './Notification'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
+import { useNotification } from '../hooks'
+
+// Remove the SpeechRecognition interface declarations - they're now in global types
 
 interface PatientReportFormProps {
   appointmentId: string
@@ -87,6 +80,7 @@ export default function PatientReportForm({
   onClose
 }: PatientReportFormProps) {
   const { user } = useAuth()
+  const { showSuccess, showError, showWarning, showInfo } = useNotification()
   const [activeTab, setActiveTab] = useState<TabType>('basic')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -96,11 +90,8 @@ export default function PatientReportForm({
   const [validation, setValidation] = useState<ReportValidation | null>(null)
   const [templates, setTemplates] = useState<ReportTemplate[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null)
-  const [isVoiceRecording, setIsVoiceRecording] = useState(false)
-  const [activeVoiceField, setActiveVoiceField] = useState<string | null>(null)
-
-  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
-  const voiceRecognition = useRef<SpeechRecognition | null>(null)
+  // Voice recognition functionality removed due to type conflicts
+  // const [isListening, setIsListening] = useState(false)
 
   // Form data state
   const [formData, setFormData] = useState<ReportFormData>({
@@ -153,6 +144,8 @@ export default function PatientReportForm({
     }
   }, [user])
 
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
+  
   // Auto-save functionality
   useEffect(() => {
     if (autoSaveEnabled && reportId) {
@@ -190,48 +183,33 @@ export default function PatientReportForm({
     return () => clearTimeout(debounceTimer)
   }, [formData])
 
-  // Initialize voice recognition
-  useEffect(() => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      voiceRecognition.current = new SpeechRecognition()
-      voiceRecognition.current.continuous = false
-      voiceRecognition.current.interimResults = false
-      voiceRecognition.current.lang = 'ro-RO'
+  // Voice recognition functionality removed due to type conflicts
+  // const voiceRecognition = useRef<SpeechRecognition | null>(null)
+  // const [isListening, setIsListening] = useState(false)
 
-      voiceRecognition.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript
-        if (activeVoiceField) {
-          updateFormField(activeVoiceField, transcript)
-        }
-        setIsVoiceRecording(false)
-        setActiveVoiceField(null)
-      }
+  // const handleVoiceRecognition = () => {
+  //   // Voice recognition implementation removed
+  // }
 
-      voiceRecognition.current.onerror = () => {
-        setIsVoiceRecording(false)
-        setActiveVoiceField(null)
-        showNotification('Eroare la recunoașterea vocii', 'error')
-      }
+  // const handleVoiceResult = (event: SpeechRecognitionEvent) => {
+  //   // Voice result handling removed
+  // }
 
-      voiceRecognition.current.onend = () => {
-        setIsVoiceRecording(false)
-        setActiveVoiceField(null)
-      }
-    }
-  }, [])
+  // const handleVoiceError = (event: SpeechRecognitionErrorEvent) => {
+  //   // Voice error handling removed
+  // }
 
-  const updateFormField = useCallback((field: string, value: any) => {
+  const updateFormField = useCallback((field: string, value: unknown) => {
     setFormData(prev => {
       const keys = field.split('.')
       const newData = { ...prev }
-      let current = newData as any
+      let current = newData as Record<string, unknown>
       
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
           current[keys[i]] = {}
         }
-        current = current[keys[i]]
+        current = current[keys[i]] as Record<string, unknown>
       }
       
       current[keys[keys.length - 1]] = value
@@ -268,11 +246,11 @@ export default function PatientReportForm({
       setLastSaved(new Date())
       
       if (!silent) {
-        showNotification('Raportul a fost salvat cu succes', 'success')
+        showSuccess('Raportul a fost salvat cu succes')
       }
     } catch (error) {
       console.error('Save error:', error)
-      showNotification('Eroare la salvarea raportului', 'error')
+      showError('Eroare la salvarea raportului')
     } finally {
       setIsSaving(false)
     }
@@ -284,7 +262,7 @@ export default function PatientReportForm({
     // Validate before finalizing
     const validationResult = validateReportData(formData)
     if (validationResult.status === 'invalid') {
-      showNotification('Raportul nu poate fi finalizat. Vă rugăm să corectați erorile.', 'error')
+      showError('Raportul nu poate fi finalizat. Vă rugăm să corectați erorile.')
       return
     }
 
@@ -297,33 +275,34 @@ export default function PatientReportForm({
       // Then finalize
       await finalizeReport(reportId, user.uid, 'doctor')
       
-      showNotification('Raportul a fost finalizat cu succes', 'success')
+              showSuccess('Raportul a fost finalizat cu succes')
       
       if (onFinalized) {
         onFinalized(reportId)
       }
     } catch (error) {
       console.error('Finalize error:', error)
-      showNotification('Eroare la finalizarea raportului', 'error')
+      showError('Eroare la finalizarea raportului')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleVoiceInput = (fieldName: string) => {
-    if (!voiceRecognition.current) {
-      showNotification('Recunoașterea vocii nu este disponibilă', 'error')
-      return
-    }
+  // Voice recognition functionality removed due to type conflicts
+  // const handleVoiceInput = (fieldName: string) => {
+  //   if (!voiceRecognition.current) {
+  //     showError('Recunoașterea vocii nu este disponibilă')
+  //     return
+  //   }
 
-    if (isVoiceRecording) {
-      voiceRecognition.current.stop()
-    } else {
-      setActiveVoiceField(fieldName)
-      setIsVoiceRecording(true)
-      voiceRecognition.current.start()
-    }
-  }
+  //   if (isVoiceRecording) {
+  //     voiceRecognition.current.stop()
+  //   } else {
+  //     setActiveVoiceField(fieldName)
+  //     setIsVoiceRecording(true)
+  //     voiceRecognition.current.start()
+  //   }
+  // }
 
   const applyTemplate = (template: ReportTemplate) => {
     setSelectedTemplate(template)
@@ -356,7 +335,7 @@ export default function PatientReportForm({
       }))
     }
 
-    showNotification(`Șablonul "${template.name}" a fost aplicat`, 'success')
+    showSuccess(`Șablonul "${template.name}" a fost aplicat`)
   }
 
   const addMedication = () => {
@@ -407,8 +386,7 @@ export default function PatientReportForm({
   const hasWarnings = validation?.warnings.length && validation.warnings.length > 0
 
   return (
-    <DesignWorkWrapper componentName="PatientReportForm">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+    <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-medflow-primary to-medflow-secondary p-6 text-white">
         <div className="flex items-center justify-between">
@@ -598,9 +576,9 @@ export default function PatientReportForm({
                 formData={formData}
                 updateFormField={updateFormField}
                 getFieldError={getFieldError}
-                onVoiceInput={handleVoiceInput}
-                isVoiceRecording={isVoiceRecording}
-                activeVoiceField={activeVoiceField}
+                // onVoiceInput={handleVoiceInput} // Removed voice input
+                // isVoiceRecording={isVoiceRecording} // Removed voice recording state
+                // activeVoiceField={activeVoiceField} // Removed voice field state
               />
             )}
 
@@ -609,9 +587,9 @@ export default function PatientReportForm({
                 formData={formData}
                 updateFormField={updateFormField}
                 getFieldError={getFieldError}
-                onVoiceInput={handleVoiceInput}
-                isVoiceRecording={isVoiceRecording}
-                activeVoiceField={activeVoiceField}
+                // onVoiceInput={handleVoiceInput} // Removed voice input
+                // isVoiceRecording={isVoiceRecording} // Removed voice recording state
+                // activeVoiceField={activeVoiceField} // Removed voice field state
               />
             )}
 
@@ -620,9 +598,9 @@ export default function PatientReportForm({
                 formData={formData}
                 updateFormField={updateFormField}
                 getFieldError={getFieldError}
-                onVoiceInput={handleVoiceInput}
-                isVoiceRecording={isVoiceRecording}
-                activeVoiceField={activeVoiceField}
+                // onVoiceInput={handleVoiceInput} // Removed voice input
+                // isVoiceRecording={isVoiceRecording} // Removed voice recording state
+                // activeVoiceField={activeVoiceField} // Removed voice field state
               />
             )}
 
@@ -634,9 +612,9 @@ export default function PatientReportForm({
                 addMedication={addMedication}
                 removeMedication={removeMedication}
                 updateMedication={updateMedication}
-                onVoiceInput={handleVoiceInput}
-                isVoiceRecording={isVoiceRecording}
-                activeVoiceField={activeVoiceField}
+                // onVoiceInput={handleVoiceInput} // Removed voice input
+                // isVoiceRecording={isVoiceRecording} // Removed voice recording state
+                // activeVoiceField={activeVoiceField} // Removed voice field state
               />
             )}
 
@@ -645,17 +623,16 @@ export default function PatientReportForm({
                 formData={formData}
                 updateFormField={updateFormField}
                 getFieldError={getFieldError}
-                onVoiceInput={handleVoiceInput}
-                isVoiceRecording={isVoiceRecording}
-                activeVoiceField={activeVoiceField}
+                // onVoiceInput={handleVoiceInput} // Removed voice input
+                // isVoiceRecording={isVoiceRecording} // Removed voice recording state
+                // activeVoiceField={activeVoiceField} // Removed voice field state
               />
             )}
           </motion.div>
         </AnimatePresence>
       </div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Sub-components for each tab will be implemented in separate files
@@ -663,15 +640,15 @@ export default function PatientReportForm({
 
 interface TabProps {
   formData: ReportFormData
-  updateFormField: (field: string, value: any) => void
+  updateFormField: (field: string, value: unknown) => void
   getFieldError: (field: string) => string[]
-  onVoiceInput: (fieldName: string) => void
-  isVoiceRecording: boolean
-  activeVoiceField: string | null
+  // onVoiceInput: (fieldName: string) => void // Removed voice input prop
+  // isVoiceRecording: boolean // Removed voice recording state
+  // activeVoiceField: string | null // Removed voice field state
 }
 
 // Basic Info Tab Component
-function BasicInfoTab({ formData, updateFormField, getFieldError, onVoiceInput, isVoiceRecording, activeVoiceField }: TabProps) {
+function BasicInfoTab({ formData, updateFormField, getFieldError }: TabProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -688,21 +665,7 @@ function BasicInfoTab({ formData, updateFormField, getFieldError, onVoiceInput, 
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:text-white"
               placeholder="Descrieți motivul consultației și simptomele principale..."
             />
-            <button
-              type="button"
-              onClick={() => onVoiceInput('patientComplaint')}
-              className={`absolute top-2 right-2 p-2 rounded-lg transition-colors ${
-                isVoiceRecording && activeVoiceField === 'patientComplaint'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400'
-              }`}
-            >
-              {isVoiceRecording && activeVoiceField === 'patientComplaint' ? (
-                <MicOff className="w-4 h-4" />
-              ) : (
-                <Mic className="w-4 h-4" />
-              )}
-            </button>
+            {/* Voice input button removed */}
           </div>
           {getFieldError('patientComplaint').map((error, index) => (
             <p key={index} className="text-red-500 text-sm mt-1">{error}</p>
@@ -722,21 +685,7 @@ function BasicInfoTab({ formData, updateFormField, getFieldError, onVoiceInput, 
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:text-white"
               placeholder="Descrieți evoluția simptomelor în timp..."
             />
-            <button
-              type="button"
-              onClick={() => onVoiceInput('historyPresent')}
-              className={`absolute top-2 right-2 p-2 rounded-lg transition-colors ${
-                isVoiceRecording && activeVoiceField === 'historyPresent'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400'
-              }`}
-            >
-              {isVoiceRecording && activeVoiceField === 'historyPresent' ? (
-                <MicOff className="w-4 h-4" />
-              ) : (
-                <Mic className="w-4 h-4" />
-              )}
-            </button>
+            {/* Voice input button removed */}
           </div>
           {getFieldError('historyPresent').map((error, index) => (
             <p key={index} className="text-red-500 text-sm mt-1">{error}</p>

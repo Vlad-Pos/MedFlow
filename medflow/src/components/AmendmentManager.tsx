@@ -14,41 +14,51 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Edit,
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  MessageSquare,
-  User,
-  Calendar,
-  History,
+import { 
+  FileText, 
+  Edit3, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle, 
   Plus,
-  Eye,
-  Send,
   X,
-  Save,
-  Undo2
+  Send, 
+  Undo2, 
+  Calendar,
+  User,
+  History,
+  Eye,
+  Download,
+  Printer,
+  Share2,
+  Lock,
+  Unlock,
+  Shield,
+  FileCheck,
+  FileX,
+  FileEdit,
+  FilePlus,
+  FileMinus,
+  FileSearch,
+  FileClock,
+  FileCode,
+  FileImage,
+  FileVideo,
+  FileAudio,
+  FileArchive,
+  FileSpreadsheet
 } from 'lucide-react'
-import {
-  PatientReport,
-  AmendmentRequest,
-  ReportVersion,
-  AmendmentStatus
-} from '../types/patientReports'
-import {
-  createAmendmentRequest,
-  processAmendmentRequest,
-  applyAmendments
-} from '../services/monthlyReports'
 import { useAuth } from '../providers/AuthProvider'
+import { useNotification } from '../hooks'
 import LoadingSpinner from './LoadingSpinner'
-import { showNotification } from './Notification'
-import { ConfirmationDialog } from './ConfirmationDialog'
-import { formatDateTime } from '../utils/dateUtils'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
+import { 
+  PatientReport, 
+  AmendmentRequest, 
+  AmendmentStatus,
+  ReportVersion 
+} from '../types/patientReports'
+import { createAmendmentRequest, processAmendmentRequest, applyAmendments } from '../services/monthlyReports'
 
 interface AmendmentManagerProps {
   report: PatientReport
@@ -61,14 +71,24 @@ interface AmendmentManagerProps {
 interface FieldChange {
   field: string
   label: string
-  currentValue: any
-  proposedValue: any
+  currentValue: unknown
+  proposedValue: unknown
 }
 
 interface AmendmentForm {
   reason: string
   changes: FieldChange[]
   deadline?: Date
+}
+
+interface EditableFields {
+  patientComplaint: string
+  historyPresent: string
+  historyPast: string
+  'diagnosis.primary': string
+  'diagnosis.secondary': string
+  additionalNotes: string
+  followUpInstructions: string
 }
 
 export default function AmendmentManager({
@@ -79,23 +99,24 @@ export default function AmendmentManager({
   onClose
 }: AmendmentManagerProps) {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<'create' | 'pending' | 'history'>('create')
+  const { showSuccess, showError, showWarning, showInfo } = useNotification()
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'applied' | 'create' | 'history'>('pending')
+  const [amendments, setAmendments] = useState<AmendmentRequest[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [pendingAmendments, setPendingAmendments] = useState<AmendmentRequest[]>([])
-  const [reportVersions, setReportVersions] = useState<ReportVersion[]>([])
-  
-  // Amendment creation form
   const [amendmentForm, setAmendmentForm] = useState<AmendmentForm>({
     reason: '',
-    changes: [],
-    deadline: undefined
+    changes: []
   })
-
-  // Edit states
-  const [editableFields, setEditableFields] = useState<Record<string, any>>({})
+  const [editableFields, setEditableFields] = useState<EditableFields>({
+    patientComplaint: '',
+    historyPresent: '',
+    historyPast: '',
+    'diagnosis.primary': '',
+    'diagnosis.secondary': '',
+    additionalNotes: '',
+    followUpInstructions: ''
+  })
   const [hasChanges, setHasChanges] = useState(false)
-
-  // Dialog states
   const [processDialog, setProcessDialog] = useState<{
     isOpen: boolean
     amendmentId: string | null
@@ -110,114 +131,133 @@ export default function AmendmentManager({
     loading: false
   })
 
-  // Initialize editable fields from report
+  // Mock data for demo purposes
+  const [pendingAmendments, setPendingAmendments] = useState<AmendmentRequest[]>([])
+  const [reportVersions, setReportVersions] = useState<ReportVersion[]>([])
+
+  // Load amendments
+  useEffect(() => {
+    loadAmendments()
+  }, [])
+
+  // Initialize editable fields
   useEffect(() => {
     setEditableFields({
-      patientComplaint: report.patientComplaint,
-      historyPresent: report.historyPresent,
+      patientComplaint: report.patientComplaint || '',
+      historyPresent: report.historyPresent || '',
       historyPast: report.historyPast || '',
-      'diagnosis.primary': report.diagnosis.primary,
-      'diagnosis.secondary': report.diagnosis.secondary || [],
+      'diagnosis.primary': report.diagnosis.primary || '',
+      'diagnosis.secondary': Array.isArray(report.diagnosis.secondary) ? report.diagnosis.secondary.join(', ') : (report.diagnosis.secondary || ''),
       additionalNotes: report.additionalNotes || '',
       followUpInstructions: report.followUpInstructions || ''
     })
   }, [report])
 
-  // Load pending amendments and versions
-  useEffect(() => {
-    // In a real implementation, these would be loaded from the backend
-    // For now, we'll simulate with empty arrays
-    setPendingAmendments([])
-    setReportVersions(report.versions || [])
-  }, [report])
-
   // Track changes
   useEffect(() => {
-    const changes: FieldChange[] = []
-    
+    let hasAnyChanges = false
     Object.keys(editableFields).forEach(field => {
       const currentValue = getNestedValue(report, field)
-      const proposedValue = editableFields[field]
+      const proposedValue = editableFields[field as keyof EditableFields]
       
       if (JSON.stringify(currentValue) !== JSON.stringify(proposedValue)) {
-        changes.push({
-          field,
-          label: getFieldLabel(field),
-          currentValue,
-          proposedValue
-        })
+        hasAnyChanges = true
       }
     })
-
-    setAmendmentForm(prev => ({ ...prev, changes }))
-    setHasChanges(changes.length > 0)
+    setHasChanges(hasAnyChanges)
   }, [editableFields, report])
 
-  const getNestedValue = (obj: any, path: string): any => {
-    return path.split('.').reduce((current, key) => current?.[key], obj)
+  const getNestedValue = (obj: PatientReport, path: string): unknown => {
+    return path.split('.').reduce((current, key) => {
+      if (current && typeof current === 'object' && key in current) {
+        return (current as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, obj as unknown)
   }
 
   const getFieldLabel = (field: string): string => {
     const labels: Record<string, string> = {
-      'patientComplaint': 'Plângerea pacientului',
-      'historyPresent': 'Istoricul bolii actuale',
-      'historyPast': 'Istoricul medical anterior',
+      patientComplaint: 'Plângerea pacientului',
+      historyPresent: 'Istoricul bolii actuale',
+      historyPast: 'Istoricul medical anterior',
       'diagnosis.primary': 'Diagnosticul principal',
       'diagnosis.secondary': 'Diagnostice secundare',
-      'additionalNotes': 'Observații suplimentare',
-      'followUpInstructions': 'Instrucțiuni de urmărire'
+      additionalNotes: 'Note suplimentare',
+      followUpInstructions: 'Instrucțiuni de follow-up'
     }
     return labels[field] || field
   }
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: unknown) => {
     setEditableFields(prev => ({
       ...prev,
       [field]: value
     }))
   }
 
+  const loadAmendments = async () => {
+    // This would load amendments from the backend
+    // For now, we'll use an empty array
+    setAmendments([])
+    setPendingAmendments([])
+    setReportVersions([])
+  }
+
   const handleCreateAmendment = async () => {
-    if (!user || !amendmentForm.reason.trim() || amendmentForm.changes.length === 0) {
-      showNotification('Vă rugăm să completați motivul și să faceți cel puțin o modificare', 'warning')
+    if (!amendmentForm.reason.trim()) {
+      showError('Vă rugăm să specificați motivul amendamentului.')
+      return
+    }
+
+    if (!hasChanges) {
+      showError('Nu există modificări de salvat.')
       return
     }
 
     setIsLoading(true)
 
     try {
-      const proposedChanges: Record<string, any> = {}
-      amendmentForm.changes.forEach(change => {
-        proposedChanges[change.field] = change.proposedValue
+      const changes: FieldChange[] = []
+      Object.keys(editableFields).forEach(field => {
+        const currentValue = getNestedValue(report, field)
+        const proposedValue = editableFields[field as keyof EditableFields]
+        
+        if (JSON.stringify(currentValue) !== JSON.stringify(proposedValue)) {
+          changes.push({
+            field,
+            label: getFieldLabel(field),
+            currentValue,
+            proposedValue
+          })
+        }
       })
 
       const amendmentId = await createAmendmentRequest(
         report.id,
         amendmentForm.reason,
-        proposedChanges,
-        user.uid,
+        changes.reduce((acc, change) => ({
+          ...acc,
+          [change.field]: { from: change.currentValue, to: change.proposedValue }
+        }), {}),
+        user!.uid,
         'doctor',
         amendmentForm.deadline
       )
-
-      showNotification('Cererea de amendament a fost creată cu succes', 'success')
+      
+      showSuccess('Cererea de amendament a fost creată cu succes.')
       
       if (onAmendmentCreated) {
         onAmendmentCreated(amendmentId)
       }
 
       // Reset form
-      setAmendmentForm({
-        reason: '',
-        changes: [],
-        deadline: undefined
-      })
-      
-      // Switch to pending tab
+      setAmendmentForm({ reason: '', changes: [] })
       setActiveTab('pending')
+      
     } catch (error) {
       console.error('Error creating amendment:', error)
-      showNotification('Eroare la crearea amendamentului', 'error')
+      showError('Eroare la crearea cererii de amendament.')
     } finally {
       setIsLoading(false)
     }
@@ -237,9 +277,8 @@ export default function AmendmentManager({
         'doctor'
       )
 
-      showNotification(
-        `Amendamentul a fost ${processDialog.action === 'approve' ? 'aprobat' : 'respins'} cu succes`,
-        'success'
+      showSuccess(
+        `Amendamentul a fost ${processDialog.action === 'approve' ? 'aprobat' : 'respins'} cu succes`
       )
 
       if (onAmendmentProcessed) {
@@ -255,7 +294,7 @@ export default function AmendmentManager({
       })
     } catch (error) {
       console.error('Error processing amendment:', error)
-      showNotification('Eroare la procesarea amendamentului', 'error')
+      showError('Eroare la procesarea amendamentului')
       setProcessDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -265,14 +304,14 @@ export default function AmendmentManager({
 
     try {
       await applyAmendments(report.id, amendmentId, user!.uid, 'doctor')
-      showNotification('Amendamentele au fost aplicate cu succes', 'success')
+      showSuccess('Amendamentele au fost aplicate cu succes')
       
       if (onAmendmentsApplied) {
         onAmendmentsApplied(report.id)
       }
     } catch (error) {
       console.error('Error applying amendments:', error)
-      showNotification('Eroare la aplicarea amendamentelor', 'error')
+      showError('Eroare la aplicarea amendamentelor')
     } finally {
       setIsLoading(false)
     }
@@ -280,11 +319,11 @@ export default function AmendmentManager({
 
   const resetChanges = () => {
     setEditableFields({
-      patientComplaint: report.patientComplaint,
-      historyPresent: report.historyPresent,
+      patientComplaint: report.patientComplaint || '',
+      historyPresent: report.historyPresent || '',
       historyPast: report.historyPast || '',
-      'diagnosis.primary': report.diagnosis.primary,
-      'diagnosis.secondary': report.diagnosis.secondary || [],
+      'diagnosis.primary': report.diagnosis.primary || '',
+      'diagnosis.secondary': Array.isArray(report.diagnosis.secondary) ? report.diagnosis.secondary.join(', ') : (report.diagnosis.secondary || ''),
       additionalNotes: report.additionalNotes || '',
       followUpInstructions: report.followUpInstructions || ''
     })
@@ -314,9 +353,19 @@ export default function AmendmentManager({
     { id: 'history' as const, name: 'Istoric versiuni', icon: History }
   ]
 
+  // Helper function to format date/time
+  const formatDateTime = (date: Date): string => {
+    return date.toLocaleDateString('ro-RO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
   return (
-    <DesignWorkWrapper componentName="AmendmentManager">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden max-w-6xl w-full max-h-[90vh]">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden max-w-6xl w-full max-h-[90vh]">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
         <div className="flex items-center justify-between">
@@ -470,64 +519,79 @@ export default function AmendmentManager({
                       />
                     </div>
 
+                    {/* Secondary Diagnosis */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Diagnostice secundare
+                      </label>
+                      <input
+                        type="text"
+                        value={editableFields['diagnosis.secondary'] || ''}
+                        onChange={(e) => handleFieldChange('diagnosis.secondary', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                        placeholder="Separate prin virgulă"
+                      />
+                    </div>
+
                     {/* Additional Notes */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Observații suplimentare
+                        Note suplimentare
                       </label>
                       <textarea
                         value={editableFields.additionalNotes || ''}
                         onChange={(e) => handleFieldChange('additionalNotes', e.target.value)}
-                        rows={2}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                      />
+                    </div>
+
+                    {/* Follow-up Instructions */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Instrucțiuni de follow-up
+                      </label>
+                      <textarea
+                        value={editableFields.followUpInstructions || ''}
+                        onChange={(e) => handleFieldChange('followUpInstructions', e.target.value)}
+                        rows={3}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
                   </div>
 
-                  {/* Changes Summary */}
-                  {hasChanges && (
-                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-3">
-                        Modificări propuse ({amendmentForm.changes.length})
-                      </h4>
-                      <div className="space-y-2">
-                        {amendmentForm.changes.map((change, index) => (
-                          <div key={index} className="text-sm">
-                            <span className="font-medium text-blue-800">{change.label}:</span>
-                            <div className="ml-4 mt-1">
-                              <span className="text-red-600">- {JSON.stringify(change.currentValue)}</span>
-                              <br />
-                              <span className="text-green-600">+ {JSON.stringify(change.proposedValue)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between mt-6">
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={resetChanges}
                       disabled={!hasChanges}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Undo2 className="w-4 h-4" />
                       <span>Resetează modificările</span>
                     </button>
 
-                    <button
-                      onClick={handleCreateAmendment}
-                      disabled={isLoading || !amendmentForm.reason.trim() || !hasChanges}
-                      className="flex items-center space-x-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {isLoading ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        <Send className="w-4 h-4" />
-                      )}
-                      <span>Creează amendamentul</span>
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setActiveTab('pending')}
+                        className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                      >
+                        Anulează
+                      </button>
+                      
+                      <button
+                        onClick={handleCreateAmendment}
+                        disabled={!hasChanges || !amendmentForm.reason.trim() || isLoading}
+                        className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {isLoading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                        <span>Creează amendamentul</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -566,7 +630,7 @@ export default function AmendmentManager({
                               </span>
                               
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {formatDateTime(amendment.requestDate.toDate())}
+                                {formatDateTime(amendment.requestDate instanceof Date ? amendment.requestDate : new Date(amendment.requestDate.seconds * 1000))}
                               </span>
                             </div>
 
@@ -634,14 +698,10 @@ export default function AmendmentManager({
                               <button
                                 onClick={() => handleApplyAmendments(amendment.id)}
                                 disabled={isLoading}
-                                className="flex items-center space-x-2 px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                                className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                title="Aplică amendamentele"
                               >
-                                {isLoading ? (
-                                  <LoadingSpinner size="sm" />
-                                ) : (
-                                  <CheckCircle className="w-4 h-4" />
-                                )}
-                                <span>Aplică</span>
+                                <FileCheck className="w-4 h-4" />
                               </button>
                             )}
                           </div>
@@ -687,7 +747,7 @@ export default function AmendmentManager({
                               )}
                               
                               <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {formatDateTime(version.timestamp.toDate())}
+                                {formatDateTime(version.timestamp instanceof Date ? version.timestamp : new Date(version.timestamp.seconds * 1000))}
                               </span>
                             </div>
 
@@ -732,37 +792,59 @@ export default function AmendmentManager({
       </div>
 
       {/* Process Amendment Dialog */}
-      <ConfirmationDialog
-        isOpen={processDialog.isOpen}
-        onClose={() => setProcessDialog({
-          isOpen: false,
-          amendmentId: null,
-          action: null,
-          comments: '',
-          loading: false
-        })}
-        onConfirm={handleProcessAmendment}
-        title={`${processDialog.action === 'approve' ? 'Aprobă' : 'Respinge'} amendamentul`}
-        message="Ești sigur că vrei să procesezi acest amendament?"
-        confirmText={processDialog.action === 'approve' ? 'Aprobă' : 'Respinge'}
-        cancelText="Anulează"
-        type={processDialog.action === 'approve' ? 'success' : 'danger'}
-        loading={processDialog.loading}
-      >
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Comentarii (opțional)
-          </label>
-          <textarea
-            value={processDialog.comments}
-            onChange={(e) => setProcessDialog(prev => ({ ...prev, comments: e.target.value }))}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-            placeholder="Adaugă comentarii despre decizia ta..."
-          />
+      {processDialog.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              {processDialog.action === 'approve' ? 'Aprobă' : 'Respinge'} amendamentul
+            </h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Comentarii (opțional)
+              </label>
+              <textarea
+                value={processDialog.comments}
+                onChange={(e) => setProcessDialog(prev => ({ ...prev, comments: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                placeholder="Adăugați comentarii despre decizia dvs..."
+              />
+            </div>
+
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                onClick={() => setProcessDialog({
+                  isOpen: false,
+                  amendmentId: null,
+                  action: null,
+                  comments: '',
+                  loading: false
+                })}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              >
+                Anulează
+              </button>
+              
+              <button
+                onClick={handleProcessAmendment}
+                disabled={processDialog.loading}
+                className={`px-4 py-2 text-white rounded-lg transition-colors ${
+                  processDialog.action === 'approve' 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {processDialog.loading ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  processDialog.action === 'approve' ? 'Aprobă' : 'Respinge'
+                )}
+              </button>
+            </div>
+          </div>
         </div>
-      </ConfirmationDialog>
+      )}
     </div>
-    </DesignWorkWrapper>
   )
 }

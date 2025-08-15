@@ -1,80 +1,392 @@
-// Simple helper to detect demo mode when Firebase env is not configured
-export function isDemoMode(): boolean {
-  const explicit = import.meta.env.VITE_DEMO_MODE
-  // If demo mode is explicitly enabled, use it regardless of Firebase config
-  if (explicit === '1' || explicit === 'true') return true
-  // If no API key or placeholder value, enable demo mode
-  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY
-  return !apiKey || apiKey === 'YOUR_API_KEY'
-}
+/**
+ * Demo Mode Utility for MedFlow
+ * Provides demo mode detection and mock data management
+ */
 
-// Demo appointments state management
-let demoAppointments: any[] = []
-let demoListeners: ((appointments: any[]) => void)[] = []
-
-export function getDemoAppointments() {
-  if (demoAppointments.length === 0) {
-    // Initialize with default demo appointments
-    const now = new Date()
-    const d = (h: number, name: string, status: 'scheduled' | 'completed' | 'no_show') => ({
-      id: `demo-${h}`,
-      patientName: name,
-      dateTime: new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 0, 0),
-      status,
-      symptoms: 'Simptome demo',
-      notes: 'Note demo',
-      doctorId: 'demo-user',
-    })
-    demoAppointments = [
-      d(9, 'Ion Popescu', 'scheduled'),
-      d(11, 'Maria Ionescu', 'completed'),
-      d(13, 'George Enache', 'no_show'),
-    ]
+// Demo mode detection
+export const isDemoMode = (): boolean => {
+  // Check for demo mode in localStorage
+  if (typeof window !== 'undefined') {
+    const demoMode = localStorage.getItem('medflow-demo-mode')
+    if (demoMode === 'true') {
+      return true
+    }
   }
-  return demoAppointments
-}
-
-export function addDemoAppointment(appointment: any) {
-  const newId = `demo-${Date.now()}`
-  const newAppointment = { ...appointment, id: newId }
-  demoAppointments.push(newAppointment)
-  demoAppointments.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
-  notifyDemoListeners()
-  return newAppointment
-}
-
-export function updateDemoAppointment(id: string, updates: any) {
-  const index = demoAppointments.findIndex(a => a.id === id)
-  if (index !== -1) {
-    demoAppointments[index] = { ...demoAppointments[index], ...updates }
-    notifyDemoListeners()
-  }
-}
-
-export function deleteDemoAppointment(id: string) {
-  const index = demoAppointments.findIndex(a => a.id === id)
-  if (index !== -1) {
-    demoAppointments.splice(index, 1)
-    notifyDemoListeners()
-  }
-}
-
-export function subscribeToDemoAppointments(callback: (appointments: any[]) => void) {
-  demoListeners.push(callback)
-  // Immediately call with current data
-  callback(getDemoAppointments())
   
-  // Return unsubscribe function
-  return () => {
-    const index = demoListeners.indexOf(callback)
-    if (index !== -1) {
-      demoListeners.splice(index, 1)
+  // Check for demo mode in environment variables
+  if (import.meta.env.VITE_DEMO_MODE === 'true') {
+    return true
+  }
+  
+  // Check for demo mode in URL parameters
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('demo') === 'true') {
+      return true
+    }
+  }
+  
+  return false
+}
+
+// Demo data management
+class DemoDataManager {
+  private appointments = new Map<string, any>()
+  private users = new Map<string, any>()
+  private documents = new Map<string, any>()
+  
+  constructor() {
+    this.initializeDemoData()
+  }
+  
+  private initializeDemoData() {
+    // Initialize with some demo appointments
+    this.addDemoAppointment({
+      id: 'demo-appointment-1',
+      patientName: 'John Doe',
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      time: '09:00',
+      type: 'Consultation',
+      status: 'Scheduled'
+    })
+    
+    this.addDemoAppointment({
+      id: 'demo-appointment-2',
+      patientName: 'Jane Smith',
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Day after tomorrow
+      time: '14:30',
+      type: 'Follow-up',
+      status: 'Confirmed'
+    })
+    
+    // Initialize with demo users
+    this.addDemoUser({
+      id: 'demo-user-1',
+      name: 'Demo Doctor',
+      email: 'doctor@demo.com',
+      role: 'DOCTOR'
+    })
+    
+    this.addDemoUser({
+      id: 'demo-user-2',
+      name: 'Demo Nurse',
+      email: 'nurse@demo.com',
+      role: 'NURSE'
+    })
+  }
+  
+  // Appointment management
+  addDemoAppointment(appointment: any) {
+    this.appointments.set(appointment.id, {
+      ...appointment,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+  }
+  
+  updateDemoAppointment(id: string, updates: any) {
+    const appointment = this.appointments.get(id)
+    if (appointment) {
+      this.appointments.set(id, {
+        ...appointment,
+        ...updates,
+        updatedAt: new Date()
+      })
+    }
+  }
+  
+  deleteDemoAppointment(id: string) {
+    this.appointments.delete(id)
+  }
+  
+  getDemoAppointments() {
+    return Array.from(this.appointments.values())
+  }
+  
+  getDemoAppointment(id: string) {
+    return this.appointments.get(id)
+  }
+  
+  // User management
+  addDemoUser(user: any) {
+    this.users.set(user.id, {
+      ...user,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+  }
+  
+  updateDemoUser(id: string, updates: any) {
+    const user = this.users.get(id)
+    if (user) {
+      this.users.set(id, {
+        ...user,
+        ...updates,
+        updatedAt: new Date()
+      })
+    }
+  }
+  
+  deleteDemoUser(id: string) {
+    this.users.delete(id)
+  }
+  
+  getDemoUsers() {
+    return Array.from(this.users.values())
+  }
+  
+  getDemoUser(id: string) {
+    return this.users.get(id)
+  }
+  
+  // Document management
+  addDemoDocument(document: any) {
+    this.documents.set(document.id, {
+      ...document,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+  }
+  
+  updateDemoDocument(id: string, updates: any) {
+    const document = this.documents.get(id)
+    if (document) {
+      this.documents.set(id, {
+        ...document,
+        ...updates,
+        updatedAt: new Date()
+      })
+    }
+  }
+  
+  deleteDemoDocument(id: string) {
+    this.documents.delete(id)
+  }
+  
+  getDemoDocuments() {
+    return Array.from(this.documents.values())
+  }
+  
+  getDemoDocument(id: string) {
+    return this.documents.get(id)
+  }
+  
+  // Clear all demo data
+  clearDemoData() {
+    this.appointments.clear()
+    this.users.clear()
+    this.documents.clear()
+    this.initializeDemoData()
+  }
+  
+  // Get demo data summary
+  getDemoDataSummary() {
+    return {
+      appointments: this.appointments.size,
+      users: this.users.size,
+      documents: this.documents.size,
+      totalRecords: this.appointments.size + this.users.size + this.documents.size
     }
   }
 }
 
-function notifyDemoListeners() {
-  demoListeners.forEach(callback => callback([...demoAppointments]))
+// Create singleton instance
+export const demoDataManager = new DemoDataManager()
+
+// Demo mode toggle functions
+export const toggleDemoMode = (): boolean => {
+  const newMode = !isDemoMode()
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('medflow-demo-mode', newMode.toString())
+  }
+  return newMode
 }
+
+export const enableDemoMode = (): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('medflow-demo-mode', 'true')
+  }
+}
+
+export const disableDemoMode = (): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('medflow-demo-mode')
+  }
+}
+
+// Demo data export/import
+export const exportDemoData = (): string => {
+  return JSON.stringify({
+    appointments: demoDataManager.getDemoAppointments().map(app => [app.id, app]),
+    users: demoDataManager.getDemoUsers().map(user => [user.id, user]),
+    documents: demoDataManager.getDemoDocuments().map(doc => [doc.id, doc])
+  }, null, 2)
+}
+
+export const importDemoData = (data: string): boolean => {
+  try {
+    const parsed = JSON.parse(data)
+    if (parsed.appointments) {
+      parsed.appointments.forEach(([id, appointment]: [string, any]) => {
+        demoDataManager.addDemoAppointment({ ...appointment, id })
+      })
+    }
+    if (parsed.users) {
+      parsed.users.forEach(([id, user]: [string, any]) => {
+        demoDataManager.addDemoUser({ ...user, id })
+      })
+    }
+    if (parsed.documents) {
+      parsed.documents.forEach(([id, document]: [string, any]) => {
+        demoDataManager.addDemoDocument({ ...document, id })
+      })
+    }
+    return true
+  } catch (error) {
+    console.error('Failed to import demo data:', error)
+    return false
+  }
+}
+
+// Demo mode status check
+export const getDemoModeStatus = () => {
+  return {
+    isDemoMode: isDemoMode(),
+    dataSummary: demoDataManager.getDemoDataSummary(),
+    localStorageKey: typeof window !== 'undefined' ? localStorage.getItem('medflow-demo-mode') : null,
+    environmentVariable: import.meta.env.VITE_DEMO_MODE,
+    urlParameter: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') : null
+  }
+}
+
+// Demo mode utilities for testing
+export const resetDemoMode = (): void => {
+  disableDemoMode()
+  demoDataManager.clearDemoData()
+}
+
+export const setDemoModeForTesting = (enabled: boolean): void => {
+  if (enabled) {
+    enableDemoMode()
+  } else {
+    disableDemoMode()
+  }
+}
+
+// Demo data types
+export interface DemoAppointment {
+  id: string
+  patientName: string
+  dateTime: Date
+  symptoms: string
+  notes: string
+  status: 'scheduled' | 'completed' | 'no_show'
+  doctorId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface DemoUser {
+  uid: string
+  email: string
+  displayName: string
+  role: string
+  lastActivity: Date
+}
+
+// Demo data functions
+export async function getDemoAppointments(doctorId?: string): Promise<DemoAppointment[]> {
+  const demoManager = new DemoDataManager()
+  const appointments = Array.from(demoManager['appointments'].values())
+  
+  if (doctorId) {
+    return appointments.filter(appointment => appointment.doctorId === doctorId)
+  }
+  
+  return appointments
+}
+
+export async function addDemoAppointment(appointmentData: Omit<DemoAppointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  const demoManager = new DemoDataManager()
+  const id = `demo-appointment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  
+  const appointment: DemoAppointment = {
+    ...appointmentData,
+    id,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+  
+  demoManager['appointments'].set(id, appointment)
+  return id
+}
+
+export async function updateDemoAppointment(id: string, updates: Partial<DemoAppointment>): Promise<void> {
+  const demoManager = new DemoDataManager()
+  const appointment = demoManager['appointments'].get(id)
+  
+  if (appointment) {
+    const updatedAppointment: DemoAppointment = {
+      ...appointment,
+      ...updates,
+      updatedAt: new Date()
+    }
+    demoManager['appointments'].set(id, updatedAppointment)
+  }
+}
+
+export async function deleteDemoAppointment(id: string): Promise<void> {
+  const demoManager = new DemoDataManager()
+  demoManager['appointments'].delete(id)
+}
+
+// Demo subscription functions for real-time updates
+export function subscribeToDemoAppointments(
+  callback: (appointments: any[]) => void,
+  doctorId?: string
+): () => void {
+  // Simulate real-time updates by calling callback immediately
+  // and setting up a periodic refresh
+  const updateAppointments = () => {
+    // Get appointments from the demo manager instance
+    const demoManager = new DemoDataManager()
+    const appointments = Array.from(demoManager['appointments'].values())
+    callback(appointments)
+  }
+  
+  // Initial call
+  updateAppointments()
+  
+  // Set up periodic updates every 5 seconds
+  const interval = setInterval(updateAppointments, 5000)
+  
+  // Return unsubscribe function
+  return () => {
+    clearInterval(interval)
+  }
+}
+
+export function subscribeToDemoUsers(
+  callback: (users: any[]) => void
+): () => void {
+  // Simulate real-time updates
+  const updateUsers = () => {
+    const demoManager = new DemoDataManager()
+    const users = Array.from(demoManager['users'].values())
+    callback(users)
+  }
+  
+  // Initial call
+  updateUsers()
+  
+  // Set up periodic updates every 10 seconds
+  const interval = setInterval(updateUsers, 10000)
+  
+  // Return unsubscribe function
+  return () => {
+    clearInterval(interval)
+  }
+}
+
 
 

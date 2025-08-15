@@ -1,0 +1,84 @@
+{
+  "appFeatures": {
+    "appointments": {
+      "title": "Gestionarea programărilor",
+      "description": "Sistem avansat de programări cu confirmări automate și notificări",
+      "demoData": {
+        "totalAppointments": 156,
+        "pendingConfirmations": 23,
+        "completedToday": 12,
+        "cancelledThisWeek": 3
+      },
+      "note": "Date demonstrative - nu reprezintă utilizatori reali"
+    },
+    "patients": {
+      "title": "Gestionarea pacienților",
+      "description": "Bază de date centralizată cu istoric medical complet",
+      "demoData": {
+        "totalPatients": 1247,
+        "newThisMonth": 89,
+        "activePatients": 892,
+        "archivedPatients": 355
+      },
+      "note": "Date demonstrative - nu reprezintă utilizatori reali"
+    },
+    "reports": {
+      "title": "Rapoarte și analize",
+      "description": "Statistici detaliate și rapoarte personalizabile",
+      "demoData": {
+        "reportsGenerated": 45,
+        "monthlyGrowth": 12.5,
+        "averageResponseTime": "2.3s",
+        "systemUptime": "99.9%"
+      },
+      "note": "Date demonstrative - nu reprezintă utilizatori reali"
+    }
+  },
+  "demoMetrics": {
+    "performance": {
+      "pageLoadTime": "1.2s",
+      "apiResponseTime": "150ms",
+      "mobileScore": 95,
+      "desktopScore": 98
+    },
+    "usage": {
+      "dailyActiveUsers": 45,
+      "weeklyActiveUsers": 156,
+      "monthlyActiveUsers": 423,
+      "averageSessionDuration": "8m 32s"
+    }
+  },
+  "demoContent": {
+    "notifications": [
+      {
+        id: 1,
+        type: "appointment",
+        message: "Programare nouă pentru Dr. Popescu",
+        timestamp: "2024-12-15T10:30:00Z",
+        isRead: false
+      },
+      {
+        id: 2,
+        type: "reminder",
+        message: "Reminder: Programare în 2 ore",
+        timestamp: "2024-12-15T08:00:00Z",
+        isRead: true
+      }
+    ],
+    "recentActivity": [
+      {
+        id: 1,
+        action: "Pacient nou înregistrat",
+        user: "Dr. Ionescu",
+        timestamp: "2024-12-15T09:15:00Z"
+      },
+      {
+        id: 2,
+        action: "Raport generat",
+        user: "Dr. Dumitrescu",
+        timestamp: "2024-12-15T08:45:00Z"
+      }
+    ]
+  },
+  "disclaimer": "Toate datele din această secțiune sunt demonstrative și sunt folosite doar pentru a prezenta funcționalitățile platformei. Nu reprezintă utilizatori reali sau date reale."
+}

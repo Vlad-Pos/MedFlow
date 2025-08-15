@@ -23,8 +23,7 @@ import {
   limit,
   serverTimestamp, 
   Timestamp,
-  writeBatch
-} from 'firebase/firestore'
+  } from 'firebase/firestore'
 import { db } from './firebase'
 import { 
   PatientFlag,
@@ -32,13 +31,11 @@ import {
   DoctorAlert,
   FlaggingConfiguration,
   FlagReason,
-  FlagSeverity,
-  FlagStatus,
   FlaggingValidationResult,
   FlagAuditLog,
-  PatientFlagGDPRData
-} from '../types/patientFlagging'
+  } from '../types/patientFlagging'
 import { AppointmentWithNotifications } from '../types/notifications'
+import { withDemoModeQuery, withDemoModeWrite, getDemoUserData } from '../utils/demoFirebase'
 
 /**
  * Default flagging configuration for Romanian medical practices
@@ -212,9 +209,9 @@ export class PatientFlaggingService {
       let reason: FlagReason = 'no_response_to_notifications'
       
       if (firstSent && secondSent) {
-        reason = 'no_response_to_notifications'
+         'no_response_to_notifications'
       } else if (firstSent) {
-        reason = 'no_response_to_notifications'
+         'no_response_to_notifications'
       }
       
       return { shouldFlag: true, reason }
@@ -402,49 +399,89 @@ export class PatientFlaggingService {
     doctorId: string,
     unreadOnly: boolean = false
   ): Promise<DoctorAlert[]> {
-    try {
-      let alertsQuery = query(
-        collection(db, 'doctorAlerts'),
-        where('doctorId', '==', doctorId),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      )
-      
-      if (unreadOnly) {
-        alertsQuery = query(
+    // Demo mode mock data
+    const demoAlerts: DoctorAlert[] = [
+      {
+        id: 'demo-alert-1',
+        doctorId: doctorId,
+        type: 'patient_flagged',
+        severity: 'warning',
+        title: 'Pacient semnalizat pentru lipsa de răspuns',
+        message: 'Ion Popescu nu a răspuns la notificările pentru programarea din 15.01.2024 la 10:00.',
+        patientId: 'demo-patient-1',
+        patientName: 'Ion Popescu',
+        appointmentId: 'demo-appointment-1',
+        read: false,
+        acknowledged: false,
+        dismissed: false,
+        requiresAction: true,
+        actionDeadline: Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+        createdAt: Timestamp.fromDate(new Date(Date.now() - 2 * 60 * 60 * 1000))
+      },
+      {
+        id: 'demo-alert-2',
+        doctorId: doctorId,
+        type: 'high_risk_patient',
+        severity: 'urgent',
+        title: 'Pacient cu risc ridicat',
+        message: 'Maria Ionescu prezintă factori de risc care necesită atenție imediată.',
+        patientId: 'demo-patient-2',
+        patientName: 'Maria Ionescu',
+        appointmentId: 'demo-appointment-2',
+        read: true,
+        acknowledged: true,
+        dismissed: false,
+        requiresAction: false,
+        actionDeadline: Timestamp.fromDate(new Date(Date.now() + 12 * 60 * 60 * 1000)),
+        createdAt: Timestamp.fromDate(new Date(Date.now() - 6 * 60 * 60 * 1000))
+      }
+    ]
+
+    return withDemoModeQuery(
+      async () => {
+        let alertsQuery = query(
           collection(db, 'doctorAlerts'),
           where('doctorId', '==', doctorId),
-          where('read', '==', false),
           orderBy('createdAt', 'desc'),
           limit(50)
         )
-      }
-      
-      const snapshot = await getDocs(alertsQuery)
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as DoctorAlert[]
-    } catch (error) {
-      console.error('Error getting doctor alerts:', error)
-      throw new Error('Nu s-au putut încărca alertele')
-    }
+        
+        if (unreadOnly) {
+          alertsQuery = query(
+            collection(db, 'doctorAlerts'),
+            where('doctorId', '==', doctorId),
+            where('read', '==', false),
+            orderBy('createdAt', 'desc'),
+            limit(50)
+          )
+        }
+        
+        const snapshot = await getDocs(alertsQuery)
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as DoctorAlert[]
+      },
+      unreadOnly ? demoAlerts.filter(alert => !alert.read) : demoAlerts,
+      'getDoctorAlerts'
+    )
   }
   
   /**
    * Mark doctor alert as read
    */
   static async markAlertAsRead(alertId: string): Promise<void> {
-    try {
-      const alertRef = doc(db, 'doctorAlerts', alertId)
-      await updateDoc(alertRef, {
-        read: true,
-        readAt: serverTimestamp()
-      })
-    } catch (error) {
-      console.error('Error marking alert as read:', error)
-      throw new Error('Nu s-a putut marca alerta ca citită')
-    }
+    return withDemoModeWrite(
+      async () => {
+        const alertRef = doc(db, 'doctorAlerts', alertId)
+        await updateDoc(alertRef, {
+          read: true,
+          readAt: serverTimestamp()
+        })
+      },
+      undefined,
+      'markAlertAsRead'
+    )
   }
   
   /**

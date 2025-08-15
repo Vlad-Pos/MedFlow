@@ -4,59 +4,59 @@
 
 /* Core visual style inspired by n8n.io */
 :root {
-  /* MedFlow Brand Colors - Enhanced contrast for dark theme */
-  --medflow-brand-1: #A18AB2;  /* Lightest - for primary text and highlights */
-  --medflow-brand-2: #9280A5;  /* Light - for secondary text and accents */
-  --medflow-brand-3: #847697;  /* Medium - for tertiary text and borders */
-  --medflow-brand-4: #756C8A;  /* Medium-dark - for surfaces and backgrounds */
-  --medflow-brand-5: #66627D;  /* Dark - for elevated surfaces */
-  --medflow-brand-6: #58586F;  /* Darker - for deep backgrounds */
-  --medflow-brand-7: #494E62;  /* Darkest - for deepest backgrounds */
+  /* NEW MedFlow Brand Colors - 12-Color Transformed Scheme */
+  --medflow-brand-1: #8A7A9F;  /* Logo Color (Neutral Purple) */
+  --medflow-brand-2: #7A48BF;  /* Secondary Floating Button (Basic Purple V1) */
+  --medflow-brand-3: #804AC8;  /* Secondary Normal Button (Basic Purple V2) */
+  --medflow-brand-4: #25153A;  /* Gradient (Dark Purple) */
+  --medflow-brand-5: #231A2F;  /* Extra Color 1 (Plum Purple) */
+  --medflow-brand-6: #100B1A;  /* Secondary Background (Really Deep Purple) */
+  --medflow-brand-7: #000000;  /* Main Background (Pure Black) */
   
-  /* Enhanced contrast gradients using brand colors */
+  /* Enhanced contrast gradients using NEW brand colors */
   --medflow-gradient-primary: linear-gradient(135deg, var(--medflow-brand-7), var(--medflow-brand-6));
   --medflow-gradient-secondary: linear-gradient(135deg, var(--medflow-brand-6), var(--medflow-brand-5));
   --medflow-gradient-accent: linear-gradient(135deg, var(--medflow-brand-1), var(--medflow-brand-2));
   --medflow-gradient-surface: linear-gradient(135deg, var(--medflow-brand-5), var(--medflow-brand-4));
   
-  /* Dark theme backgrounds with brand colors */
-  --medflow-dark-bg: #0f0f10;
-  --medflow-surface-dark: var(--medflow-brand-7);
-  --medflow-surface-elevated: var(--medflow-brand-6);
+  /* Dark theme backgrounds with NEW brand colors */
+  --medflow-dark-bg: #000000;  /* Updated to Main Background */
+  --medflow-surface-dark: var(--medflow-brand-6);
+  --medflow-surface-elevated: var(--medflow-brand-5);
   
   /* High contrast text colors for dark backgrounds */
   --medflow-text-primary: #FFFFFF;      /* Pure white for maximum contrast */
   --medflow-text-secondary: #F8FAFC;    /* Very light gray for secondary text */
   --medflow-text-tertiary: #E2E8F0;    /* Light gray for tertiary text */
-  --medflow-text-muted: #CBD5E1;       /* Medium gray for muted text */
+  --medflow-text-muted: #CCCCCC;       /* Updated to Subsection Text (Toned Grey) */
   
-  /* Brand accent colors for interactive elements */
-  --medflow-accent: 161 138 178;       /* RGB values for brand-1 */
-  --medflow-accent-hover: 146 128 151; /* RGB values for brand-2 */
-  --medflow-accent-dark: 132 118 151;  /* RGB values for brand-3 */
+  /* Brand accent colors for interactive elements - UPDATED */
+  --medflow-accent: 138 122 159;       /* RGB values for brand-1 (#8A7A9F) */
+  --medflow-accent-hover: 122 72 191;  /* RGB values for brand-2 (#7A48BF) */
+  --medflow-accent-dark: 128 74 200;   /* RGB values for brand-3 (#804AC8) */
   
-  /* Legacy variables maintained for compatibility */
+  /* Legacy variables maintained for compatibility - UPDATED */
   --medflow-background: var(--medflow-brand-6);
   --medflow-primary: var(--medflow-brand-1);
   --medflow-secondary: var(--medflow-brand-2);
   
-  /* Legacy compatibility */
-  --medflow-blue: #3B82F6;
-  --medflow-green: #10B981;
+  /* Legacy compatibility - UPDATED TO NEW SCHEME */
+  --medflow-blue: #25153A;    /* Now uses Gradient color */
+  --medflow-green: #7A48BF;   /* Now uses Secondary Floating Button color */
   --medflow-white: #FFFFFF;
   
-  /* Enhanced MedFlow gradients */
+  /* Enhanced MedFlow gradients - UPDATED */
   --medflow-gradient: var(--medflow-gradient-primary);
-  --medflow-gradient-subtle: linear-gradient(135deg, rgba(161, 138, 178, 0.1) 0%, rgba(146, 128, 165, 0.1) 100%);
+  --medflow-gradient-subtle: linear-gradient(135deg, rgba(138, 122, 159, 0.1) 0%, rgba(122, 72, 191, 0.1) 100%);
   --medflow-gradient-dark: var(--medflow-gradient-primary);
   
-  /* Dark theme base colors with brand integration */
-  --medflow-bg-primary: rgba(73, 78, 98, 0.95);    /* brand-7 with transparency */
-  --medflow-bg-secondary: rgba(88, 88, 111, 0.9);   /* brand-6 with transparency */
-  --medflow-bg-tertiary: rgba(102, 98, 125, 0.8);   /* brand-5 with transparency */
+  /* Dark theme base colors with NEW brand integration */
+  --medflow-bg-primary: rgba(0, 0, 0, 0.95);      /* brand-7 with transparency */
+  --medflow-bg-secondary: rgba(16, 11, 26, 0.9);   /* brand-6 with transparency */
+  --medflow-bg-tertiary: rgba(37, 21, 58, 0.8);   /* brand-4 with transparency */
   
-  /* High contrast borders using brand colors */
-  --medflow-border: rgba(161, 138, 178, 0.25);      /* brand-1 with transparency */
+  /* High contrast borders using NEW brand colors */
+  --medflow-border: rgba(138, 122, 159, 0.25);     /* brand-1 with transparency */
   --medflow-border-hover: var(--medflow-brand-1);
   
   /* Responsive spacing */
@@ -77,29 +77,29 @@
   --sal: env(safe-area-inset-left);
   --sar: env(safe-area-inset-right);
   
-  /* Shadows and effects with brand colors */
-  --medflow-shadow-sm: 0 1px 2px 0 rgba(161, 138, 178, 0.1);
-  --medflow-shadow: 0 4px 6px -1px rgba(161, 138, 178, 0.15), 0 2px 4px -1px rgba(161, 138, 178, 0.1);
-  --medflow-shadow-lg: 0 10px 15px -3px rgba(161, 138, 178, 0.15), 0 4px 6px -2px rgba(161, 138, 178, 0.1);
-  --medflow-shadow-xl: 0 20px 25px -5px rgba(161, 138, 178, 0.15), 0 10px 10px -5px rgba(161, 138, 178, 0.1);
+  /* Shadows and effects with NEW brand colors */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(138, 122, 159, 0.1);
+  --medflow-shadow: 0 4px 6px -1px rgba(138, 122, 159, 0.15), 0 2px 4px -1px rgba(138, 122, 159, 0.1);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(138, 122, 159, 0.15), 0 4px 6px -2px rgba(138, 122, 159, 0.1);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(138, 122, 159, 0.15), 0 10px 10px -5px rgba(138, 122, 159, 0.1);
   
   /* Animation timing */
   --medflow-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --medflow-transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark mode MedFlow theme */
+/* Dark mode MedFlow theme - UPDATED */
 .dark {
-  --medflow-bg-primary: #0f172a;
-  --medflow-bg-secondary: #1e293b;
-  --medflow-bg-tertiary: #334155;
+  --medflow-bg-primary: #000000;    /* Updated to Main Background */
+  --medflow-bg-secondary: #100B1A;  /* Updated to Secondary Background */
+  --medflow-bg-tertiary: #25153A;   /* Updated to Gradient */
   --medflow-text-primary: #FFFFFF;
   --medflow-text-secondary: #F8FAFC;
   --medflow-text-tertiary: #E2E8F0;
-  --medflow-border: #334155;
+  --medflow-border: #25153A;        /* Updated to Gradient */
   --medflow-border-hover: var(--medflow-primary);
   
-  /* Dark mode shadows with MedFlow colors */
+  /* Dark mode shadows with MedFlow colors - UPDATED */
   --medflow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --medflow-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
   --medflow-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
@@ -403,6 +403,110 @@ html {
 /* Loading spinner */
 .spinner {
   @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
+}
+
+/* Advanced Grid-Based Loader Animation - MedFlow Brand Compliant */
+.loader {
+  display: grid;
+  padding: 0;
+  background: transparent;
+  /* Smooth appearance for polished feel */
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+  /* Simple center positioning - let parent handle centering */
+  margin: 0 auto;
+  width: 120px;
+  height: 40px;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  height: 40px;
+  width: 120px;
+  background:
+    radial-gradient(35% 146% at 50% 159%, transparent 64%, #6F6280 66% 98%, transparent 101%) 0 0,
+    radial-gradient(35% 146% at 50% -59%, transparent 64%, #6F6280 66% 98%, transparent 101%) 100% 100%;
+  background-size: calc(200%/3) 50%;
+  background-repeat: repeat-x;
+  clip-path: inset(0 100% 0 0);
+  animation: l15 1.5s infinite linear;
+}
+.loader:after {
+  scale: -1 1;
+}
+@keyframes l15{
+  50% {clip-path: inset(0)}
+  to {clip-path: inset(0 0 0 100%)}
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Enhanced Loading Animation - MedFlow Brand */
+.loading-animation-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-animation-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(138, 122, 159, 0.1),
+    transparent
+  );
+  animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Loading Background Pulse */
+.loading-bg-pulse {
+  animation: loading-pulse 2s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+  0%, 100% {
+    background-color: rgba(138, 122, 159, 0.05);
+  }
+  50% {
+    background-color: rgba(138, 122, 159, 0.15);
+  }
+}
+
+/* Loading Text Fade */
+.loading-text-fade {
+  animation: loading-text-fade 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-text-fade {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* React Big Calendar tweak for dark mode */

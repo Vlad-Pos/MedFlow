@@ -3,9 +3,8 @@ import { motion } from 'framer-motion'
 import { Plus, Users, Search, Calendar, Mail, Phone, MapPin, FileText, Edit3, Trash2 } from 'lucide-react'
 import PatientSearch from '../components/PatientSearch'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { MedFlowLoader, SimpleLoader } from '../components/ui'
 import { isDemoMode } from '../utils/demo'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface Patient {
   id: string
   name: string
@@ -123,10 +122,10 @@ export default function Patients() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-medflow-text-secondary">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-medflow-text-secondary">
             Se încarcă informațiile pacienților...
           </p>
         </div>
@@ -135,8 +134,7 @@ export default function Patients() {
   }
 
   return (
-    <DesignWorkWrapper componentName="Patients">
-      <motion.section
+    <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="space-y-8"
@@ -422,6 +420,5 @@ export default function Patients() {
           </div>
         )}
       </motion.section>
-    </DesignWorkWrapper>
-  )
+    )
 }

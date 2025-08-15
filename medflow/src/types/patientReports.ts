@@ -108,8 +108,8 @@ export interface AuditEntry {
   action: 'created' | 'updated' | 'finalized' | 'archived' | 'viewed' | 'printed' | 'exported' | 'amended' | 'reviewed' | 'approved' | 'submitted'
   userId: string // User who performed the action
   userRole: 'doctor' | 'nurse' | 'admin'
-  changes?: Record<string, { from: any; to: any }> // What changed
-  metadata?: Record<string, any> // Additional metadata
+  changes?: Record<string, { from: unknown; to: unknown }> // What changed
+  metadata?: Record<string, unknown> // Additional metadata
   ipAddress?: string // User's IP address
   userAgent?: string // Browser/device information
   amendmentReason?: string // Reason for amendment
@@ -122,7 +122,7 @@ export interface ReportVersion {
   timestamp: Timestamp
   createdBy: string
   createdByRole: 'doctor' | 'nurse' | 'admin'
-  changes: Record<string, { from: any; to: any }>
+  changes: Record<string, { from: unknown; to: unknown }>
   reason: string
   isActive: boolean
   parentVersionId?: string
@@ -135,7 +135,7 @@ export interface AmendmentRequest {
   requestedByRole: 'doctor' | 'nurse' | 'admin'
   requestDate: Timestamp
   reason: string
-  proposedChanges: Record<string, any>
+  proposedChanges: Record<string, unknown>
   status: AmendmentStatus
   reviewedBy?: string
   reviewedByRole?: 'doctor' | 'nurse' | 'admin'
@@ -378,7 +378,7 @@ export interface SubmissionBatch {
   
   // Submission details
   submissionUrl?: string
-  submissionData?: Record<string, any>
+  submissionData?: Record<string, unknown>
   encryptionDetails?: {
     algorithm: string
     keyVersion: string
@@ -405,7 +405,7 @@ export interface SubmissionLogEntry {
   }
   userId?: string
   userRole?: 'doctor' | 'nurse' | 'admin' | 'system'
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface GovernmentSubmissionConfig {
@@ -456,7 +456,7 @@ export interface SubmissionReceipt {
   reportCount: number
   checksum: string
   status: 'received' | 'processing' | 'accepted' | 'rejected'
-  receiptData: Record<string, any>
+  receiptData: Record<string, unknown>
 }
 
 // ==========================================

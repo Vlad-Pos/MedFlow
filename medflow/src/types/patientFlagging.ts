@@ -230,8 +230,8 @@ export interface FlagAuditLog {
   performedByType: 'doctor' | 'system' | 'admin'
   
   // Change details
-  oldValue?: any
-  newValue?: any
+  oldValue?: unknown
+  newValue?: unknown
   changeReason?: string
   
   // Legal compliance
@@ -288,7 +288,7 @@ export interface PatientFlagGDPRData {
   dataAccessRequests: {
     requestDate: Timestamp
     fulfilledDate?: Timestamp
-    requestType: 'access' | 'rectification' | 'erasure' | 'portability'
+    requestType: 'access' | 'rectification' | 'erasure' | 'portability' | 'restrict'
   }[]
   
   // Right to be forgotten
@@ -317,7 +317,7 @@ export interface FlagEvent {
   alertId?: string
   patientId: string
   doctorId: string
-  data: any
+  data: Record<string, unknown>
   timestamp: Timestamp
 }
 

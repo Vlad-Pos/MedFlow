@@ -8,7 +8,7 @@
  * @version 1.0
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Bell, 
@@ -17,7 +17,6 @@ import {
   Smartphone,
   Shield,
   Check,
-  X,
   AlertTriangle,
   Info,
   Settings,
@@ -26,15 +25,12 @@ import {
 } from 'lucide-react'
 import { 
   PatientNotificationPreferences,
-  GDPRConsent,
-  NotificationChannel,
   PreferencesValidationResult
 } from '../types/notifications'
 import PatientNotificationPreferencesService from '../services/notificationPreferences'
 import LoadingSpinner from './LoadingSpinner'
 import { useAuth } from '../providers/AuthProvider'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { Timestamp } from 'firebase/firestore'
 interface NotificationPreferencesProps {
   patientId?: string
   onSaved?: (preferences: PatientNotificationPreferences) => void
@@ -56,6 +52,8 @@ interface FormData {
     appointmentReminders: boolean
     analytics: boolean
     performanceTracking: boolean
+    consentDate: Timestamp
+    consentVersion: string
   }
 }
 
@@ -89,7 +87,9 @@ export default function NotificationPreferences({
       marketingCommunications: false,
       appointmentReminders: false,
       analytics: false,
-      performanceTracking: false
+      performanceTracking: false,
+      consentDate: Timestamp.now(),
+      consentVersion: '1.0'
     }
   })
   
@@ -124,7 +124,9 @@ export default function NotificationPreferences({
             marketingCommunications: preferences.gdprConsent.marketingCommunications,
             appointmentReminders: preferences.gdprConsent.appointmentReminders,
             analytics: preferences.gdprConsent.analytics,
-            performanceTracking: preferences.gdprConsent.performanceTracking
+            performanceTracking: preferences.gdprConsent.performanceTracking,
+            consentDate: preferences.gdprConsent.consentDate,
+            consentVersion: preferences.gdprConsent.consentVersion
           }
         })
       } else {
@@ -153,7 +155,7 @@ export default function NotificationPreferences({
       email: formData.email,
       phoneNumber: formData.phoneNumber,
       channels: formData.channels,
-      gdprConsent: formData.gdprConsent as any
+      gdprConsent: formData.gdprConsent
     })
     
     setValidation(validation)
@@ -161,7 +163,7 @@ export default function NotificationPreferences({
   }, [formData, effectivePatientId])
   
   // Handle form field changes
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -246,7 +248,7 @@ export default function NotificationPreferences({
         phoneNumber: formData.phoneNumber,
         channels: formData.channels,
         language: formData.language,
-        gdprConsent: formData.gdprConsent as any
+        gdprConsent: formData.gdprConsent
       })
       
       setSuccess(true)
@@ -286,14 +288,18 @@ export default function NotificationPreferences({
   if (loading) {
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
-        <LoadingSpinner size="lg" />
+        <div className="text-center">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+            Se încarcă preferințele...
+          </p>
+        </div>
       </div>
     )
   }
   
   return (
-    <DesignWorkWrapper componentName="NotificationPreferences">
-      <div className={`max-w-4xl mx-auto space-y-6 ${className}`}>
+    <div className={`max-w-4xl mx-auto space-y-6 ${className}`}>
       {/* Header */}
       <div className="text-center">
         <div className="flex items-center justify-center mb-4">
@@ -690,7 +696,7 @@ export default function NotificationPreferences({
         
         <button
           onClick={handleSave}
-          disabled={saving || (validation && !validation.valid)}
+          disabled={saving || (validation ? !validation.valid : false)}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
         >
           {saving ? (
@@ -707,6 +713,5 @@ export default function NotificationPreferences({
         </button>
       </div>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

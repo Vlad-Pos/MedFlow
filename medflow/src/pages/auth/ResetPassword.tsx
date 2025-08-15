@@ -27,8 +27,6 @@ import {
   checkAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
-import DesignWorkWrapper from '../../../DesignWorkWrapper'
-
 export default function ResetPassword() {
   // Hooks
   const { resetPassword } = useAuth()
@@ -89,8 +87,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <DesignWorkWrapper componentName="ResetPassword">
-      <motion.div 
+    <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -319,6 +316,5 @@ export default function ResetPassword() {
         <p>Link-urile de resetare sunt securizate și expiră automat pentru protecția contului</p>
       </motion.div>
     </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

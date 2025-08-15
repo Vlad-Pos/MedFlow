@@ -27,7 +27,6 @@ import {
   BarChart3,
   Target,
   Star,
-  Zap,
   Bell,
   UserCheck,
   Activity,
@@ -37,8 +36,7 @@ import {
 import { useAuth } from '../providers/AuthProvider'
 import { staggerContainer, staggerItem, cardVariants } from '../utils/animations'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { MedFlowLoader } from './ui'
 interface Recommendation {
   id: string
   type: 'optimization' | 'follow-up' | 'scheduling' | 'insight' | 'alert'
@@ -67,7 +65,12 @@ interface PatientInsight {
 }
 
 interface SmartRecommendationsProps {
-  appointments: any[]
+  appointments: Array<{
+    id: string
+    dateTime: string | Date
+    status: string
+    patientName: string
+  }>
   timeRange?: 'week' | 'month' | 'quarter'
   maxRecommendations?: number
 }
@@ -171,7 +174,7 @@ export default function SmartRecommendations({
     }, {} as Record<number, number>)
 
     const peakHours = Object.entries(hourlyDistribution)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3)
       .map(([hour]) => `${hour}:00`)
 
@@ -204,11 +207,16 @@ export default function SmartRecommendations({
       }
       acc[apt.patientName].push(apt)
       return acc
-    }, {} as Record<string, any[]>)
+    }, {} as Record<string, Array<{
+      id: string
+      dateTime: string | Date
+      status: string
+      patientName: string
+    }>>)
 
     Object.entries(patientHistory).forEach(([patientName, history]) => {
       if (history.length >= 3) {
-        const completedVisits = history.filter(apt => apt.status === 'completed').length
+        const completedVisits = history.filter((apt) => apt.status === 'completed').length
         const totalVisits = history.length
         const adherenceRate = completedVisits / totalVisits
 
@@ -231,7 +239,7 @@ export default function SmartRecommendations({
         }
 
         const lastVisit = history
-          .filter(apt => apt.status === 'completed')
+          .filter((apt) => apt.status === 'completed')
           .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())[0]
 
         insights.push({
@@ -291,7 +299,7 @@ export default function SmartRecommendations({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
+          <MedFlowLoader size="lg" />
           <p className="mt-4 text-gray-600 dark:text-gray-400">
             AI analizează datele și generează recomandări...
           </p>
@@ -301,8 +309,7 @@ export default function SmartRecommendations({
   }
 
   return (
-    <DesignWorkWrapper componentName="SmartRecommendations">
-      <motion.div
+    <motion.div
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -333,7 +340,7 @@ export default function SmartRecommendations({
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'recommendations' | 'insights' | 'analytics')}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
@@ -547,6 +554,5 @@ export default function SmartRecommendations({
           )}
         </AnimatePresence>
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

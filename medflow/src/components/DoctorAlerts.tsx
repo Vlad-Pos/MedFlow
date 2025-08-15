@@ -16,7 +16,6 @@ import {
   User, 
   Clock, 
   Check, 
-  X, 
   Eye,
   Flag,
   Calendar,
@@ -26,11 +25,11 @@ import {
 import { DoctorAlert } from '../types/patientFlagging'
 import PatientFlaggingService from '../services/patientFlagging'
 import LoadingSpinner from './LoadingSpinner'
+import { MedFlowLoader } from './ui'
 import { useAuth } from '../providers/AuthProvider'
 import { formatDistanceToNow } from 'date-fns'
 import { ro } from 'date-fns/locale'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { Timestamp } from 'firebase/firestore'
 interface DoctorAlertsProps {
   className?: string
   showUnreadOnly?: boolean
@@ -89,9 +88,9 @@ export default function DoctorAlerts({
       await PatientFlaggingService.markAlertAsRead(alertId)
       
       // Update local state
-      setAlerts(prev => prev.map(alert => 
-        alert.id === alertId 
-          ? { ...alert, read: true, readAt: new Date() as any }
+      setAlerts(prev => prev.map(alert =>
+        alert.id === alertId
+          ? { ...alert, read: true, readAt: Timestamp.now() }
           : alert
       ))
     } catch (error) {
@@ -153,7 +152,7 @@ export default function DoctorAlerts({
   if (loading) {
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
-        <LoadingSpinner size="sm" className="mr-2" />
+                                         <MedFlowLoader size="sm" />
         <span className="text-gray-600">Se încarcă alertele...</span>
       </div>
     )
@@ -241,8 +240,7 @@ export default function DoctorAlerts({
    * Render full alert list
    */
   return (
-    <DesignWorkWrapper componentName="DoctorAlerts">
-      <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-3 ${className}`}>
       <AnimatePresence>
         {alerts.map((alert) => {
           const colors = getAlertColors(alert)
@@ -308,7 +306,7 @@ export default function DoctorAlerts({
                         {alert.actionDeadline && (
                           <span className="flex items-center text-orange-600">
                             <Calendar className="w-3 h-3 mr-1" />
-                            Termen: {alert.actionDeadline.toDate().toLocaleDateString('ro-RO')}
+                            Termen: {alert.actionDeadline?.toDate().toLocaleDateString('ro-RO')}
                           </span>
                         )}
                       </div>
@@ -451,6 +449,5 @@ export default function DoctorAlerts({
         </div>
       )}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

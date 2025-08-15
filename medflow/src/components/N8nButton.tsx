@@ -1,13 +1,12 @@
 /**
  * n8n.io-inspired Button Component
  * Enhanced styling matching the provided visual package
+ * UPDATED: Now uses new 12-brand color scheme
  */
 
 import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 import { ReactNode } from 'react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface N8nButtonProps {
   children: ReactNode
   variant?: 'primary' | 'secondary' | 'ghost'
@@ -34,9 +33,9 @@ export default function N8nButton({
   const baseClasses = "relative overflow-hidden rounded-xl font-bold transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
   
   const variants = {
-    primary: "bg-gradient-to-r from-[#A18AB2] to-[#9280A5] text-white shadow-lg hover:shadow-xl hover:shadow-[#A18AB2]/25 focus:ring-[#A18AB2]/50 hover:-translate-y-1",
-    secondary: "bg-transparent border-2 border-[#A18AB2] text-[#A18AB2] hover:bg-[#A18AB2] hover:text-white focus:ring-[#A18AB2]/50 hover:-translate-y-1",
-    ghost: "bg-transparent text-white hover:text-[#A18AB2] hover:bg-[#A18AB2]/10 focus:ring-[#A18AB2]/50"
+      primary: "bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-2)] text-white shadow-lg hover:shadow-xl hover:shadow-[var(--medflow-brand-1)]/25 focus:ring-[var(--medflow-brand-1)]/50 hover:-translate-y-1",
+  secondary: "bg-transparent border-2 border-[var(--medflow-brand-1)] text-[var(--medflow-brand-1)] hover:bg-[var(--medflow-brand-1)] hover:text-white focus:ring-[var(--medflow-brand-1)]/50 hover:-translate-y-1",
+  ghost: "bg-transparent text-white hover:text-[var(--medflow-brand-1)] hover:bg-[var(--medflow-brand-1)]/10 focus:ring-[var(--medflow-brand-1)]/50"
   }
   
   const sizes = {
@@ -48,8 +47,7 @@ export default function N8nButton({
   const Component = href ? motion.a : motion.button
   
   return (
-    <DesignWorkWrapper componentName="N8nButton">
-      <Component
+    <Component
         href={href}
         onClick={onClick}
         disabled={disabled}
@@ -60,7 +58,7 @@ export default function N8nButton({
         {/* Animated background gradient */}
         {variant === 'primary' && (
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-[#9280A5] to-[#A18AB2] opacity-0 hover:opacity-100 transition-opacity duration-300"
+            className="absolute inset-0 bg-gradient-to-r from-[var(--medflow-brand-2)] to-[var(--medflow-brand-1)] opacity-0 hover:opacity-100 transition-opacity duration-300"
             initial={false}
           />
         )}
@@ -94,6 +92,5 @@ export default function N8nButton({
           )}
         </span>
       </Component>
-    </DesignWorkWrapper>
-  )
+    )
 }

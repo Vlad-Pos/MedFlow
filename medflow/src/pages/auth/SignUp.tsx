@@ -24,7 +24,6 @@ import { useAuth } from '../../providers/AuthProvider'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ValidatedInput from '../../components/auth/ValidatedInput'
 import PasswordStrengthIndicator from '../../components/auth/PasswordStrengthIndicator'
-import DesignWorkWrapper from '../../../DesignWorkWrapper'
 import { 
   validateSignUpForm,
   validateDisplayName,
@@ -107,8 +106,7 @@ export default function SignUp() {
       await signUp(
         formData.email.trim(), 
         formData.password, 
-        formData.displayName.trim(), 
-        formData.role as 'doctor' | 'nurse'
+        formData.displayName.trim()
       )
       
       // Clear rate limit on successful registration
@@ -133,8 +131,7 @@ export default function SignUp() {
   ]
 
   return (
-    <DesignWorkWrapper componentName="SignUp">
-      <motion.div 
+    <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -389,6 +386,5 @@ export default function SignUp() {
         <p>Datele sunt criptate și protejate conform standardelor medicale și GDPR</p>
       </motion.div>
     </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

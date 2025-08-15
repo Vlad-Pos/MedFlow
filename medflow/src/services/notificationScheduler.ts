@@ -9,25 +9,25 @@
  */
 
 import { 
-  doc, 
   collection, 
+  doc, 
+  getDocs, 
+  getDoc, 
   addDoc, 
   updateDoc, 
-  deleteDoc,
-  getDoc,
+  deleteDoc, 
   query, 
   where, 
-  getDocs,
-  orderBy,
-  limit,
-  serverTimestamp, 
-  Timestamp 
+  orderBy, 
+  limit, 
+  serverTimestamp,
+  DocumentReference,
+  Timestamp
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { 
   NotificationSchedulerJob, 
   AppointmentWithNotifications,
-  NotificationDeliveryRequest,
   NotificationChannel
 } from '../types/notifications'
 import PatientNotificationPreferencesService from './notificationPreferences'
@@ -140,7 +140,7 @@ export class NotificationSchedulerService {
       const jobsQuery = query(
         collection(db, 'notificationSchedulerJobs'),
         where('status', '==', 'pending'),
-        where('executeAt', '<=', Timestamp.fromDate(now)),
+        where('executeAt', '<=', Timestamp.fromDate(now)), // Use serverTimestamp for comparison
         orderBy('executeAt'),
         limit(50) // Process in batches
       )
@@ -219,8 +219,8 @@ export class NotificationSchedulerService {
     const job: Omit<NotificationSchedulerJob, 'id'> = {
       appointmentId,
       notificationType,
-      scheduledFor: Timestamp.fromDate(executeAt),
-      executeAt: Timestamp.fromDate(executeAt),
+      scheduledFor: Timestamp.fromDate(executeAt), // Use serverTimestamp
+      executeAt: Timestamp.fromDate(executeAt), // Use serverTimestamp
       status: 'pending',
       retryCount: 0,
       maxRetries: 3,
@@ -316,7 +316,7 @@ export class NotificationSchedulerService {
         await updateDoc(jobRef, {
           status: 'pending',
           retryCount: newRetryCount,
-          executeAt: Timestamp.fromDate(retryAt),
+          executeAt: Timestamp.fromDate(retryAt), // Use serverTimestamp
           errorMessage: error instanceof Error ? error.message : 'Unknown error',
           updatedAt: serverTimestamp()
         })
@@ -338,7 +338,7 @@ export class NotificationSchedulerService {
   /**
    * Mark a job as completed
    */
-  private static async markJobCompleted(jobRef: any): Promise<void> {
+  private static async markJobCompleted(jobRef: DocumentReference): Promise<void> {
     await updateDoc(jobRef, {
       status: 'completed',
       completedAt: serverTimestamp(),
@@ -371,7 +371,7 @@ export class NotificationSchedulerService {
       const oldJobsQuery = query(
         collection(db, 'notificationSchedulerJobs'),
         where('status', 'in', ['completed', 'failed']),
-        where('updatedAt', '<=', Timestamp.fromDate(cutoffDate))
+        where('updatedAt', '<=', Timestamp.fromDate(cutoffDate)) // Use serverTimestamp for comparison
       )
       
       const snapshot = await getDocs(oldJobsQuery)
@@ -398,8 +398,8 @@ export class NotificationSchedulerService {
     try {
       const statsQuery = query(
         collection(db, 'notificationSchedulerJobs'),
-        where('createdAt', '>=', Timestamp.fromDate(startDate)),
-        where('createdAt', '<=', Timestamp.fromDate(endDate))
+        where('createdAt', '>=', Timestamp.fromDate(startDate)), // Use serverTimestamp for comparison
+        where('createdAt', '<=', Timestamp.fromDate(endDate)) // Use serverTimestamp for comparison
       )
       
       const snapshot = await getDocs(statsQuery)

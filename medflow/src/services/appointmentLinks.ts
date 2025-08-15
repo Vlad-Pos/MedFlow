@@ -13,8 +13,6 @@ import {
   getDoc, 
   setDoc, 
   updateDoc, 
-  deleteDoc,
-  collection,
   serverTimestamp, 
   Timestamp 
 } from 'firebase/firestore'
@@ -289,7 +287,7 @@ export class AppointmentLinksService {
         success: true,
         appointment: {
           ...appointment,
-          status: 'confirmed' as any,
+          status: 'confirmed' as 'confirmed',
           notifications: {
             ...appointment.notifications,
             confirmationReceived: true,
@@ -366,7 +364,7 @@ export class AppointmentLinksService {
         success: true,
         appointment: {
           ...appointment,
-          status: 'declined' as any
+          status: 'declined' as 'declined'
         },
         requiresRescheduling: true
       }
@@ -458,7 +456,7 @@ export class AppointmentLinksService {
     
     // Create hash for additional security (simplified - in production use proper crypto)
     const encoder = new TextEncoder()
-    const data = encoder.encode(tokenData)
+    const encodedData = encoder.encode(tokenData)
     
     // For now, return a secure token based on available data
     // In production, implement proper HMAC or JWT signing

@@ -8,13 +8,18 @@
 
 ### 1. Brand Colors
 Use these colors in this exact order and preserve harmony:
-- #A18AB2
-- #9280A5
-- #847697
-- #756C8A
-- #66627D
-- #58586F
-- #494E62
+- #8A7A9F (Logo Color)
+- #000000 (Pure Black)
+- #100B1A (Really Deep Purple)
+- #7A48BF (Basic Purple V1)
+- #804AC8 (Basic Purple V2)
+- #25153A (Dark Purple)
+- #FFFFFF (Pure White)
+- #CCCCCC (Toned Grey)
+- #231A2F (Plum Purple)
+- #BFBFBF (Light Grey)
+- #A6A6A6 (Medium Grey)
+- #737373 (Dark Grey)
 
 ### 2. Website Design
 - Darker, colored gradient backgrounds inspired by medflow.care and n8n.io

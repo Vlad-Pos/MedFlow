@@ -284,7 +284,7 @@ export class FlaggingIntegrationService {
  * Browser integration for manual testing
  */
 if (typeof window !== 'undefined') {
-  (window as any).testPatientFlagging = {
+  (window as unknown as Record<string, unknown>).testPatientFlagging = {
     runFlaggingCheck: () => FlaggingIntegrationService.triggerManualFlaggingCheck(),
     getStatistics: () => FlaggingIntegrationService.getFlaggingStatistics(),
     initialize: () => FlaggingIntegrationService.initialize()

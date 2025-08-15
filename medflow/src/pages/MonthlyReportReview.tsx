@@ -12,7 +12,7 @@
  * @version 1.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar,
@@ -29,14 +29,8 @@ import {
   RefreshCw,
   CheckSquare,
   Square,
-  Users,
-  TrendingUp,
-  Archive,
-  Flag,
-  MessageSquare,
   ChevronDown,
   ChevronRight,
-  Settings,
   X,
   Activity
 } from 'lucide-react'
@@ -44,10 +38,8 @@ import {
   PatientReport,
   MonthlyReportFilters,
   MonthlyReportSummary,
-  SubmissionBatch,
-  AmendmentRequest,
   SubmissionStatus,
-  AmendmentStatus
+  ReportStatus
 } from '../types/patientReports'
 import {
   getMonthlyReportSummary,
@@ -67,11 +59,10 @@ import {
 import SubmissionStatusManager from '../components/SubmissionStatusManager'
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { showNotification } from '../components/Notification'
+import { MedFlowLoader } from '../components/ui'
+import { useNotification } from '../hooks/useNotification'
 import ConfirmationDialog from '../components/ConfirmationDialog'
 import { formatDateTime } from '../utils/dateUtils'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface SelectedReports {
   [key: string]: boolean
 }
@@ -85,6 +76,7 @@ interface FilterState extends MonthlyReportFilters {
 
 export default function MonthlyReportReview() {
   const { user } = useAuth()
+  const { showSuccess, showError, showWarning, showInfo } = useNotification()
   const [selectedMonth, setSelectedMonth] = useState<string>('')
   const [availableMonths, setAvailableMonths] = useState<string[]>([])
   const [monthlyReports, setMonthlyReports] = useState<PatientReport[]>([])
@@ -99,7 +91,7 @@ export default function MonthlyReportReview() {
   const [filters, setFilters] = useState<FilterState>({
     month: '',
     searchQuery: '',
-    selectedStatuses: [],
+    selectedStatuses: [] as ReportStatus[],
     showOnlyNeedsReview: false,
     showOnlyWithAmendments: false,
     includeSubmitted: false
@@ -165,19 +157,24 @@ export default function MonthlyReportReview() {
         }
       } catch (error) {
         console.error('Error loading available months:', error)
-        showNotification.error('Eroare la încărcarea lunilor disponibile')
+        showError('Eroare la încărcarea lunilor disponibile')
       }
     }
 
     loadAvailableMonths()
   }, [user, selectedMonth])
 
+  // Update filters when month changes
+  useEffect(() => {
+    if (selectedMonth) {
+      setFilters(prev => ({ ...prev, month: selectedMonth }))
+    }
+  }, [selectedMonth])
+
   // Load monthly data when month changes
   useEffect(() => {
     if (!user || !selectedMonth) return
 
-    setFilters(prev => ({ ...prev, month: selectedMonth }))
-    
     const loadMonthlyData = async () => {
       setIsLoading(true)
       try {
@@ -185,15 +182,17 @@ export default function MonthlyReportReview() {
         const summary = await getMonthlyReportSummary(user.uid, selectedMonth)
         setMonthlySummary(summary)
 
-        // Load reports
-        const { reports } = await getMonthlyReports(user.uid, {
+        const { reports: monthlyReportsData } = await getMonthlyReports(user.uid, {
           month: selectedMonth,
-          includeSubmitted: filters.includeSubmitted
+          includeSubmitted: filters.includeSubmitted,
+          needsReview: filters.showOnlyNeedsReview,
+          hasAmendments: filters.showOnlyWithAmendments,
+          status: filters.selectedStatuses.length > 0 ? filters.selectedStatuses as ReportStatus[] : undefined
         })
-        setMonthlyReports(reports)
+        setMonthlyReports(monthlyReportsData)
       } catch (error) {
         console.error('Error loading monthly data:', error)
-        showNotification.error('Eroare la încărcarea datelor lunare')
+        showError('Eroare la încărcarea datelor lunare')
       } finally {
         setIsLoading(false)
       }
@@ -286,18 +285,18 @@ export default function MonthlyReportReview() {
   const handleBulkApproval = async () => {
     try {
       await bulkApproveReports(selectedReportIds, user!.uid)
-      showNotification.success('Rapoartele au fost aprobate cu succes')
+      showSuccess('Rapoartele au fost aprobate cu succes')
       // Refresh data by calling the same logic as loadMonthlyData
       if (user && selectedMonth) {
         const summary = await getMonthlyReportSummary(user.uid, selectedMonth)
         setMonthlySummary(summary)
-        const reports = await getMonthlyReports(user.uid, selectedMonth, filters)
-        setMonthlyReports(reports)
+        const reports = await getMonthlyReports(user.uid, { ...filters, month: selectedMonth })
+        setMonthlyReports(reports.reports)
       }
       setSelectedReports({}) // Clear selections
     } catch (error) {
       console.error('Error during bulk approval:', error)
-      showNotification.error('Eroare la aprobarea în masă')
+      showError('Eroare la aprobarea în masă')
     }
   }
 
@@ -308,12 +307,12 @@ export default function MonthlyReportReview() {
 
     try {
       await bulkApproveReports(bulkApprovalDialog.reportIds, user.uid, 'doctor')
-      showNotification(`${bulkApprovalDialog.reportIds.length} rapoarte aprobate cu succes`, 'success')
+      showSuccess(`${bulkApprovalDialog.reportIds.length} rapoarte aprobate cu succes`)
       setSelectedReports({})
       setBulkApprovalDialog({ isOpen: false, reportIds: [], loading: false })
     } catch (error) {
       console.error('Error bulk approving:', error)
-      showNotification('Eroare la aprobarea în masă', 'error')
+      showError('Eroare la aprobarea în masă')
       setBulkApprovalDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -325,7 +324,7 @@ export default function MonthlyReportReview() {
     })
 
     if (readyReports.length === 0) {
-      showNotification('Nu există rapoarte pregătite pentru trimitere', 'warning')
+      showWarning('Nu există rapoarte pregătite pentru trimitere')
       return
     }
 
@@ -352,9 +351,9 @@ export default function MonthlyReportReview() {
       // Queue for automatic submission if within period
       if (isWithinSubmissionPeriod) {
         await queueSubmissionBatch(batchId, 'manual', 'high')
-        showNotification(`Lot creat și programat pentru trimitere (${batchId})`, 'success')
+        showSuccess(`Lot creat și programat pentru trimitere (${batchId})`)
       } else {
-        showNotification(`Lot de trimitere creat (${batchId}). Va fi trimis în perioada 5-10 ale lunii.`, 'info')
+                  showInfo(`Lot de trimitere creat (${batchId}). Va fi trimis în perioada 5-10 ale lunii.`)
       }
       
       setSelectedReports({})
@@ -364,7 +363,7 @@ export default function MonthlyReportReview() {
       setSubmissionStatusDialog({ isOpen: true, batchId })
     } catch (error) {
       console.error('Error creating submission batch:', error)
-      showNotification('Eroare la crearea lotului de trimitere', 'error')
+      showError('Eroare la crearea lotului de trimitere')
       setSubmissionDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -376,10 +375,10 @@ export default function MonthlyReportReview() {
     try {
       const summary = await getMonthlyReportSummary(user.uid, selectedMonth)
       setMonthlySummary(summary)
-      showNotification('Datele au fost actualizate', 'success')
+              showSuccess('Datele au fost actualizate')
     } catch (error) {
       console.error('Error refreshing:', error)
-      showNotification('Eroare la actualizare', 'error')
+      showError('Eroare la actualizare')
     } finally {
       setIsRefreshing(false)
     }
@@ -417,7 +416,7 @@ export default function MonthlyReportReview() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <LoadingSpinner size="lg" />
+          <MedFlowLoader size="lg" />
           <p className="mt-4 text-gray-600 dark:text-gray-400">
             Se încarcă datele lunare...
           </p>
@@ -427,8 +426,7 @@ export default function MonthlyReportReview() {
   }
 
   return (
-    <DesignWorkWrapper componentName="MonthlyReportReview">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -946,7 +944,7 @@ export default function MonthlyReportReview() {
           message={`Ești sigur că vrei să aprobi ${bulkApprovalDialog.reportIds.length} rapoarte pentru trimitere? Acestea vor fi marcate ca pregătite pentru submisia către autorități.`}
           confirmText="Aprobă toate"
           cancelText="Anulează"
-          type="success"
+          type="info"
           loading={bulkApprovalDialog.loading}
         />
 
@@ -963,7 +961,7 @@ export default function MonthlyReportReview() {
           }`}
           confirmText="Creează lotul"
           cancelText="Anulează"
-          type="primary"
+          type="info"
           loading={submissionDialog.loading}
         />
 
@@ -1007,6 +1005,5 @@ export default function MonthlyReportReview() {
           )}
         </AnimatePresence>
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

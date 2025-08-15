@@ -17,28 +17,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  MessageCircle, 
   Send, 
   Bot, 
   User, 
   AlertTriangle, 
   Phone, 
-  Calendar,
-  FileText,
   Heart,
   Brain,
   Mic,
   MicOff,
-  Paperclip,
   X,
-  ChevronDown,
-  Clock
-} from 'lucide-react'
+  } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
-import { getAIService, ChatbotResponse, detectEmergency } from '../services/aiService'
+import { getAIService, detectEmergency } from '../services/aiService'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface ChatMessage {
   id: string
   content: string
@@ -62,7 +54,7 @@ interface PatientIntakeData {
 interface ChatbotInterfaceProps {
   isOpen: boolean
   onClose: () => void
-  onAppointmentRequest?: (data: any) => void
+  onAppointmentRequest?: (data: Record<string, unknown>) => void
   patientId?: string
 }
 
@@ -116,15 +108,29 @@ Cum vă pot ajuta astăzi?`,
     }
   }, [isOpen, user, messages.length])
 
-  // Handle user message submission
+  // Utility function to convert ChatMessage to Record format for AI service
+  const convertMessagesToRecord = useCallback((chatMessages: ChatMessage[]): Record<string, unknown>[] => {
+    return chatMessages.map(msg => ({
+      id: msg.id,
+      content: msg.content,
+      type: msg.type,
+      timestamp: msg.timestamp,
+      intent: msg.intent,
+      requiresAction: msg.requiresAction,
+      medicalDisclaimer: msg.medicalDisclaimer
+    }))
+  }, [])
+
+  // Handle send message
   const handleSendMessage = useCallback(async () => {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim() || isTyping) return
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: (Date.now() + 1).toString(),
       content: inputMessage,
       type: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      intent: 'user_input'
     }
 
     setMessages(prev => [...prev, userMessage])
@@ -158,7 +164,7 @@ Din descrierea dvs., pare că aveți simptome care necesită atenție medicală 
 
       // Process message with AI service
       // TODO: Replace with actual AI integration
-      const response = await aiService.processChatbotMessage(inputMessage, messages)
+      const response = await aiService.processChatbotMessage(inputMessage, convertMessagesToRecord(messages))
       
       const botMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
@@ -204,7 +210,7 @@ ${response.followUp.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
     } finally {
       setIsTyping(false)
     }
-  }, [inputMessage, messages, aiService])
+  }, [inputMessage, messages, aiService, isTyping, convertMessagesToRecord])
 
   // Handle enter key press
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -242,8 +248,7 @@ ${response.followUp.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
   if (!isOpen) return null
 
   return (
-    <DesignWorkWrapper componentName="ChatbotInterface">
-      <AnimatePresence>
+    <AnimatePresence>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -493,6 +498,5 @@ ${response.followUp.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
         </motion.div>
       </motion.div>
     </AnimatePresence>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -239,13 +239,13 @@ export class PatientNotificationPreferencesService {
   ): Promise<void> {
     try {
       const preferencesRef = doc(db, 'patientNotificationPreferences', patientId)
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         [`channels.${channel}.verified`]: true,
         [`channels.${channel}.verificationDate`]: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
       
-      await updateDoc(preferencesRef, updateData)
+      await updateDoc(preferencesRef, updateData as any)
     } catch (error) {
       console.error(`Error verifying ${channel} channel:`, error)
       throw new Error(`Nu s-a putut verifica canalul de ${channel}`)

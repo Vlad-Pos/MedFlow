@@ -4,19 +4,16 @@
  */
 
 import { motion } from 'framer-motion'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export const HeroBackground = () => (
-  <DesignWorkWrapper componentName="HeroBackground">
-    <div className="absolute inset-0 overflow-hidden">
+  <div className="absolute inset-0 overflow-hidden">
       {/* Futuristic gradient background with abstract shapes */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1d1f21] via-[#2a2d31] to-[#1d1f21]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-7)]" />
       
       {/* Abstract floating shapes */}
       <motion.div
         className="absolute top-20 left-20 w-96 h-96 rounded-full opacity-30"
         style={{
-          background: 'radial-gradient(circle, #ff7e5f 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--medflow-brand-1) 0%, transparent 70%)',
           filter: 'blur(40px)'
         }}
         animate={{
@@ -29,7 +26,7 @@ export const HeroBackground = () => (
       <motion.div
         className="absolute bottom-20 right-32 w-80 h-80 rounded-full opacity-25"
         style={{
-          background: 'radial-gradient(circle, #feb47b 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--medflow-brand-2) 0%, transparent 70%)',
           filter: 'blur(50px)'
         }}
         animate={{
@@ -42,7 +39,7 @@ export const HeroBackground = () => (
       <motion.div
         className="absolute top-60 right-20 w-64 h-64 rounded-full opacity-20"
         style={{
-          background: 'radial-gradient(circle, #4a9eff 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--medflow-brand-3) 0%, transparent 70%)',
           filter: 'blur(30px)'
         }}
         animate={{
@@ -52,17 +49,15 @@ export const HeroBackground = () => (
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
-  </DesignWorkWrapper>
-)
+  )
 
 export const ScrollEffectGraphics = () => (
-  <DesignWorkWrapper componentName="ScrollEffectGraphics">
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+  <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {/* Blurred gradient blobs with motion blur */}
       <motion.div
         className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full opacity-20"
         style={{
-          background: 'linear-gradient(45deg, #ff7e5f, #feb47b)',
+          background: 'linear-gradient(45deg, var(--medflow-brand-1), var(--medflow-brand-2))',
           filter: 'blur(20px)'
         }}
         animate={{
@@ -76,7 +71,7 @@ export const ScrollEffectGraphics = () => (
       <motion.div
         className="absolute top-3/4 right-1/4 w-24 h-24 rounded-full opacity-15"
         style={{
-          background: 'linear-gradient(135deg, #4a9eff, #b084cc)',
+          background: 'linear-gradient(135deg, var(--medflow-brand-3), var(--medflow-brand-1))',
           filter: 'blur(25px)'
         }}
         animate={{
@@ -87,35 +82,33 @@ export const ScrollEffectGraphics = () => (
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
-  </DesignWorkWrapper>
-)
+  )
 
 export const SectionIllustrations = ({ variant = 'workflow' }: { variant?: 'workflow' | 'automation' | 'data' }) => {
   const variants = {
     workflow: {
-      primary: '#ff7e5f',
-      secondary: '#feb47b',
-      accent: '#4a9eff'
+      primary: 'var(--medflow-brand-1)',
+      secondary: 'var(--medflow-brand-2)',
+      accent: 'var(--medflow-brand-3)'
     },
     automation: {
-      primary: '#4a9eff',
-      secondary: '#b084cc',
-      accent: '#ff7e5f'
+      primary: 'var(--medflow-brand-3)',
+      secondary: 'var(--medflow-brand-1)',
+      accent: 'var(--medflow-brand-2)'
     },
     data: {
-      primary: '#b084cc',
-      secondary: '#ff7e5f',
-      accent: '#feb47b'
+      primary: 'var(--medflow-brand-2)',
+      secondary: 'var(--medflow-brand-1)',
+      accent: 'var(--medflow-brand-3)'
     }
   }
   
   const colors = variants[variant]
   
   return (
-    <DesignWorkWrapper componentName="SectionIllustrations">
-      <div className="relative w-full h-32 overflow-hidden rounded-xl">
+    <div className="relative w-full h-32 overflow-hidden rounded-xl">
         {/* 3D isometric illustration effect with CSS */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1b1e] to-[#24262a]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--medflow-brand-7)] to-[var(--medflow-brand-6)]" />
         
         {/* Glowing edges effect */}
         <motion.div
@@ -157,31 +150,29 @@ export const SectionIllustrations = ({ variant = 'workflow' }: { variant?: 'work
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
-export const NeonIconSet = ({ icon: Icon, variant = 'primary' }: { icon: any, variant?: 'primary' | 'secondary' | 'accent' }) => {
+export const NeonIconSet = ({ icon: Icon, variant = 'primary' }: { icon: React.ComponentType<{ className?: string }>, variant?: 'primary' | 'secondary' | 'accent' }) => {
   const variants = {
     primary: {
-      gradient: 'from-[#ff7e5f] to-[#feb47b]',
-      glow: '#ff7e5f'
+      gradient: 'from-[var(--medflow-brand-1)] to-[var(--medflow-brand-2)]',
+      glow: 'var(--medflow-brand-1)'
     },
     secondary: {
-      gradient: 'from-[#4a9eff] to-[#b084cc]',
-      glow: '#4a9eff'
+      gradient: 'from-[var(--medflow-brand-3)] to-[var(--medflow-brand-1)]',
+      glow: 'var(--medflow-brand-3)'
     },
     accent: {
-      gradient: 'from-[#b084cc] to-[#ff7e5f]',
-      glow: '#b084cc'
+      gradient: 'from-[var(--medflow-brand-2)] to-[var(--medflow-brand-1)]',
+      glow: 'var(--medflow-brand-2)'
     }
   }
   
   const style = variants[variant]
   
   return (
-    <DesignWorkWrapper componentName="NeonIconSet">
-      <motion.div
+    <motion.div
         className={`relative w-16 h-16 rounded-xl bg-gradient-to-br ${style.gradient} p-4 flex items-center justify-center`}
         style={{
           boxShadow: `0 0 20px ${style.glow}40, 0 0 40px ${style.glow}20`
@@ -203,6 +194,5 @@ export const NeonIconSet = ({ icon: Icon, variant = 'primary' }: { icon: any, va
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+import { MedFlowLoader, SimpleLoader } from './ui'
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'dots' | 'pulse'
@@ -29,8 +28,7 @@ export default function LoadingSpinner({
 
   if (variant === 'dots') {
     return (
-      <DesignWorkWrapper componentName="LoadingSpinner">
-        <div className={`flex items-center justify-center space-x-1 ${className}`}>
+      <div className={`flex items-center justify-center space-x-1 ${className}`}>
           <motion.div
             className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
             animate={{
@@ -75,14 +73,12 @@ export default function LoadingSpinner({
             </span>
           )}
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
 
   if (variant === 'pulse') {
     return (
-      <DesignWorkWrapper componentName="LoadingSpinner">
-        <div className={`flex items-center justify-center ${className}`}>
+      <div className={`flex items-center justify-center ${className}`}>
           <motion.div
             className={`bg-medflow-primary rounded-full ${sizeClasses[size]}`}
             animate={{
@@ -101,13 +97,11 @@ export default function LoadingSpinner({
             </span>
           )}
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
 
   return (
-    <DesignWorkWrapper componentName="LoadingSpinner">
-      <div className={`flex items-center justify-center ${className}`}>
+    <div className={`flex items-center justify-center ${className}`}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{
@@ -124,22 +118,19 @@ export default function LoadingSpinner({
           </span>
         )}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Route loading component
 export function RouteLoadingSpinner() {
   return (
-    <DesignWorkWrapper componentName="RouteLoadingSpinner">
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
-          <LoadingSpinner size="lg" text="Se încarcă..." />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Vă rugăm să așteptați...
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+            Se încarcă...
           </p>
         </div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

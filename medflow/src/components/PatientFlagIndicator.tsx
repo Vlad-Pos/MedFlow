@@ -13,19 +13,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Flag, 
   AlertTriangle, 
-  User, 
-  Calendar, 
   Clock, 
   Eye,
   X,
   ExternalLink
 } from 'lucide-react'
-import { PatientFlagSummary, PatientFlag } from '../types/patientFlagging'
+import { PatientFlagSummary, } from '../types/patientFlagging'
 import PatientFlaggingService from '../services/patientFlagging'
 import { formatDistanceToNow } from 'date-fns'
 import { ro } from 'date-fns/locale'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface PatientFlagIndicatorProps {
   patientId: string
   patientName: string
@@ -147,7 +143,7 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
           <div className="flex items-center text-sm text-gray-600">
             <Clock className="w-4 h-4 mr-2" />
             <span>
-              Ultima semnalizare: {formatDistanceToNow(summary.lastFlagDate.toDate(), { 
+              Ultima semnalizare: {formatDistanceToNow(summary.lastFlagDate?.toDate(), { 
                 locale: ro, 
                 addSuffix: true 
               })}
@@ -248,8 +244,7 @@ export default function PatientFlagIndicator({
    */
   if (mode === 'badge') {
     return (
-      <DesignWorkWrapper componentName="PatientFlagIndicator">
-        <div className={`relative inline-flex ${className}`}>
+      <div className={`relative inline-flex ${className}`}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             onMouseEnter={handleMouseEnter}
@@ -271,8 +266,7 @@ export default function PatientFlagIndicator({
             )}
           </AnimatePresence>
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
   
   /**
@@ -280,8 +274,7 @@ export default function PatientFlagIndicator({
    */
   if (mode === 'inline') {
     return (
-      <DesignWorkWrapper componentName="PatientFlagIndicator">
-        <div className={`relative inline-flex items-center ${className}`}>
+      <div className={`relative inline-flex items-center ${className}`}>
           <motion.div
             whileHover={{ scale: 1.02 }}
             onMouseEnter={handleMouseEnter}
@@ -307,16 +300,14 @@ export default function PatientFlagIndicator({
             )}
           </AnimatePresence>
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
   
   /**
    * Render full mode (detailed view)
    */
   return (
-    <DesignWorkWrapper componentName="PatientFlagIndicator">
-      <div className={`${className}`}>
+    <div className={`${className}`}>
         <div className={`p-4 border rounded-lg ${getFlagColor()}`}>
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center space-x-3">
@@ -353,7 +344,7 @@ export default function PatientFlagIndicator({
             <div className="flex items-center text-sm opacity-75 mb-3">
               <Clock className="w-4 h-4 mr-2" />
               <span>
-                Ultima semnalizare: {formatDistanceToNow(flagSummary.lastFlagDate.toDate(), { 
+                Ultima semnalizare: {formatDistanceToNow(flagSummary.lastFlagDate?.toDate(), { 
                   locale: ro, 
                   addSuffix: true 
                 })}
@@ -372,6 +363,5 @@ export default function PatientFlagIndicator({
           )}
         </div>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

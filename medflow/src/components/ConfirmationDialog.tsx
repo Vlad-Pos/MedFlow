@@ -14,8 +14,6 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Trash2, X, CheckCircle } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface ConfirmationDialogProps {
   isOpen: boolean
   onClose: () => void
@@ -85,8 +83,7 @@ export default function ConfirmationDialog({
   }
 
   return (
-    <DesignWorkWrapper componentName="ConfirmationDialog">
-      <AnimatePresence>
+    <AnimatePresence>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -164,8 +161,7 @@ export default function ConfirmationDialog({
           </motion.div>
         </motion.div>
       </AnimatePresence>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 /**
@@ -190,8 +186,7 @@ export function DeleteAppointmentDialog({
   if (!isOpen) return null
 
   return (
-    <DesignWorkWrapper componentName="DeleteAppointmentDialog">
-      <AnimatePresence>
+    <AnimatePresence>
         <ConfirmationDialog
           isOpen={isOpen}
           onClose={onClose}
@@ -208,8 +203,7 @@ export function DeleteAppointmentDialog({
           loading={loading}
         />
       </AnimatePresence>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 interface CompleteAppointmentDialogProps {
@@ -230,8 +224,7 @@ export function CompleteAppointmentDialog({
   if (!isOpen) return null
 
   return (
-    <DesignWorkWrapper componentName="CompleteAppointmentDialog">
-      <AnimatePresence>
+    <AnimatePresence>
         <ConfirmationDialog
           isOpen={isOpen}
           onClose={onClose}
@@ -248,6 +241,5 @@ export function CompleteAppointmentDialog({
           loading={loading}
         />
       </AnimatePresence>
-    </DesignWorkWrapper>
-  )
+    )
 }

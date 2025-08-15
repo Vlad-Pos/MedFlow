@@ -9,13 +9,18 @@
 
 ## 2. Branding Principles
 - **Brand Colors (in order - HIGH IMPORTANCE):**
-  - #A18AB2
-  - #9280A5
-  - #847697
-  - #756C8A
-  - #66627D
-  - #58586F
-  - #494E62
+  - #8A7A9F (Logo Color)
+- #000000 (Pure Black)
+- #100B1A (Really Deep Purple)
+- #7A48BF (Basic Purple V1)
+- #804AC8 (Basic Purple V2)
+- #25153A (Dark Purple)
+- #FFFFFF (Pure White)
+- #CCCCCC (Toned Grey)
+- #231A2F (Plum Purple)
+- #BFBFBF (Light Grey)
+- #A6A6A6 (Medium Grey)
+- #737373 (Dark Grey)
 - These colors are of **high importance and must be preserved**. When extending the palette, use closely related shades for harmony.
 - Maintain branding consistency across all platforms, ensuring the website and app feel like a unified product.
 

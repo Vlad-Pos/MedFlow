@@ -17,12 +17,9 @@ import AIChat from './AIChat'
 import { motion } from 'framer-motion'
 import { fadeInVariants } from '../utils/animations'
 import { Brain, MessageCircle, Calendar, Heart, Languages, Zap } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export default function ChatbotPlaceholder() {
   return (
-    <DesignWorkWrapper componentName="ChatbotPlaceholder">
-      <motion.section
+    <motion.section
         variants={fadeInVariants}
         initial="initial"
         animate="animate"
@@ -112,6 +109,5 @@ export default function ChatbotPlaceholder() {
           </div>
         </motion.div>
       </motion.section>
-    </DesignWorkWrapper>
-  )
+    )
 }

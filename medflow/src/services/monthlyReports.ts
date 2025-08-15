@@ -18,7 +18,6 @@ import {
   doc,
   addDoc,
   updateDoc,
-  deleteDoc,
   getDoc,
   getDocs,
   query,
@@ -46,8 +45,7 @@ import {
   AuditEntry,
   ReportStatus,
   SubmissionStatus,
-  AmendmentStatus
-} from '../types/patientReports'
+  } from '../types/patientReports'
 import { isDemoMode } from '../utils/demo'
 
 // ==========================================
@@ -68,12 +66,13 @@ const GOVERNMENT_SUBMISSION_DEADLINE_DAY = 10 // 10th of each month
 // DEMO DATA
 // ==========================================
 
-let demoMonthlyReports: PatientReport[] = []
-let demoAmendmentRequests: AmendmentRequest[] = []
-let demoSubmissionBatches: SubmissionBatch[] = []
-let demoMonthlySubscribers: ((data: any) => void)[] = []
+const demoMonthlyReports: PatientReport[] = []
+const demoAmendmentRequests: AmendmentRequest[] = []
+const demoSubmissionBatches: SubmissionBatch[] = []
+// Demo subscribers for development
+const demoMonthlySubscribers: Array<(data: Record<string, unknown>) => void> = []
 
-function notifyDemoSubscribers(data: any) {
+function notifyDemoSubscribers(data: Record<string, unknown>) {
   demoMonthlySubscribers.forEach(callback => callback(data))
 }
 
@@ -113,7 +112,7 @@ function createAmendmentAuditEntry(
   action: AuditEntry['action'],
   userId: string,
   userRole: 'doctor' | 'nurse' | 'admin',
-  changes?: Record<string, { from: any; to: any }>,
+  changes?: Record<string, { from: unknown; to: unknown }>,
   amendmentReason?: string,
   reviewComments?: string
 ): Omit<AuditEntry, 'id'> {
@@ -217,7 +216,7 @@ export async function getMonthlyReportSummary(
     }
 
     // Cache the summary
-    await updateDoc(doc(db, COLLECTIONS.MONTHLY_SUMMARIES, `${doctorId}_${month}`), summary)
+    await updateDoc(doc(db, COLLECTIONS.MONTHLY_SUMMARIES, `${doctorId}_${month}`), summary as any)
 
     return summary
   } catch (error) {
@@ -331,14 +330,16 @@ export function subscribeToMonthlyReports(
   callback: (reports: PatientReport[]) => void
 ): () => void {
   if (isDemoMode()) {
-    demoMonthlySubscribers.push(callback)
-    const monthReports = demoMonthlyReports.filter(r => 
-      r.doctorId === doctorId && r.reportMonth === month
-    )
-    callback(monthReports)
+    // Convert callback to expected type
+    const wrappedCallback = (data: Record<string, unknown>) => {
+      if (data.reports && Array.isArray(data.reports)) {
+        callback(data.reports as PatientReport[])
+      }
+    }
+    demoMonthlySubscribers.push(wrappedCallback)
     
     return () => {
-      const index = demoMonthlySubscribers.indexOf(callback)
+      const index = demoMonthlySubscribers.indexOf(wrappedCallback)
       if (index > -1) {
         demoMonthlySubscribers.splice(index, 1)
       }
@@ -374,7 +375,7 @@ export function subscribeToMonthlyReports(
 export async function createAmendmentRequest(
   reportId: string,
   reason: string,
-  proposedChanges: Record<string, any>,
+  proposedChanges: Record<string, unknown>,
   requestedBy: string,
   userRole: 'doctor' | 'nurse' = 'doctor',
   deadline?: Date
@@ -526,7 +527,7 @@ export async function applyAmendments(
         timestamp: Timestamp.now(),
         createdBy: userId,
         createdByRole: userRole,
-        changes: request.proposedChanges,
+        changes: request.proposedChanges as Record<string, { from: unknown; to: unknown }>,
         reason: request.reason,
         isActive: true,
         parentVersionId: `version_${report.currentVersion}`
@@ -535,7 +536,7 @@ export async function applyAmendments(
       // Apply changes to report
       Object.keys(request.proposedChanges).forEach(key => {
         if (key in report) {
-          (report as any)[key] = request.proposedChanges[key]
+          (report as unknown as Record<string, unknown>)[key] = request.proposedChanges[key]
         }
       })
 
@@ -549,7 +550,7 @@ export async function applyAmendments(
         auditTrail: [
           ...report.auditTrail,
           {
-            ...createAmendmentAuditEntry('amended', userId, userRole, request.proposedChanges, request.reason),
+            ...createAmendmentAuditEntry('amended', userId, userRole, request.proposedChanges as Record<string, { from: unknown; to: unknown }>, request.reason),
             id: `audit_${Date.now()}`
           }
         ]
@@ -586,7 +587,7 @@ export async function applyAmendments(
         timestamp: serverTimestamp() as Timestamp,
         createdBy: userId,
         createdByRole: userRole,
-        changes: requestData.proposedChanges,
+        changes: requestData.proposedChanges as Record<string, { from: unknown; to: unknown }>,
         reason: requestData.reason,
         isActive: true,
         parentVersionId: `version_${reportData.currentVersion}`
@@ -598,7 +599,7 @@ export async function applyAmendments(
       const updatedData = { ...reportData }
       Object.keys(requestData.proposedChanges).forEach(key => {
         if (key in updatedData) {
-          (updatedData as any)[key] = requestData.proposedChanges[key]
+          (updatedData as Record<string, unknown>)[key] = requestData.proposedChanges[key]
         }
       })
 
@@ -612,7 +613,7 @@ export async function applyAmendments(
         auditTrail: [
           ...reportData.auditTrail,
           {
-            ...createAmendmentAuditEntry('amended', userId, userRole, requestData.proposedChanges, requestData.reason),
+            ...createAmendmentAuditEntry('amended', userId, userRole, requestData.proposedChanges as Record<string, { from: unknown; to: unknown }>, requestData.reason),
             id: `audit_${Date.now()}`
           }
         ]
@@ -687,13 +688,19 @@ export async function createSubmissionBatch(
   notes?: string
 ): Promise<string> {
   try {
-    const batchData: Omit<SubmissionBatch, 'id'> = {
+        const batchData: Omit<SubmissionBatch, 'id'> = {
       month,
       createdBy,
       createdAt: Timestamp.now(),
       reportIds,
       status: 'preparing',
-      notes
+      notes,
+      gdprCompliant: true,
+      retryCount: 0,
+      maxRetries: 3,
+      submissionMethod: 'manual',
+      submissionLog: [],
+      dataAnonymized: false
     }
 
     if (isDemoMode()) {

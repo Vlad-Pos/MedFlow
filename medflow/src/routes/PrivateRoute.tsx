@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { MedFlowLoader, SimpleLoader } from '../components/ui'
 import { isDemoMode } from '../utils/demo'
 
 export default function PrivateRoute() {
@@ -10,8 +11,13 @@ export default function PrivateRoute() {
   // Show loading spinner while checking authentication state
   if (initializing) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <LoadingSpinner text="Se încarcă..." />
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="loader mb-4"></div>
+          <p className="text-6xl font-bold text-[#6F6280]">
+            medflow
+          </p>
+        </div>
       </div>
     )
   }

@@ -112,7 +112,7 @@ export function validateEmail(email: string): AuthValidationResult {
   if (domainPart) {
     // Check for common domain issues
     if (domainPart.includes('..') || domainPart.startsWith('.') || domainPart.endsWith('.')) {
-      errors.push(AUTH_ERRORS.DOMAIN_INVALID)
+      errors.push(AUTH_ERRORS.EMAIL_INVALID)
     }
     
     // Warn about temporary email providers (optional)

@@ -26,25 +26,17 @@ import {
   Calendar,
   FileText,
   Activity,
-  Zap,
-  Shield,
-  Server,
   Timer,
-  Settings,
   Play,
-  Pause,
   RotateCcw,
   AlertOctagon,
   CheckSquare,
-  Info
-} from 'lucide-react'
+  } from 'lucide-react'
 import {
-  SubmissionBatch,
   SubmissionReceipt,
   SubmissionLogEntry,
   SubmissionStatus,
-  SubmissionQueue
-} from '../types/patientReports'
+  } from '../types/patientReports'
 import {
   getSubmissionStatus,
   subscribeToSubmissionUpdates,
@@ -58,11 +50,9 @@ import {
 } from '../services/governmentSubmission'
 import { useAuth } from '../providers/AuthProvider'
 import LoadingSpinner from './LoadingSpinner'
-import { showNotification } from './Notification'
+import { useNotification } from '../hooks/useNotification'
 import ConfirmationDialog from './ConfirmationDialog'
 import { formatDateTime } from '../utils/dateUtils'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface SubmissionStatusManagerProps {
   batchId?: string
   onClose?: () => void
@@ -84,6 +74,7 @@ export default function SubmissionStatusManager({
   showFullInterface = true
 }: SubmissionStatusManagerProps) {
   const { user } = useAuth()
+  const { showSuccess, showError, showWarning, showInfo } = useNotification()
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('not_ready')
   const [submissionLog, setSubmissionLog] = useState<SubmissionLogEntry[]>([])
   const [receipt, setReceipt] = useState<SubmissionReceipt | undefined>()
@@ -126,7 +117,7 @@ export default function SubmissionStatusManager({
       setNextRetryAt(statusData.nextRetryAt)
     } catch (error) {
       console.error('Error loading submission data:', error)
-              showNotification.error('Eroare la încărcarea datelor de trimitere')
+      showError('Eroare la încărcarea datelor de trimitere')
     } finally {
       setIsLoading(false)
     }
@@ -188,12 +179,12 @@ export default function SubmissionStatusManager({
 
     try {
       await retryFailedSubmission(batchId, user.uid, 'doctor')
-              showNotification.success('Reîncercarea a fost inițiată cu succes')
+      showSuccess('Reîncercarea a fost inițiată cu succes')
       setRetryDialog({ isOpen: false, loading: false })
       loadSubmissionData()
     } catch (error) {
       console.error('Error retrying submission:', error)
-              showNotification.error('Eroare la reîncercarea trimiterii')
+      showError('Eroare la reîncercarea trimiterii')
       setRetryDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -204,12 +195,12 @@ export default function SubmissionStatusManager({
     try {
       await scheduleAutomaticSubmission()
       await processSubmissionQueue()
-              showNotification.success('Trimiterea automată a fost programată cu succes')
+      showSuccess('Trimiterea automată a fost programată cu succes')
       setScheduleDialog({ isOpen: false, loading: false })
       loadStatistics()
     } catch (error) {
       console.error('Error scheduling submission:', error)
-              showNotification.error('Eroare la programarea trimiterii automate')
+      showError('Eroare la programarea trimiterii automate')
       setScheduleDialog(prev => ({ ...prev, loading: false }))
     }
   }
@@ -280,22 +271,19 @@ export default function SubmissionStatusManager({
 
   if (isLoading && batchId) {
     return (
-      <DesignWorkWrapper componentName="SubmissionStatusManager">
-        <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-8">
           <div className="text-center">
-            <LoadingSpinner size="lg" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
+            <div className="loader mb-4"></div>
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
               Se încarcă statusul trimiterii...
             </p>
           </div>
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
 
   return (
-    <DesignWorkWrapper componentName="SubmissionStatusManager">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -333,7 +321,7 @@ export default function SubmissionStatusManager({
               </div>
             </div>
 
-            {/* Submission Period Info */}
+            {/* Submission Period */}
             {nextPeriod && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
@@ -636,10 +624,9 @@ export default function SubmissionStatusManager({
           message="Ești sigur că vrei să programezi trimiterea automată pentru toate loturile pregătite? Această acțiune va procesa coada de trimitere."
           confirmText="Programează trimiterea"
           cancelText="Anulează"
-          type="primary"
+          type="info"
           loading={scheduleDialog.loading}
         />
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -12,10 +12,8 @@
  */
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle2, XCircle, } from 'lucide-react'
 import { analyzePasswordStrength, type PasswordStrength } from '../../utils/authValidation'
-import DesignWorkWrapper from '../../../DesignWorkWrapper'
-
 interface PasswordStrengthIndicatorProps {
   password: string
   showRequirements?: boolean
@@ -55,8 +53,7 @@ export default function PasswordStrengthIndicator({
   }
 
   return (
-    <DesignWorkWrapper componentName="PasswordStrengthIndicator">
-      <div className={`space-y-3 ${className}`} role="region" aria-label="Indicarea puterii parolei">
+    <div className={`space-y-3 ${className}`} role="region" aria-label="Indicarea puterii parolei">
         {/* Strength bar and feedback */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
@@ -110,8 +107,7 @@ export default function PasswordStrengthIndicator({
           </motion.div>
         )}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 /**

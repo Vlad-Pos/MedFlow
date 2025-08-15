@@ -19,8 +19,6 @@ import {
   collection,
   doc,
   addDoc,
-  updateDoc,
-  deleteDoc,
   getDoc,
   getDocs,
   query,
@@ -41,14 +39,11 @@ import {
   PatientReport,
   ReportFormData,
   ReportFilters,
-  ReportSearchQuery,
   ReportSummary,
   ReportStatistics,
   ReportTemplate,
-  VoiceTranscription,
   AuditEntry,
   ReportValidation,
-  ReportError,
   ReportValidationError,
   ReportStatus,
   ValidationStatus
@@ -190,8 +185,8 @@ function createAuditEntry(
   action: AuditEntry['action'],
   userId: string,
   userRole: 'doctor' | 'nurse' | 'admin',
-  changes?: Record<string, { from: any; to: any }>,
-  metadata?: Record<string, any>
+  changes?: Record<string, { from: unknown; to: unknown }>,
+  metadata?: Record<string, unknown>
 ): Omit<AuditEntry, 'id'> {
   return {
     timestamp: Timestamp.now(),
@@ -207,8 +202,8 @@ function createAuditEntry(
 // DEMO MODE SUPPORT
 // ==========================================
 
-let demoReports: PatientReport[] = []
-let demoReportSubscribers: ((reports: PatientReport[]) => void)[] = []
+const demoReports: PatientReport[] = []
+const demoReportSubscribers: ((reports: PatientReport[]) => void)[] = []
 
 function notifyDemoSubscribers() {
   demoReportSubscribers.forEach(callback => callback([...demoReports]))
@@ -259,8 +254,14 @@ export async function createReport(
         medications: formData.currentMedications || [],
         
         vitalSigns: formData.vitalSigns,
-        physicalExamination: formData.physicalExamination || { general: '', systems: {} },
-        diagnosis: formData.diagnosis || { primary: '', confidence: 'medium' },
+        physicalExamination: {
+          general: formData.physicalExamination?.general || '',
+          systems: formData.physicalExamination?.systems || {}
+        },
+        diagnosis: {
+          primary: formData.diagnosis?.primary || '',
+          confidence: formData.diagnosis?.confidence || 'medium'
+        },
         prescribedMedications: formData.prescribedMedications?.map((med, index) => ({
           id: `med_${Date.now()}_${index}`,
           name: med.name || '',
@@ -269,7 +270,10 @@ export async function createReport(
           duration: med.duration || '',
           instructions: med.instructions || ''
         })) || [],
-        treatmentPlan: formData.treatmentPlan || { immediate: [], followUp: [] },
+        treatmentPlan: {
+          immediate: formData.treatmentPlan?.immediate || [],
+          followUp: formData.treatmentPlan?.followUp || []
+        },
         
         additionalNotes: formData.additionalNotes,
         recommendations: formData.recommendations || [],
@@ -338,7 +342,7 @@ export async function updateReport(
         validationStatus: validation.status
       })
 
-      const updatedReport: PatientReport = {
+      const updatedReport = {
         ...existingReport,
         ...formData,
         version: existingReport.version + 1,
@@ -347,7 +351,7 @@ export async function updateReport(
         auditTrail: [...existingReport.auditTrail, { ...auditEntry, id: `audit_${Date.now()}` }]
       }
 
-      demoReports[reportIndex] = updatedReport
+      demoReports[reportIndex] = updatedReport as any
       notifyDemoSubscribers()
       return
     }
@@ -634,7 +638,7 @@ export function subscribeToReports(
     }
   }
 
-  let q = query(
+  const q = query(
     collection(db, COLLECTIONS.REPORTS),
     where('doctorId', '==', doctorId),
     orderBy('updatedAt', 'desc')
@@ -766,11 +770,11 @@ export async function getReportStatistics(doctorId: string): Promise<ReportStati
       const byPriority = doctorReports.reduce((acc, report) => {
         acc[report.priority] = (acc[report.priority] || 0) + 1
         return acc
-      }, {} as any)
+      }, {} as Record<string, number>)
 
       return {
         total: doctorReports.length,
-        byStatus: { draft: 0, final: 0, archived: 0, ...byStatus },
+        byStatus: { ...byStatus, draft: 0, final: 0, archived: 0, submitted: 0, under_review: 0, ready_for_submission: 0 },
         byPriority: { low: 0, normal: 0, high: 0, urgent: 0, ...byPriority },
         avgCompletionTime: 2.5, // Demo value
         pendingDrafts: byStatus.draft || 0,
@@ -782,7 +786,7 @@ export async function getReportStatistics(doctorId: string): Promise<ReportStati
     // For now, return demo statistics
     return {
       total: 0,
-      byStatus: { draft: 0, final: 0, archived: 0 },
+      byStatus: { draft: 0, final: 0, archived: 0, submitted: 0, under_review: 0, ready_for_submission: 0 },
       byPriority: { low: 0, normal: 0, high: 0, urgent: 0 },
       avgCompletionTime: 0,
       pendingDrafts: 0,

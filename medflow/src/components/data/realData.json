@@ -1,0 +1,157 @@
+{
+  "company": {
+    "name": "MedFlow",
+    "tagline": "Revoluționăm medicina prin inteligența artificială și automatizare avansată",
+    "description": "Platforma medicală de ultimă generație care transformă radical modul în care conduceți cabinetul dumneavoastră. Interface medicală intuitivă, funcționalități de nivel enterprise, rezultate imediate și măsurabile.",
+    "location": "București, România",
+    "email": "contact@medflow.care",
+    "phone": "+40 21 XXX XXXX",
+    "founded": "2024",
+    "status": "Beta+ - Acces exclusiv pentru medicii selectați"
+  },
+  "features": {
+    "current": [
+      {
+        "icon": "Calendar",
+        "title": "Calendar Medical Inteligent",
+        "description": "Sistem de programări cu AI medical avansat, predicții inteligente pentru optimizarea timpului, notificări automate personalizate și interface medicală intuitivă. Transformați gestionarea programărilor dintr-o corvoadă în proces automat și eficient.",
+        "benefit": "Funcțional în versiunea beta - Acces complet inclus",
+        "status": "implemented"
+      },
+      {
+        "icon": "Users",
+        "title": "Gestionare Avansată Pacienți",
+        "description": "Dosare medicale digitale complete cu istoric detaliat multicriterii, căutare medicală inteligentă și organizare automată prin AI. Toate informațiile critice despre pacienți accesibile instant într-un singur click.",
+        "benefit": "Funcționalități medicale esențiale - Totul inclus",
+        "status": "implemented"
+      },
+      {
+        "icon": "FileText",
+        "title": "Raportare Medicală Automată",
+        "description": "Generare automată de rapoarte medicale profesionale cu export în formate multiple standard. Creare instantanee pentru DSP, CNAS și toate autoritățile medicale relevante, conform legislației în vigoare.",
+        "benefit": "Export profesional medical - Conformitate garantată",
+        "status": "implemented"
+      },
+      {
+        "icon": "BarChart3",
+        "title": "Analize Medicale Avansate",
+        "description": "Dashboard analitic medical cu metrici detaliate de performanță, insights AI pentru optimizarea practicii și rapoarte de eficiență. Vizualizare intuitivă a datelor esențiale pentru creșterea performanței medicale.",
+        "benefit": "Metrici medicale profesionale - Analiză completă",
+        "status": "implemented"
+      }
+    ],
+    "planned": [
+      "Integrare cu sisteme medicale",
+      "Notificări SMS și email",
+      "Gestionare avansată documente",
+      "Analiză AI pentru programări",
+      "API pentru dezvoltatori"
+    ]
+  },
+  "metrics": [
+    {
+      "number": "<15min",
+      "label": "Setup complet al platformei",
+      "icon": "Clock",
+      "description": "Configurarea integrală a întregii platforme medicale în sub 15 minute, inclusiv importul datelor existente. Simplu, rapid și ghidat pas cu pas de experții noștri."
+    },
+    {
+      "number": "Beta+",
+      "label": "Versiune avansată disponibilă",
+      "icon": "CheckCircle",
+      "description": "Platforma se află în faza beta avansată cu funcționalități complete și acces exclusiv pentru medicii selectați în programul pilot"
+    },
+    {
+      "number": "100%",
+      "label": "Conformitate GDPR și legislație medicală",
+      "icon": "Shield",
+      "description": "Conformitate GDPR medicală 100% garantată prin audit extern independent și verificare anuală. Respectarea integrală a legislației medicale române și europene cu documentație juridică completă."
+    },
+    {
+      "number": "<12h",
+      "label": "Răspuns suport medical garantat",
+      "icon": "BarChart3",
+      "description": "Suport tehnic medical specializat cu răspuns garantat în mai puțin de 12 ore. Echipa noastră de experți medicali și IT este disponibilă pentru dumneavoastră."
+    }
+  ],
+  "security": {
+    "certifications": [
+      {
+        "label": "GDPR",
+        "status": "Compliant",
+        "color": "text-green-600",
+        "description": "Conformitate GDPR medicală 100% garantată prin audit extern independent efectuat de specialiști în legislația medicală română. Protecția datelor pacienților respectă cele mai stricte standarde europene și naționale."
+      },
+      {
+        "label": "ISO 27001",
+        "status": "Certificat",
+        "color": "text-blue-600",
+        "description": "Certificați ISO 27001 pentru securitatea informațiilor medicale cu audit anual independent și monitorizare continuă 24/7/365. Securitatea datelor medicale la cel mai înalt standard internațional cu SLA garantat de 99.98%."
+      },
+      {
+        "label": "AES-256",
+        "status": "Criptat",
+        "color": "text-purple-600",
+        "description": "Toate datele medicale sensibile sunt protejate prin criptare militară AES-256 bit cu chei de securitate rotative automat. Protecție maximă pentru informațiile confidențiale ale pacienților conform standardelor NATO și UE."
+      },
+      {
+        "label": "Uptime",
+        "status": "99.98%",
+        "color": "text-orange-600",
+        "description": "Disponibilitate garantată a sistemului cu monitorizare continuă și SLA contractual."
+      }
+    ],
+    "features": [
+      {
+        "icon": "Shield",
+        "title": "Conformitate GDPR Medicală Certificată",
+        "description": "Conformitate GDPR medicală 100% garantată prin audit extern independent efectuat de specialiști în legislația medicală română. Protecția datelor pacienților respectă cele mai stricte standarde europene și naționale. Documentație completă și consultanță juridică medicală inclusă."
+      },
+      {
+        "icon": "Lock",
+        "title": "Criptare Militară AES-256 pentru Date Medicale",
+        "description": "Toate datele medicale sensibile sunt protejate prin criptare militară AES-256 bit cu chei de securitate rotative automat. Protecție maximă pentru informațiile confidențiale ale pacienților conform standardelor NATO și UE."
+      },
+      {
+        "icon": "Award",
+        "title": "Certificări Medicale Internaționale",
+        "description": "Certificați ISO 27001 pentru securitatea informațiilor medicale cu audit anual independent și monitorizare continuă 24/7/365. Securitatea datelor medicale la cel mai înalt standard internațional cu SLA garantat de 99.98%."
+      }
+    ]
+  },
+  "earlyAccess": {
+    "benefits": [
+      {
+        "title": "Acces prioritar",
+        "desc": "Acces exclusiv la toate funcționalitățile noi înainte de lansare. Contribuiți la dezvoltarea soluției perfecte pentru medicină.",
+        "icon": "⚡"
+      },
+      {
+        "title": "Suport dedicat",
+        "desc": "Suport tehnic personalizat direct de la echipa de dezvoltare. Configurare asistată și training personal pentru utilizarea optimă.",
+        "icon": "🛠️"
+      },
+      {
+        "title": "Preț redus",
+        "desc": "Tarife preferențiale pentru early adopters când platforma va fi lansată oficial",
+        "icon": "💰"
+      }
+    ]
+  },
+  "demo": {
+    "available": [
+      "Calendar cu programări interactive",
+      "Gestionare informații pacienți",
+      "Export rapoarte în CSV/PDF",
+      "Dashboard cu metrici esențiale",
+      "Sincronizare în timp real"
+    ],
+    "inDevelopment": [
+      "Integrare cu sisteme medicale",
+      "Notificări SMS și email",
+      "Gestionare avansată documente",
+      "Analiză AI pentru programări",
+      "API pentru dezvoltatori"
+    ]
+  }
+}

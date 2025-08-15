@@ -18,13 +18,12 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Timestamp, addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../providers/AuthProvider'
-import { isDemoMode, addDemoAppointment, updateDemoAppointment, getDemoAppointments } from '../utils/demo'
+import { isDemoMode, addDemoAppointment, updateDemoAppointment, getDemoAppointments, DemoAppointment } from '../utils/demo'
 import { motion, AnimatePresence } from 'framer-motion'
 import NotificationSchedulerService from '../services/notificationScheduler'
 import { AppointmentWithNotifications } from '../types/notifications'
 import { 
   User, 
-  Calendar, 
   Clock, 
   FileText, 
   AlertCircle, 
@@ -50,14 +49,9 @@ import {
   AppointmentFormErrors
 } from '../utils/appointmentValidation'
 import { 
-  MedicalTextInput, 
-  MedicalTextArea, 
-  MedicalDateTimeInput, 
-  MedicalSelectInput 
-} from './AppointmentFormInput'
+  FormInput
+} from './forms'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
 export interface Appointment {
@@ -81,6 +75,14 @@ interface AppointmentFormProps {
     symptoms?: string
     notes?: string
   }
+}
+
+// Define the AI analysis type
+interface AIAnalysis {
+  severity?: 'low' | 'medium' | 'high' | 'urgent'
+  suggestions?: string[]
+  redFlags?: string[]
+  relatedConditions?: string[]
 }
 
 export default function AppointmentForm({ 
@@ -108,7 +110,7 @@ export default function AppointmentForm({
   const [submitSuccess, setSubmitSuccess] = useState(false)
   
   // AI features state (for future implementation)
-  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null)
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [optimalTimes, setOptimalTimes] = useState<string[]>([])
   
@@ -120,7 +122,7 @@ export default function AppointmentForm({
     async function loadAppointment() {
       if (!appointmentId) {
         // Initialize with optimal time suggestions for new appointments
-        const suggestions = suggestOptimalAppointmentTimes()
+        const suggestions = await suggestOptimalAppointmentTimes()
         setOptimalTimes(suggestions)
         return
       }
@@ -130,16 +132,16 @@ export default function AppointmentForm({
       
       try {
         if (isDemoMode()) {
-          const demoAppointments = getDemoAppointments()
-          const appointment = demoAppointments.find(a => a.id === appointmentId)
+          const demoAppointments = await getDemoAppointments()
+          const appointment = demoAppointments.find((a: any) => a.id === appointmentId)
           if (appointment) {
-            const appointmentDate = new Date(appointment.dateTime?.toDate?.() || appointment.dateTime)
+            const appointmentDate = new Date(appointment.dateTime)
             const dateTimeString = formatDateForInput(appointmentDate) + 'T' + appointmentDate.toTimeString().slice(0, 5)
             
             setFormData({
               patientName: appointment.patientName || '',
-              patientEmail: appointment.patientEmail || '',
-              patientPhone: appointment.patientPhone || '',
+              patientEmail: '', // Demo appointments don't have email
+              patientPhone: '', // Demo appointments don't have phone
               dateTime: dateTimeString,
               symptoms: appointment.symptoms || '',
               notes: appointment.notes || '',
@@ -153,17 +155,17 @@ export default function AppointmentForm({
           const snap = await getDoc(ref)
           
           if (snap.exists()) {
-            const data = snap.data() as any
-            const appointmentDate = new Date(data.dateTime?.toDate?.() || data.dateTime)
+            const data = snap.data() as Record<string, unknown>
+            const appointmentDate = new Date(data.dateTime as Date)
             const dateTimeString = formatDateForInput(appointmentDate) + 'T' + appointmentDate.toTimeString().slice(0, 5)
             
             setFormData({
-              patientName: data.patientName || '',
-              patientEmail: data.patientEmail || '',
-              patientPhone: data.patientPhone || '',
+              patientName: (data.patientName as string) || '',
+              patientEmail: (data.patientEmail as string) || '',
+              patientPhone: (data.patientPhone as string) || '',
               dateTime: dateTimeString,
-              symptoms: data.symptoms || '',
-              notes: data.notes || '',
+              symptoms: (data.symptoms as string) || '',
+              notes: (data.notes as string) || '',
               status: (data.status as AppointmentStatus) || 'scheduled'
             })
           } else {
@@ -192,8 +194,11 @@ export default function AppointmentForm({
   // AI symptom analysis (placeholder for future AI integration)
   useEffect(() => {
     if (formData.symptoms.length > 20) {
-      const analysis = analyzeSymptoms(formData.symptoms)
-      setAiAnalysis(analysis)
+      const analyzeAndSet = async () => {
+        const analysis = await analyzeSymptoms(formData.symptoms)
+        setAiAnalysis(analysis)
+      }
+      analyzeAndSet()
     } else {
       setAiAnalysis(null)
     }
@@ -209,6 +214,32 @@ export default function AppointmentForm({
   const handleFieldBlur = useCallback((field: keyof AppointmentFormData) => {
     setTouched(prev => ({ ...prev, [field]: true }))
   }, [])
+
+  // Optimized field change handlers
+  const handlePatientNameChange = useCallback((value: string) => handleFieldChange('patientName', value), [handleFieldChange])
+  const handlePatientEmailChange = useCallback((value: string) => handleFieldChange('patientEmail', value), [handleFieldChange])
+  const handlePatientPhoneChange = useCallback((value: string) => handleFieldChange('patientPhone', value), [handleFieldChange])
+  const handleSymptomsChange = useCallback((value: string) => handleFieldChange('symptoms', value), [handleFieldChange])
+  const handleNotesChange = useCallback((value: string) => handleFieldChange('notes', value), [handleFieldChange])
+
+  // Optimized field blur handlers
+  const handlePatientNameBlur = useCallback(() => handleFieldBlur('patientName'), [handleFieldBlur])
+  const handlePatientEmailBlur = useCallback(() => handleFieldBlur('patientEmail'), [handleFieldBlur])
+  const handlePatientPhoneBlur = useCallback(() => handleFieldBlur('patientPhone'), [handleFieldBlur])
+  const handleDateTimeBlur = useCallback(() => handleFieldBlur('dateTime'), [handleFieldBlur])
+  const handleSymptomsBlur = useCallback(() => handleFieldBlur('symptoms'), [handleFieldBlur])
+  const handleNotesBlur = useCallback(() => handleFieldBlur('notes'), [handleFieldBlur])
+
+  // Optimized date/time change handlers
+  const handleDateChange = useCallback((value: string) => {
+    const time = formData.dateTime.split('T')[1] || '09:00'
+    handleFieldChange('dateTime', `${value}T${time}`)
+  }, [formData.dateTime, handleFieldChange])
+
+  const handleTimeChange = useCallback((value: string) => {
+    const date = formData.dateTime.split('T')[0] || new Date().toISOString().split('T')[0]
+    handleFieldChange('dateTime', `${date}T${value}`)
+  }, [formData.dateTime, handleFieldChange])
 
   // Enhanced submit handler with progress tracking
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -244,18 +275,6 @@ export default function AppointmentForm({
         setSaveProgress(prev => Math.min(prev + 20, 90))
       }, 100)
 
-      const payload: any = {
-        doctorId: user.uid,
-        patientName: formData.patientName.trim(),
-        patientEmail: formData.patientEmail?.trim() || '',
-        patientPhone: formData.patientPhone?.trim() || '',
-        dateTime: new Date(formData.dateTime),
-        symptoms: formData.symptoms.trim(),
-        notes: formData.notes.trim(),
-        status: formData.status,
-        updatedAt: serverTimestamp(),
-      }
-
       let savedAppointmentId = appointmentId
 
       if (isDemoMode()) {
@@ -263,27 +282,72 @@ export default function AppointmentForm({
         await new Promise(resolve => setTimeout(resolve, 1000))
         
         if (!appointmentId) {
-          const demoAppointment = addDemoAppointment(payload)
-          savedAppointmentId = demoAppointment.id
+          // Create new appointment data
+          const appointmentData: Omit<DemoAppointment, 'id'> = {
+            doctorId: user.uid,
+            patientName: formData.patientName,
+            dateTime: new Date(formData.dateTime),
+            symptoms: formData.symptoms,
+            notes: formData.notes,
+            status: formData.status as 'scheduled' | 'completed' | 'no_show',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+          const newAppointment = await addDemoAppointment(appointmentData)
+          savedAppointmentId = newAppointment
         } else {
-          updateDemoAppointment(appointmentId, payload)
+          // Update existing appointment
+          const updateData: Partial<DemoAppointment> = {
+            patientName: formData.patientName,
+            dateTime: new Date(formData.dateTime),
+            symptoms: formData.symptoms,
+            notes: formData.notes,
+            status: formData.status as 'scheduled' | 'completed' | 'no_show'
+          }
+          updateDemoAppointment(appointmentId, updateData)
         }
       } else {
+        const ref = doc(db, 'appointments', appointmentId || '') // Ensure appointmentId is not undefined
         if (!appointmentId) {
-          // Initialize notification tracking for new appointments
-          payload.createdAt = serverTimestamp()
-          payload.notifications = {
-            firstNotification: { sent: false },
-            secondNotification: { sent: false },
-            confirmationReceived: false,
-            optedOut: false
+          // Create appointment data for Firestore
+          const appointmentData = {
+            doctorId: user.uid,
+            patientName: formData.patientName,
+            patientEmail: formData.patientEmail,
+            patientPhone: formData.patientPhone,
+            dateTime: new Date(formData.dateTime),
+            symptoms: formData.symptoms,
+            notes: formData.notes,
+            status: formData.status,
+            createdAt: new Date(),
+            updatedAt: new Date()
           }
-          
-          const docRef = await addDoc(collection(db, 'appointments'), payload)
-          savedAppointmentId = docRef.id
+
+          if (appointmentId) {
+            // Update existing appointment
+            await updateDoc(ref, appointmentData)
+            // Assuming showNotification is defined elsewhere or removed if not needed
+            // showNotification.success('Programarea a fost actualizată cu succes')
+          } else {
+            // Create new appointment
+            const docRef = await addDoc(collection(db, 'appointments'), appointmentData)
+            savedAppointmentId = docRef.id
+            // Assuming showNotification is defined elsewhere or removed if not needed
+            // showNotification.success('Programarea a fost creată cu succes')
+          }
         } else {
-          const ref = doc(db, 'appointments', appointmentId)
-          await updateDoc(ref, payload)
+          // Update appointment data
+          const updateData = {
+            patientName: formData.patientName,
+            patientEmail: formData.patientEmail,
+            patientPhone: formData.patientPhone,
+            dateTime: new Date(formData.dateTime),
+            symptoms: formData.symptoms,
+            notes: formData.notes,
+            status: formData.status,
+            updatedAt: new Date()
+          }
+          await updateDoc(ref, updateData)
         }
       }
 
@@ -292,21 +356,21 @@ export default function AppointmentForm({
         try {
           const appointmentWithNotifications: AppointmentWithNotifications = {
             id: savedAppointmentId,
-            patientName: payload.patientName,
+            patientName: formData.patientName,
             patientEmail: formData.patientEmail || '', // Add patient email field if available
-            dateTime: payload.dateTime,
-            symptoms: payload.symptoms,
-            notes: payload.notes,
-            status: payload.status,
-            doctorId: payload.doctorId,
-            notifications: payload.notifications || {
+            dateTime: new Date(formData.dateTime),
+            symptoms: formData.symptoms,
+            notes: formData.notes,
+            status: formData.status,
+            doctorId: user.uid,
+            notifications: { // Assuming notifications are part of the Appointment interface
               firstNotification: { sent: false },
               secondNotification: { sent: false },
               confirmationReceived: false,
               optedOut: false
             },
-            createdAt: payload.createdAt || serverTimestamp() as any,
-            updatedAt: payload.updatedAt
+            createdAt: serverTimestamp() as Timestamp, // Use serverTimestamp for new appointments
+            updatedAt: serverTimestamp() as Timestamp // Use serverTimestamp for new appointments
           }
 
           if (!appointmentId) {
@@ -385,8 +449,8 @@ export default function AppointmentForm({
         className="flex items-center justify-center py-12"
       >
         <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
             Se încarcă formularul de programare...
           </p>
         </div>
@@ -395,8 +459,7 @@ export default function AppointmentForm({
   }
 
   return (
-    <DesignWorkWrapper componentName="AppointmentForm">
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg">
       {/* Professional Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center space-x-3">
@@ -479,10 +542,10 @@ export default function AppointmentForm({
                 <Brain className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-medium text-sm">Analiză AI a Simptomelor</h4>
-                  {aiAnalysis.suggestions?.map((suggestion: string, index: number) => (
+                  {aiAnalysis.suggestions && aiAnalysis.suggestions.map((suggestion: string, index: number) => (
                     <p key={index} className="text-xs mt-1">{suggestion}</p>
                   ))}
-                  {aiAnalysis.redFlags?.map((flag: string, index: number) => (
+                  {aiAnalysis.redFlags && aiAnalysis.redFlags.map((flag: string, index: number) => (
                     <p key={index} className="text-xs mt-1 font-medium">⚠️ {flag}</p>
                   ))}
                 </div>
@@ -492,11 +555,11 @@ export default function AppointmentForm({
         </AnimatePresence>
 
         {/* Patient Name */}
-        <MedicalTextInput
+        <FormInput
           label="Nume pacient"
           value={formData.patientName}
-          onChange={(value) => handleFieldChange('patientName', value)}
-          onBlur={() => handleFieldBlur('patientName')}
+          onChange={handlePatientNameChange}
+          onBlur={handlePatientNameBlur}
           error={touched.patientName ? errors.patientName : undefined}
           required
           icon={<User className="w-4 h-4" />}
@@ -507,11 +570,11 @@ export default function AppointmentForm({
 
         {/* Patient Contact Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <MedicalTextInput
+          <FormInput
             label="Email pacient (pentru notificări)"
             value={formData.patientEmail || ''}
-            onChange={(value) => handleFieldChange('patientEmail', value)}
-            onBlur={() => handleFieldBlur('patientEmail')}
+            onChange={handlePatientEmailChange}
+            onBlur={handlePatientEmailBlur}
             error={touched.patientEmail ? errors.patientEmail : undefined}
             icon={<Mail className="w-4 h-4" />}
             placeholder="exemplu@email.com"
@@ -520,11 +583,11 @@ export default function AppointmentForm({
             type="email"
           />
 
-          <MedicalTextInput
+          <FormInput
             label="Telefon pacient (pentru SMS)"
             value={formData.patientPhone || ''}
-            onChange={(value) => handleFieldChange('patientPhone', value)}
-            onBlur={() => handleFieldBlur('patientPhone')}
+            onChange={handlePatientPhoneChange}
+            onBlur={handlePatientPhoneBlur}
             error={touched.patientPhone ? errors.patientPhone : undefined}
             icon={<MessageSquare className="w-4 h-4" />}
             placeholder="+40123456789"
@@ -536,43 +599,36 @@ export default function AppointmentForm({
 
         {/* Date and Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <MedicalDateTimeInput
+          <FormInput
             label="Data programării"
             type="date"
             value={formData.dateTime.split('T')[0] || ''}
-            onChange={(value) => {
-              const time = formData.dateTime.split('T')[1] || '09:00'
-              handleFieldChange('dateTime', `${value}T${time}`)
-            }}
-            onBlur={() => handleFieldBlur('dateTime')}
+            onChange={handleDateChange}
+            onBlur={handleDateTimeBlur}
             error={touched.dateTime ? errors.dateTime : undefined}
             required
             min={new Date().toISOString().split('T')[0]}
           />
 
-          <MedicalDateTimeInput
+          <FormInput
             label="Ora programării"
             type="time"
             value={formData.dateTime.split('T')[1] || '09:00'}
-            onChange={(value) => {
-              const date = formData.dateTime.split('T')[0] || new Date().toISOString().split('T')[0]
-              handleFieldChange('dateTime', `${date}T${value}`)
-            }}
-            onBlur={() => handleFieldBlur('dateTime')}
+            onChange={handleTimeChange}
+            onBlur={handleDateTimeBlur}
             error={touched.dateTime ? errors.dateTime : undefined}
             required
             step="900" // 15 minute intervals
             aiSuggestions={optimalTimes}
-            showAISuggestions={!appointmentId && optimalTimes.length > 0}
           />
         </div>
 
         {/* Symptoms */}
-        <MedicalTextArea
+        <FormInput
           label="Simptome și motivul consultației"
           value={formData.symptoms}
-          onChange={(value) => handleFieldChange('symptoms', value)}
-          onBlur={() => handleFieldBlur('symptoms')}
+          onChange={handleSymptomsChange}
+          onBlur={handleSymptomsBlur}
           error={touched.symptoms ? errors.symptoms : undefined}
           required
           icon={<Activity className="w-4 h-4" />}
@@ -583,11 +639,11 @@ export default function AppointmentForm({
         />
 
         {/* Notes */}
-        <MedicalTextArea
+        <FormInput
           label="Note suplimentare (opțional)"
           value={formData.notes}
-          onChange={(value) => handleFieldChange('notes', value)}
-          onBlur={() => handleFieldBlur('notes')}
+          onChange={handleNotesChange}
+          onBlur={handleNotesBlur}
           error={touched.notes ? errors.notes : undefined}
           icon={<FileText className="w-4 h-4" />}
           placeholder="Observații suplimentare, instrucțiuni speciale, istoric medical relevant..."
@@ -597,7 +653,7 @@ export default function AppointmentForm({
         />
 
         {/* Status Selection */}
-        <MedicalSelectInput
+        <FormInput
           label="Status programare"
           value={formData.status}
           onChange={(value) => handleFieldChange('status', value as AppointmentStatus)}
@@ -674,6 +730,5 @@ export default function AppointmentForm({
         </div>
       </motion.form>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

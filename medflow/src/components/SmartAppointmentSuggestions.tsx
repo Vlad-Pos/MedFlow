@@ -22,7 +22,6 @@ import {
   Brain, 
   CheckCircle, 
   AlertTriangle, 
-  Users, 
   Zap,
   TrendingUp,
   RefreshCw,
@@ -34,8 +33,6 @@ import { useAuth } from '../providers/AuthProvider'
 import { getAIService, AppointmentSuggestion } from '../services/aiService'
 import { formatDateTime } from '../utils/dateUtils'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface SmartAppointmentSuggestionsProps {
   doctorId?: string
   patientPreferences?: {
@@ -138,7 +135,7 @@ export default function SmartAppointmentSuggestions({
           const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
           return suggestion.datetime <= weekFromNow
         case 'urgent':
-          return suggestion.priority === 'high' || suggestion.priority === 'urgent'
+          return suggestion.priority === 'high'
         default:
           return true
       }
@@ -177,8 +174,7 @@ export default function SmartAppointmentSuggestions({
   }, [])
 
   return (
-    <DesignWorkWrapper componentName="SmartAppointmentSuggestions">
-      <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg ${className}`}>
+    <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg ${className}`}>
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
@@ -280,7 +276,7 @@ export default function SmartAppointmentSuggestions({
           {['all', 'today', 'week', 'urgent'].map((filter) => (
             <button
               key={filter}
-              onClick={() => setFilterBy(filter as any)}
+              onClick={() => setFilterBy(filter as 'all' | 'today' | 'week' | 'urgent')}
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 filterBy === filter
                   ? 'bg-medflow-primary text-white'
@@ -301,8 +297,8 @@ export default function SmartAppointmentSuggestions({
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <LoadingSpinner size="lg" />
-              <p className="mt-4 text-gray-600 dark:text-gray-400">
+              <div className="loader mb-4"></div>
+              <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
                 🤖 AI analizează programul și generează sugestii...
               </p>
             </div>
@@ -351,7 +347,7 @@ export default function SmartAppointmentSuggestions({
                           </div>
                           
                           <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(suggestion.priority)}`}>
-                            {suggestion.priority === 'urgent' && '🚨 Urgent'}
+                            {suggestion.priority === 'high' && '🚨 Urgent'}
                             {suggestion.priority === 'high' && '⚡ Prioritate'}
                             {suggestion.priority === 'medium' && '📅 Normal'}
                             {suggestion.priority === 'low' && '🕐 Flexibil'}
@@ -437,6 +433,5 @@ export default function SmartAppointmentSuggestions({
         </div>
       </div>
     </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

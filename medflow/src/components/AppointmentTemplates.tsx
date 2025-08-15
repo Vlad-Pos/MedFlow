@@ -14,17 +14,15 @@
  */
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, } from 'framer-motion'
 import { 
   Files, 
   Plus, 
   Clock, 
   FileText, 
   Edit, 
-  Trash2,
   Star,
   Search,
-  Filter,
   CheckCircle,
   AlertCircle,
   Calendar,
@@ -40,8 +38,6 @@ import {
 } from 'lucide-react'
 import { staggerContainer, staggerItem, cardVariants } from '../utils/animations'
 import { useAuth } from '../providers/AuthProvider'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface AppointmentTemplate {
   id: string
   name: string
@@ -64,7 +60,7 @@ interface AppointmentTemplate {
 
 interface AppointmentTemplatesProps {
   onSelectTemplate: (template: AppointmentTemplate) => void
-  onCreateFromTemplate?: (template: AppointmentTemplate, customData: any) => void
+  onCreateFromTemplate?: (template: AppointmentTemplate, customData: Record<string, unknown>) => void
   showManagement?: boolean
 }
 
@@ -229,7 +225,7 @@ export default function AppointmentTemplates({
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<AppointmentTemplate | null>(null)
 
-  // Filter templates based on search and filters
+  // templates based on search and filters
   useEffect(() => {
     let filtered = templates.filter(template => template.isActive)
 
@@ -299,8 +295,7 @@ export default function AppointmentTemplates({
   }
 
   return (
-    <DesignWorkWrapper componentName="AppointmentTemplates">
-      <motion.div
+    <motion.div
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -567,6 +562,5 @@ export default function AppointmentTemplates({
         </div>
       </motion.div>
     </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

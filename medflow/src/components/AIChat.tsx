@@ -21,28 +21,20 @@ import {
   Bot, 
   User, 
   Calendar, 
-  Clock, 
   Heart, 
   Brain,
   MessageCircle,
   Mic,
   MicOff,
   Languages,
-  Star,
   ThumbsUp,
   ThumbsDown,
-  AlertTriangle,
-  CheckCircle,
-  Copy,
   Download,
-  RefreshCw,
   Settings
 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { staggerContainer, staggerItem, fadeInVariants } from '../utils/animations'
 import LoadingSpinner from './LoadingSpinner'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
@@ -57,7 +49,7 @@ interface ChatMessage {
     responseTime?: number
     tokens?: number
     intent?: string
-    entities?: any[]
+    entities?: Record<string, unknown>[]
   }
 }
 
@@ -418,8 +410,7 @@ export default function AIChat() {
   }, [messages])
 
   return (
-    <DesignWorkWrapper componentName="AIChat">
-      <motion.div
+    <motion.div
         variants={fadeInVariants}
         initial="initial"
         animate="animate"
@@ -680,6 +671,5 @@ export default function AIChat() {
           </div>
         </div>
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

@@ -5,8 +5,6 @@
 
 import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 interface N8nFeatureCardProps {
   icon: LucideIcon
   title: string
@@ -25,8 +23,7 @@ export default function N8nFeatureCard({
   isActive = false 
 }: N8nFeatureCardProps) {
   return (
-    <DesignWorkWrapper componentName="N8nFeatureCard">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -38,19 +35,19 @@ export default function N8nFeatureCard({
         }}
         className={`
           group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 cursor-pointer
-          backdrop-blur-sm border border-white/10 hover:border-[#A18AB2]/30
+          backdrop-blur-sm border border-white/10 hover:border-[var(--medflow-brand-1)]/30
           ${isActive 
-            ? 'bg-gradient-to-br from-[#A18AB2]/20 to-[#9280A5]/20 shadow-lg shadow-[#A18AB2]/30' 
-            : 'bg-gradient-to-br from-[#1a1b1e]/80 to-[#24262a]/80 hover:shadow-xl hover:shadow-[#A18AB2]/20'
+                          ? 'bg-gradient-to-br from-[var(--medflow-brand-1)]/20 to-[var(--medflow-brand-2)]/20 shadow-lg shadow-[var(--medflow-brand-1)]/30' 
+                                                     : 'bg-gradient-to-br from-[var(--medflow-brand-7)]/80 to-[var(--medflow-brand-6)]/80 hover:shadow-xl hover:shadow-[var(--medflow-brand-1)]/20'
           }
         `}
       >
         {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#A18AB2]/10 via-transparent to-[#9280A5]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--medflow-brand-1)]/10 via-transparent to-[var(--medflow-brand-2)]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         {/* Animated background blobs */}
         <motion.div 
-          className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-[#A18AB2]/30 to-[#9280A5]/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--medflow-brand-1)]/30 to-[var(--medflow-brand-2)]/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           animate={{
             scale: [1, 1.1, 1],
             rotate: [0, 10, 0]
@@ -65,18 +62,18 @@ export default function N8nFeatureCard({
         <div className="relative z-10">
           {/* Icon with enhanced styling */}
           <motion.div 
-            className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-gradient-to-br from-[#A18AB2]/30 to-[#9280A5]/30 border border-[#A18AB2]/40"
+            className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-gradient-to-br from-[var(--medflow-brand-1)]/30 to-[var(--medflow-brand-2)]/30 border border-[var(--medflow-brand-1)]/40"
             whileHover={{ 
               scale: 1.1,
               rotate: [0, -5, 5, 0]
             }}
             transition={{ duration: 0.3 }}
           >
-            <Icon className="w-8 h-8 text-[#A18AB2] group-hover:text-[#9280A5] transition-colors duration-300" />
+            <Icon className="w-8 h-8 text-[var(--medflow-brand-1)] group-hover:text-[var(--medflow-brand-2)] transition-colors duration-300" />
           </motion.div>
 
           {/* Content */}
-          <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[#A18AB2] transition-colors duration-300">
+          <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[var(--medflow-brand-1)] transition-colors duration-300">
             {title}
           </h3>
           
@@ -86,10 +83,10 @@ export default function N8nFeatureCard({
           
           {/* Status badge */}
           <motion.div 
-            className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-[#A18AB2]/30 to-[#9280A5]/30 border border-[#A18AB2]/40"
+            className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-[var(--medflow-brand-1)]/30 to-[var(--medflow-brand-2)]/30 border border-[var(--medflow-brand-1)]/40"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-sm font-medium text-[#A18AB2]">{benefit}</span>
+            <span className="text-sm font-medium text-[var(--medflow-brand-1)]">{benefit}</span>
           </motion.div>
         </div>
 
@@ -101,6 +98,5 @@ export default function N8nFeatureCard({
           transition={{ duration: 0.6 }}
         />
       </motion.div>
-    </DesignWorkWrapper>
-  )
+    )
 }

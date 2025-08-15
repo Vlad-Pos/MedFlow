@@ -20,15 +20,12 @@ import {
   Users,
   BarChart3,
   Lock,
-  Star,
-  ChevronDown,
   Play,
   Phone,
   Mail,
   MapPin,
   Menu,
   X,
-  Heart,
   Award,
   Zap
 } from 'lucide-react'
@@ -38,8 +35,6 @@ import EarlyAccessForm from '../components/EarlyAccessForm'
 import N8nFeatureCard from '../components/N8nFeatureCard'
 import N8nButton from '../components/N8nButton'
 import { HeroBackground, ScrollEffectGraphics, SectionIllustrations, NeonIconSet } from '../components/N8nVisualEffects'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
 export default function WebsiteLanding() {
   const { user } = useAuth()
   const { scrollY } = useScroll()
@@ -49,11 +44,11 @@ export default function WebsiteLanding() {
   // Enhanced scroll animations
   const heroY = useTransform(scrollY, [0, 500], [0, -100])
   const featuresY = useTransform(scrollY, [0, 800], [0, -50])
-  const headerOpacity = useTransform(scrollY, [0, 100], [0.95, 1])
+  const heroScale = useTransform(scrollY, [0, 100], [0.95, 1])
   const headerBlur = useTransform(scrollY, [0, 100], [8, 16])
-  const parallaxY1 = useTransform(scrollY, [0, 1000], [0, -200])
-  const parallaxY2 = useTransform(scrollY, [0, 1000], [0, -150])
-  const parallaxY3 = useTransform(scrollY, [0, 1000], [0, -100])
+  const heroParallax = useTransform(scrollY, [0, 1000], [0, -200])
+  const featuresParallax = useTransform(scrollY, [0, 1000], [0, -150])
+  const contactParallax = useTransform(scrollY, [0, 1000], [0, -100])
   
   // Initialize n8n.io-inspired animations and performance optimizations
   useEffect(() => {
@@ -62,7 +57,9 @@ export default function WebsiteLanding() {
     
     return () => {
       cleanupAnimations();
-      cleanupPerformance();
+      if (cleanupPerformance && typeof cleanupPerformance.cleanup === 'function') {
+        cleanupPerformance.cleanup();
+      }
     };
   }, []);
 
@@ -113,18 +110,14 @@ export default function WebsiteLanding() {
   // Removed fake testimonials - will be replaced with early access section
 
   return (
-    <DesignWorkWrapper componentName="WebsiteLanding">
-      <div 
-        className="min-h-screen"
-        style={{ background: 'var(--medflow-gradient-primary)' }}
-      >
+    <div className="min-h-screen">
         {/* Header with navigation */}
         <motion.header 
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           style={{ 
             backdropFilter: `blur(${headerBlur}px)`,
-            backgroundColor: `rgba(50, 56, 78, ${headerOpacity * 0.95})`
+            backgroundColor: `rgba(50, 56, 78, 0.95)`
           }}
           className="fixed top-0 w-full z-50 border-b border-white/10 shadow-sm transition-all duration-300"
           role="banner"
@@ -138,10 +131,10 @@ export default function WebsiteLanding() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <div className="w-10 h-10 bg-gradient-to-r from-[#9F86B1] to-[#32384E] rounded-xl flex items-center justify-center p-1">
+                <div className="w-10 h-10 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-6)] rounded-xl flex items-center justify-center p-1">
                   <img src={medflowLogo} alt="MedFlow" className="w-6 h-6 filter brightness-0 invert" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-[#32384E] to-[#9F86B1] bg-clip-text text-transparent">MedFlow</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-[var(--medflow-brand-6)] to-[var(--medflow-brand-1)] bg-clip-text text-transparent">MedFlow</span>
               </motion.div>
               
               {/* Desktop Navigation */}
@@ -157,7 +150,7 @@ export default function WebsiteLanding() {
                 {user ? (
                   <Link
                     to="/dashboard"
-                    className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                    className="bg-gradient-to-r from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
                   >
                     Dashboard
                   </Link>
@@ -171,7 +164,7 @@ export default function WebsiteLanding() {
                     </Link>
                     <Link
                       to="/signup"
-                      className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                      className="bg-gradient-to-r from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
                     >
                       Înregistrează-te pentru beta
                     </Link>
@@ -212,7 +205,7 @@ export default function WebsiteLanding() {
                         <Link to="/signin" className="text-medflow-text-secondary font-medium">Autentificare</Link>
                         <Link 
                           to="/signup" 
-                          className="bg-gradient-to-r from-[#32384E] to-[#5D5D75] text-white px-4 py-2 rounded-lg text-center font-medium"
+                          className="bg-gradient-to-r from-[var(--medflow-brand-7)] to-[var(--medflow-brand-4)] text-white px-4 py-2 rounded-lg text-center font-medium"
                         >
                           Înregistrează-te pentru beta
                         </Link>
@@ -235,10 +228,10 @@ export default function WebsiteLanding() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 font-medium flex items-center space-x-2"
+            className="bg-gradient-to-r from-[var(--medflow-brand-6)] via-[var(--medflow-brand-2)] to-[var(--medflow-brand-3)] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 font-medium flex items-center space-x-2"
           >
             <Play className="w-4 h-4" />
-            <span>Explorează platforma</span>
+            <span>Acces exclusiv gratuit</span>
           </motion.button>
         </motion.div>
 
@@ -267,34 +260,33 @@ export default function WebsiteLanding() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-[#9F86B1]/10 via-[#32384E]/5 to-[#5D5D75]/10 border border-[#9F86B1]/30 rounded-full px-6 py-3 mb-8 backdrop-blur-sm"
+                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-[var(--medflow-brand-1)]/10 via-[var(--medflow-brand-7)]/5 to-[var(--medflow-brand-4)]/10 border border-[var(--medflow-brand-1)]/30 rounded-full px-6 py-3 mb-8 backdrop-blur-sm"
                 >
-                  <div className="w-6 h-6 bg-gradient-to-r from-[#9F86B1] to-[#32384E] rounded-full flex items-center justify-center">
+                                      <div className="w-6 h-6 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-7)] rounded-full flex items-center justify-center">
                     <img src={medflowLogo} alt="MedFlow" className="w-4 h-4 filter brightness-0 invert" />
                   </div>
-                  <span className="text-[#32384E] font-bold text-base">Platformă în dezvoltare - Acces timpuriu disponibil</span>
-                  <div className="w-2 h-2 bg-[#9F86B1] rounded-full animate-pulse"></div>
+                  <span className="text-[var(--medflow-brand-6)] font-bold text-base">Platformă în dezvoltare - Acces timpuriu disponibil</span>
+                                      <div className="w-2 h-2 bg-[var(--medflow-brand-1)] rounded-full animate-pulse"></div>
                 </motion.div>
 
                 <h1 id="hero-title" className="hero-title text-5xl md:text-7xl font-extrabold text-white leading-[0.95] mb-8 tracking-tight">
-                  Gestionarea
-                  <span className="bg-gradient-to-r from-[#A18AB2] via-[#9280A5] to-[#847697] bg-clip-text text-transparent"> medicală</span>
+                  Revoluționăm
+                  <span className="bg-gradient-to-r from-[var(--medflow-brand-1)] via-[var(--medflow-brand-2)] to-[var(--medflow-brand-3)] bg-clip-text text-transparent"> medicina</span>
                   <br />
-                  <span className="text-4xl md:text-6xl font-bold text-gray-100">simplificată</span>
+                  <span className="text-4xl md:text-6xl font-bold text-gray-100">prin inteligența artificială</span>
                 </h1>
                 
                 <p className="text-xl md:text-2xl text-white mb-10 leading-relaxed font-light max-w-2xl">
-                  Testați viitorul gestionării practice medicale. Platformă în faza beta cu funcționalități 
-                  de bază implementate pentru <strong className="font-semibold text-[#A18AB2]">calendar programări și gestionare pacienți</strong>.
+                  Platforma medicală de ultimă generație care transformă radical modul în care conduceți cabinetul dumneavoastră. Interface medicală intuitivă, funcționalități de nivel enterprise, rezultate imediate și măsurabile.
                 </p>
                 
                 {/* Key Benefits */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
                   {[
-                    { icon: Calendar, text: 'Programări automate', color: 'text-[#32384E]', bg: 'bg-[#32384E]/5', gradient: 'from-[#32384E] to-[#9F86B1]' },
-                    { icon: Shield, text: 'GDPR compliant', color: 'text-[#41475C]', bg: 'bg-[#41475C]/5', gradient: 'from-[#41475C] to-[#32384E]' },
-                    { icon: Clock, text: 'Eficiență îmbunătățită', color: 'text-[#5D5D75]', bg: 'bg-[#5D5D75]/5', gradient: 'from-[#5D5D75] to-[#9F86B1]' },
-                    { icon: Users, text: 'Dosare digitale', color: 'text-[#4D5266]', bg: 'bg-[#4D5266]/5', gradient: 'from-[#4D5266] to-[#32384E]' }
+                    { icon: Calendar, text: 'Programări inteligente cu AI medical', color: 'text-[var(--medflow-brand-7)]', bg: 'bg-[var(--medflow-brand-7)]/5', gradient: 'from-[var(--medflow-brand-7)] to-[var(--medflow-brand-1)]' },
+                    { icon: Shield, text: 'Conformitate GDPR și securitate medicală certificată', color: 'text-[var(--medflow-brand-6)]', bg: 'bg-[var(--medflow-brand-6)]/5', gradient: 'from-[var(--medflow-brand-6)] to-[var(--medflow-brand-7)]' },
+                    { icon: Clock, text: 'Eficiență operațională maximizată', color: 'text-[var(--medflow-brand-4)]', bg: 'bg-[var(--medflow-brand-4)]/5', gradient: 'from-[var(--medflow-brand-4)] to-[var(--medflow-brand-1)]' },
+                    { icon: Users, text: 'Dosare medicale digitale avansate', color: 'text-[var(--medflow-brand-5)]', bg: 'bg-[var(--medflow-brand-5)]/5', gradient: 'from-[var(--medflow-brand-5)] to-[var(--medflow-brand-7)]' }
                   ].map((benefit, index) => (
                     <motion.div
                       key={index}
@@ -304,9 +296,9 @@ export default function WebsiteLanding() {
                       whileHover={{ 
                         scale: 1.03, 
                         y: -4,
-                        boxShadow: "0 20px 40px rgba(159, 134, 177, 0.15)"
+                        boxShadow: "0 20px 40px rgba(138, 122, 159, 0.15)"
                       }}
-                      className={`group flex items-center space-x-4 p-6 rounded-2xl ${benefit.bg} border border-transparent hover:border-[#9F86B1]/30 transition-all duration-300 cursor-pointer relative overflow-hidden`}
+                      className={`group flex items-center space-x-4 p-6 rounded-2xl ${benefit.bg} border border-transparent hover:border-[var(--medflow-brand-1)]/30 transition-all duration-300 cursor-pointer relative overflow-hidden`}
                     >
                       {/* Gradient overlay on hover */}
                       <div className={`absolute inset-0 bg-gradient-to-r ${benefit.gradient}/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
@@ -317,9 +309,9 @@ export default function WebsiteLanding() {
                           whileHover={{ rotate: 360 }}
                           transition={{ duration: 0.6 }}
                         >
-                          <benefit.icon className={`w-6 h-6 ${benefit.color} group-hover:text-[#9F86B1] transition-colors duration-300`} />
+                          <benefit.icon className={`w-6 h-6 ${benefit.color} group-hover:text-[var(--medflow-brand-1)] transition-colors duration-300`} />
                         </motion.div>
-                        <span className="text-white font-bold text-lg group-hover:text-[#A18AB2] transition-colors duration-300">{benefit.text}</span>
+                        <span className="text-white font-bold text-lg group-hover:text-[var(--medflow-brand-1)] transition-colors duration-300">{benefit.text}</span>
                       </div>
                     </motion.div>
                   ))}
@@ -330,7 +322,7 @@ export default function WebsiteLanding() {
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Link
                         to="/dashboard"
-                        className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[#32384E]/25 transition-all duration-300 transform hover:-translate-y-1"
+                        className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[var(--medflow-brand-7)]/25 transition-all duration-300 transform hover:-translate-y-1"
                       >
                         Acces Dashboard
                         <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform duration-200" />
@@ -341,11 +333,11 @@ export default function WebsiteLanding() {
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <Link
                           to="/signup"
-                          className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[#32384E]/25 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
+                          className="group inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-[var(--medflow-brand-7)]/25 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
                         >
-                          <span className="relative z-10">Înregistrează-te pentru beta</span>
+                          <span className="relative z-10">Obțineți acces exclusiv gratuit</span>
                           <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#41475C] via-[#5D5D75] to-[#32384E] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-[var(--medflow-brand-6)] via-[var(--medflow-brand-4)] to-[var(--medflow-brand-7)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </Link>
                       </motion.div>
                       
@@ -353,10 +345,10 @@ export default function WebsiteLanding() {
                         href="#demo"
                         whileHover={{ scale: 1.02 }} 
                         whileTap={{ scale: 0.98 }}
-                        className="group inline-flex items-center justify-center px-10 py-5 border-2 border-[#32384E] text-[#32384E] text-xl font-bold rounded-2xl hover:bg-[#32384E] hover:text-white transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-[#32384E]/20"
+                        className="group inline-flex items-center justify-center px-10 py-5 border-2 border-[var(--medflow-brand-7)] text-[var(--medflow-brand-7)] text-xl font-bold rounded-2xl hover:bg-[var(--medflow-brand-7)] hover:text-white transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--medflow-brand-7)]/20"
                       >
                         <Play className="mr-3 w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
-                        Explorează funcționalitățile
+                        Demonstrație personalizată gratuită
                       </motion.a>
                     </>
                   )}
@@ -371,7 +363,7 @@ export default function WebsiteLanding() {
                 className="relative"
               >
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                  <div className="bg-gradient-to-br from-[#32384E] via-[#41475C] to-[#5D5D75] p-8 text-white">
+                  <div className="bg-gradient-to-br from-[var(--medflow-brand-7)] via-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] p-8 text-white">
                     {/* Browser controls */}
                     <div className="flex items-center space-x-3 mb-6">
                       <div className="w-3 h-3 bg-red-400 rounded-full"></div>
@@ -438,7 +430,7 @@ export default function WebsiteLanding() {
           id="features"
           style={{ 
             y: featuresY,
-            background: 'linear-gradient(135deg, #1a1b1e, #24262a)'
+            background: 'linear-gradient(135deg, var(--medflow-brand-7), var(--medflow-brand-6))'
           }}
           className="py-20 section fade-in"
           role="region"
@@ -452,11 +444,10 @@ export default function WebsiteLanding() {
               className="text-center mb-16"
             >
               <h2 id="features-title" className="text-4xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
-                Funcționalități
-                <span className="bg-gradient-to-r from-[#A18AB2] via-[#9280A5] to-[#847697] bg-clip-text text-transparent"> esențiale</span>
+                Instrumentele profesionale pe care le merită practica dumneavoastră medicală modernă
               </h2>
               <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto font-light leading-relaxed">
-                Toate instrumentele necesare pentru gestionarea eficientă a cabinetului medical într-o singură platformă intuitivă și sigură
+                Suita completă de instrumente avansate pentru automatizarea integrală a cabinetului medical - o platformă medicală intuitivă, certificată și sigură, dezvoltată exclusiv pentru nevoile specifice ale medicilor români
               </p>
               
               {/* Progress Indicator */}
@@ -467,7 +458,7 @@ export default function WebsiteLanding() {
                       key={index}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         index === activeFeature 
-                          ? 'bg-gradient-to-r from-[#32384E] to-[#5D5D75] scale-125' 
+                          ? 'bg-gradient-to-r from-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] scale-125' 
                           : 'bg-gray-300 hover:bg-gray-400'
                       }`}
                       whileHover={{ scale: 1.2 }}
@@ -501,7 +492,7 @@ export default function WebsiteLanding() {
         {/* Efficiency Metrics Section with n8n.io styling */}
         <motion.section 
           className="py-20 section fade-in"
-          style={{ background: 'linear-gradient(135deg, #0f0f10, #1a1b1e)' }}
+          style={{ background: 'linear-gradient(135deg, var(--medflow-brand-7), var(--medflow-brand-6))' }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -511,11 +502,10 @@ export default function WebsiteLanding() {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
-                Creștere măsurabilă a
-                <span className="bg-gradient-to-r from-[#A18AB2] via-[#9280A5] to-[#847697] bg-clip-text text-transparent"> productivității</span>
+                Creștere măsurabilă și demonstrabilă a eficienței medicale
               </h2>
               <p className="text-xl md:text-2xl text-white font-light max-w-3xl mx-auto leading-relaxed">
-                Rezultate reale și măsurabile obținute de medicii care folosesc MedFlow zilnic
+                Rezultate reale, măsurabile și verificabile obținute de cabinetele medicale care testează MedFlow în programul nostru pilot exclusiv
               </p>
               <div className="mt-8 inline-flex items-center space-x-2 bg-green-100 px-6 py-3 rounded-full">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -541,27 +531,27 @@ export default function WebsiteLanding() {
                     y: -8,
                     transition: { duration: 0.2 }
                   }}
-                  className="group text-center p-8 bg-medflow-surface/50 backdrop-blur rounded-2xl border border-[#9F86B1]/10 hover:border-[#9F86B1]/30 hover:shadow-xl hover:shadow-[#9F86B1]/10 transition-all duration-300 cursor-pointer"
+                  className="group text-center p-8 bg-medflow-surface/50 backdrop-blur rounded-2xl border border-[var(--medflow-brand-1)]/10 hover:border-[var(--medflow-brand-1)]/30 hover:shadow-xl hover:shadow-[var(--medflow-brand-1)]/10 transition-all duration-300 cursor-pointer"
                 >
                   <motion.div 
-                    className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#32384E]/10 via-[#9F86B1]/10 to-[#5D5D75]/10 rounded-full mx-auto mb-6 group-hover:from-[#9F86B1]/20 group-hover:via-[#32384E]/20 group-hover:to-[#5D5D75]/20 transition-all duration-300"
+                    className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[var(--medflow-brand-7)]/10 via-[var(--medflow-brand-1)]/10 to-[var(--medflow-brand-4)]/10 rounded-full mx-auto mb-6 group-hover:from-[var(--medflow-brand-1)]/20 group-hover:via-[var(--medflow-brand-7)]/20 group-hover:to-[var(--medflow-brand-4)]/20 transition-all duration-300"
                     whileHover={{ 
                       rotate: [0, -10, 10, 0],
                       scale: 1.1
                     }}
                     transition={{ duration: 0.5 }}
                   >
-                    <metric.icon className="w-10 h-10 text-[#32384E] group-hover:text-[#9F86B1] transition-colors duration-300" />
+                    <metric.icon className="w-10 h-10 text-[var(--medflow-brand-7)] group-hover:text-[var(--medflow-brand-1)] transition-colors duration-300" />
                   </motion.div>
                   <motion.div 
-                    className="text-4xl font-extrabold bg-gradient-to-r from-[#32384E] to-[#9F86B1] bg-clip-text text-transparent mb-3"
+                    className="text-4xl font-extrabold bg-gradient-to-r from-[var(--medflow-brand-7)] to-[var(--medflow-brand-1)] bg-clip-text text-transparent mb-3"
                     initial={{ scale: 1 }}
                     whileInView={{ scale: [1, 1.1, 1] }}
                     transition={{ delay: index * 0.1 + 0.5, duration: 0.6 }}
                   >
                     {metric.number}
                   </motion.div>
-                  <div className="text-white font-semibold text-lg group-hover:text-[#A18AB2] transition-colors duration-300">{metric.label}</div>
+                  <div className="text-white font-semibold text-lg group-hover:text-[var(--medflow-brand-1)] transition-colors duration-300">{metric.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -569,7 +559,7 @@ export default function WebsiteLanding() {
         </motion.section>
 
         {/* Trust and Security Section */}
-        <motion.section className="py-20 bg-gradient-to-br from-[#32384E]/5 via-[#41475C]/5 to-[#5D5D75]/5">
+        <motion.section className="py-20 bg-gradient-to-br from-[var(--medflow-brand-7)]/5 via-[var(--medflow-brand-6)]/5 to-[var(--medflow-brand-4)]/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <motion.div
@@ -578,12 +568,10 @@ export default function WebsiteLanding() {
                 viewport={{ once: true }}
               >
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                  Securitate și 
-                  <span className="bg-gradient-to-r from-[#A18AB2] to-[#9280A5] bg-clip-text text-transparent"> încredere</span>
+                  Securitate medicală de nivel enterprise cu certificări internaționale
                 </h2>
                 <p className="text-lg text-white mb-8">
-                  Protecția datelor medicale este prioritatea noastră absolută. 
-                  MedFlow respectă cele mai stricte standarde de securitate.
+                  Protejăm datele medicale sensibile cu tehnologii de securitate de ultimă generație și conformitate GDPR medicală 100% garantată prin audit extern independent anual
                 </p>
                 
                 <div className="space-y-6">
@@ -612,8 +600,8 @@ export default function WebsiteLanding() {
                       transition={{ delay: index * 0.1 }}
                       className="flex space-x-4"
                     >
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-[#32384E]/10 to-[#5D5D75]/10 rounded-lg flex items-center justify-center">
-                        <item.icon className="w-6 h-6 text-[#32384E]" />
+                                          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-[var(--medflow-brand-7)]/10 to-[var(--medflow-brand-4)]/10 rounded-lg flex items-center justify-center">
+                      <item.icon className="w-6 h-6 text-[var(--medflow-brand-7)]" />
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
@@ -668,12 +656,10 @@ export default function WebsiteLanding() {
               className="text-center mb-16"
             >
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Alătură-te programului de 
-                <span className="bg-gradient-to-r from-[#A18AB2] to-[#9280A5] bg-clip-text text-transparent"> acces timpuriu</span>
+                Alătură-te programului de acces exclusiv pentru medicii selectați
               </h2>
               <p className="text-lg text-white max-w-3xl mx-auto">
-                Fii printre primii medici care testează și modelează viitorul gestionării digitale a practicii medicale.
-                Accesul timpuriu include suport dedicat și preț preferențial.
+                Fii printre primii medici care testează și modelează viitorul gestionării digitale a practicii medicale. Accesul exclusiv include suport dedicat și preț preferențial pentru early adopters.
               </p>
             </motion.div>
 
@@ -685,18 +671,18 @@ export default function WebsiteLanding() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 { 
-                  title: "Acces prioritar", 
-                  desc: "Primii care testează funcționalitățile noi și oferă feedback pentru îmbunătățiri",
+                  title: "Acces exclusiv prioritar", 
+                  desc: "Primii care testează funcționalitățile noi și oferă feedback pentru îmbunătățiri. Contribuiți la dezvoltarea soluției perfecte pentru medicină.",
                   icon: "⚡"
                 },
                 { 
-                  title: "Suport dedicat", 
-                  desc: "Asistență directă de la echipa de dezvoltare pentru configurare și utilizare",
+                  title: "Suport medical specializat", 
+                  desc: "Asistență directă de la echipa de dezvoltare pentru configurare și utilizare. Training personalizat pentru utilizarea optimă.",
                   icon: "🛠️"
                 },
                 { 
-                  title: "Preț redus", 
-                  desc: "Tarife preferențiale pentru early adopters când platforma va fi lansată oficial",
+                  title: "Preț preferențial exclusiv", 
+                  desc: "Tarife preferențiale pentru early adopters când platforma va fi lansată oficial. Economisiți până la 40% din costul lunar.",
                   icon: "💰"
                 }
               ].map((benefit, index) => (
@@ -724,8 +710,8 @@ export default function WebsiteLanding() {
         >
           {/* Background decorative elements */}
           <div className="absolute inset-0">
-            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-[#9F86B1]/10 to-[#32384E]/5 rounded-full blur-xl"></div>
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-[#5D5D75]/10 to-[#41475C]/5 rounded-full blur-xl"></div>
+                            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-[var(--medflow-brand-1)]/10 to-[var(--medflow-brand-7)]/5 rounded-full blur-xl"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-[var(--medflow-brand-4)]/10 to-[var(--medflow-brand-6)]/5 rounded-full blur-xl"></div>
           </div>
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -735,28 +721,28 @@ export default function WebsiteLanding() {
               viewport={{ once: true }}
               className="text-center mb-20"
             >
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#9F86B1]/10 to-[#32384E]/10 border border-[#9F86B1]/20 rounded-full px-6 py-3 mb-8">
-                <Play className="w-5 h-5 text-[#9F86B1]" />
-                <span className="text-[#32384E] font-bold">Demo Interactiv Disponibil</span>
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[var(--medflow-brand-1)]/10 to-[var(--medflow-brand-7)]/10 border border-[var(--medflow-brand-1)]/20 rounded-full px-6 py-3 mb-8">
+                <Play className="w-5 h-5 text-[var(--medflow-brand-1)]" />
+                <span className="text-[var(--medflow-brand-7)] font-bold">Demo Medical Interactiv Disponibil</span>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </div>
               
               <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
                 Experimentați
-                <span className="bg-gradient-to-r from-[#32384E] via-[#9F86B1] to-[#5D5D75] bg-clip-text text-transparent"> MedFlow</span>
+                <span className="bg-gradient-to-r from-[var(--medflow-brand-7)] via-[var(--medflow-brand-1)] to-[var(--medflow-brand-4)] bg-clip-text text-transparent"> MedFlow</span>
                 <br className="hidden sm:block" />
                 în acțiune
               </h2>
               <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto font-light leading-relaxed">
-                Descoperiți cum MedFlow simplifică gestionarea cabinetului medical printr-un demo complet interactiv
+                Descoperiți cum MedFlow revoluționează gestionarea cabinetului medical printr-un demo complet interactiv personalizat pentru specialitatea dumneavoastră
               </p>
               
               {/* Usage Guide Steps */}
               <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
                 {[
-                  { step: "1", title: "Explorați dashboard-ul", desc: "Navigați prin interfața intuitivă" },
-                  { step: "2", title: "Testați funcționalitățile", desc: "Încercați programări și rapoarte" },
-                  { step: "3", title: "Înregistrați-vă gratuit", desc: "Începeți să folosiți MedFlow" }
+                  { step: "1", title: "Explorați dashboard-ul medical", desc: "Navigați prin interfața intuitivă și profesională" },
+                  { step: "2", title: "Testați funcționalitățile avansate", desc: "Încercați programări AI și rapoarte automate" },
+                  { step: "3", title: "Înregistrați-vă pentru acces exclusiv", desc: "Începeți să folosiți MedFlow gratuit" }
                 ].map((guide, index) => (
                   <motion.div
                     key={index}
@@ -764,9 +750,9 @@ export default function WebsiteLanding() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-center space-x-4 bg-white/60 backdrop-blur rounded-xl p-4 border border-[#9F86B1]/10"
+                    className="flex items-center space-x-4 bg-white/60 backdrop-blur rounded-xl p-4 border border-[var(--medflow-brand-1)]/10"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-r from-[#32384E] to-[#9F86B1] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[var(--medflow-brand-6)] to-[var(--medflow-brand-1)] text-white rounded-full flex items-center justify-center font-bold text-lg">
                       {guide.step}
                     </div>
                     <div className="text-left">
@@ -785,9 +771,9 @@ export default function WebsiteLanding() {
               className="relative"
             >
               {/* Demo Container */}
-              <div className="bg-medflow-surface/50 rounded-3xl shadow-2xl overflow-hidden border border-[#9F86B1]/20">
+              <div className="bg-medflow-surface/50 rounded-3xl shadow-2xl overflow-hidden border border-[var(--medflow-brand-1)]/20">
                 {/* Browser Header */}
-                <div className="bg-gradient-to-r from-[#32384E] via-[#41475C] to-[#5D5D75] p-6 text-white">
+                <div className="bg-gradient-to-r from-[var(--medflow-brand-6)] via-[var(--medflow-brand-4)] to-[var(--medflow-brand-4)] p-6 text-white">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-red-400 rounded-full hover:bg-red-300 transition-colors cursor-pointer"></div>
@@ -847,14 +833,14 @@ export default function WebsiteLanding() {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 pt-6 border-t border-gray-200">
                     <Link
                       to="/signup"
-                      className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#32384E] to-[#5D5D75] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
+                      className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[var(--medflow-brand-6)] to-[var(--medflow-brand-4)] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
                     >
-                      Începeți gratuit
+                      Obțineți acces exclusiv gratuit
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
-                    <button className="inline-flex items-center justify-center px-6 py-3 border-2 border-[#32384E] text-[#32384E] font-semibold rounded-lg hover:bg-[#32384E] hover:text-white transition-all duration-200">
+                    <button className="inline-flex items-center justify-center px-6 py-3 border-2 border-[var(--medflow-brand-6)] text-[var(--medflow-brand-6)] font-semibold rounded-lg hover:bg-[var(--medflow-brand-6)] hover:text-white transition-all duration-200">
                       <Calendar className="mr-2 w-4 h-4" />
-                      Programați demonstrație
+                      Demonstrație medicală personalizată
                     </button>
                   </div>
                   
@@ -886,14 +872,14 @@ export default function WebsiteLanding() {
               {/* Company Info */}
               <div className="md:col-span-2">
                 <div className="flex items-center space-x-4 mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#9F86B1] to-[#32384E] rounded-xl flex items-center justify-center p-2">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-6)] rounded-xl flex items-center justify-center p-2">
                     <img src={medflowLogo} alt="MedFlow" className="w-8 h-8 filter brightness-0 invert" />
                   </div>
                   <span className="text-3xl font-bold bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">MedFlow</span>
                 </div>
                 <p className="text-gray-400 mb-6 leading-relaxed">
-                  Platforma digitală românească pentru managementul modern al practicii medicale. 
-                  Transformăm medicina prin tehnologie sigură și intuitivă.
+                  Platforma digitală românească de ultimă generație pentru managementul modern al practicii medicale. 
+                  Revoluționăm medicina prin tehnologie sigură, intuitivă și certificată la standarde internaționale.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-gray-400">
@@ -913,7 +899,7 @@ export default function WebsiteLanding() {
               
               {/* Product Links */}
               <div>
-                <h3 className="text-lg font-bold mb-6 bg-gradient-to-r from-[#9F86B1] to-[#32384E] bg-clip-text text-transparent">Produs</h3>
+                <h3 className="text-lg font-bold mb-6 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-6)] bg-clip-text text-transparent">Produs</h3>
                 <ul className="space-y-3 text-gray-400">
                   <li><a href="#features" className="hover:text-white transition-colors">Funcționalități</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Prețuri</a></li>
@@ -924,7 +910,7 @@ export default function WebsiteLanding() {
               
               {/* Support Links */}
               <div>
-                <h3 className="text-lg font-bold mb-6 bg-gradient-to-r from-[#9F86B1] to-[#32384E] bg-clip-text text-transparent">Suport</h3>
+                <h3 className="text-lg font-bold mb-6 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-6)] bg-clip-text text-transparent">Suport</h3>
                 <ul className="space-y-3 text-gray-400">
                   <li><a href="#" className="hover:text-white transition-colors">Documentație</a></li>
                   <li><a href="#" className="hover:text-white transition-colors">Training</a></li>
@@ -968,6 +954,5 @@ export default function WebsiteLanding() {
           </div>
         </footer>
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }

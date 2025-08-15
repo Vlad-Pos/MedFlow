@@ -3,16 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Eye, 
   EyeOff, 
-  Volume2, 
-  VolumeX, 
   ZoomIn, 
   ZoomOut,
   Contrast,
   Sun,
-  Moon
-} from 'lucide-react'
-import DesignWorkWrapper from '../../DesignWorkWrapper'
-
+  } from 'lucide-react'
 interface AccessibilityProps {
   children: ReactNode
   className?: string
@@ -42,8 +37,7 @@ export function HighContrastMode({ children, className = '' }: AccessibilityProp
   }
 
   return (
-    <DesignWorkWrapper componentName="HighContrastMode">
-      <div className={className}>
+    <div className={className}>
         <button
           onClick={toggleHighContrast}
           className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -53,8 +47,7 @@ export function HighContrastMode({ children, className = '' }: AccessibilityProp
         </button>
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Font size controls
@@ -84,8 +77,7 @@ export function FontSizeControls({ children, className = '' }: AccessibilityProp
   }
 
   return (
-    <DesignWorkWrapper componentName="FontSizeControls">
-      <div className={className}>
+    <div className={className}>
         <div className="fixed bottom-4 left-4 z-50 flex gap-2">
           <button
             onClick={decreaseFontSize}
@@ -104,8 +96,7 @@ export function FontSizeControls({ children, className = '' }: AccessibilityProp
         </div>
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Reduced motion component
@@ -132,8 +123,7 @@ export function ReducedMotion({ children, className = '' }: AccessibilityProps) 
   }
 
   return (
-    <DesignWorkWrapper componentName="ReducedMotion">
-      <div className={className}>
+    <div className={className}>
         <button
           onClick={toggleReducedMotion}
           className="fixed bottom-4 right-20 z-50 p-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
@@ -143,8 +133,7 @@ export function ReducedMotion({ children, className = '' }: AccessibilityProps) 
         </button>
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Screen reader only text
@@ -198,15 +187,13 @@ export function FocusTrap({ children, className = '' }: AccessibilityProps) {
   }, [])
 
   return (
-    <DesignWorkWrapper componentName="FocusTrap">
-      <div className={className}>
+    <div className={className}>
         {isActive && (
           <div className="fixed inset-0 z-40 bg-black/50" />
         )}
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Live region for announcements
@@ -216,16 +203,14 @@ export function LiveRegion({ children, className = '', 'aria-live': ariaLive = '
   'aria-live'?: 'polite' | 'assertive' | 'off'
 }) {
   return (
-    <DesignWorkWrapper componentName="LiveRegion">
-      <div
+    <div
         className={className}
         aria-live={ariaLive}
         aria-atomic="true"
       >
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Accessibility toolbar
@@ -233,8 +218,7 @@ export function AccessibilityToolbar({ children, className = '' }: Accessibility
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <DesignWorkWrapper componentName="AccessibilityToolbar">
-      <div className={className}>
+    <div className={className}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="fixed bottom-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -284,8 +268,7 @@ export function AccessibilityToolbar({ children, className = '' }: Accessibility
         </AnimatePresence>
         {children}
       </div>
-    </DesignWorkWrapper>
-  )
+    )
 }
 
 // Keyboard navigation component

@@ -16,8 +16,6 @@ import { useState, useEffect, forwardRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, AlertCircle, CheckCircle2, User, Mail, Lock, UserCheck } from 'lucide-react'
 import type { AuthValidationResult } from '../../utils/authValidation'
-import DesignWorkWrapper from '../../../DesignWorkWrapper'
-
 interface ValidatedInputProps {
   // Input props
   type: 'text' | 'email' | 'password' | 'select'
@@ -135,8 +133,7 @@ export default forwardRef<HTMLInputElement | HTMLSelectElement, ValidatedInputPr
     const hasSuccess = touched && validation.isValid && value
     
     return (
-      <DesignWorkWrapper componentName="ValidatedInput">
-        <div className={`space-y-2 ${className}`}>
+      <div className={`space-y-2 ${className}`}>
           {/* Label */}
           <label 
             htmlFor={name}
@@ -293,7 +290,6 @@ export default forwardRef<HTMLInputElement | HTMLSelectElement, ValidatedInputPr
             </motion.div>
           )}
         </div>
-      </DesignWorkWrapper>
-    )
+      )
   }
 )
