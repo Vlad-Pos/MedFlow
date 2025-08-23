@@ -21,7 +21,7 @@ import { KeyboardNavigation } from './components/Accessibility'
 import { AppRouteWrapper } from './components/layout'
 import routes, { routeComponents } from './routes/routeConfig'
 import PrivateRoute from './routes/PrivateRoute'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import ErrorBoundary from './components/ErrorBoundary'
 
 // Conditional imports for development-only features
 const FramerWelcomeBanner = process.env.NODE_ENV === 'development' 
@@ -87,7 +87,7 @@ function App() {
               </Route>
 
               {/* Catch-all route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </KeyboardNavigation>
         </NotificationProvider>

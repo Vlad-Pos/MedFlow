@@ -30,6 +30,7 @@ import { useAuth } from '../providers/AuthProvider'
 import { formatDistanceToNow } from 'date-fns'
 import { ro } from 'date-fns/locale'
 import { Timestamp } from 'firebase/firestore'
+import { formatTimeAgo } from '../utils/timeUtils'
 interface DoctorAlertsProps {
   className?: string
   showUnreadOnly?: boolean
@@ -136,15 +137,7 @@ export default function DoctorAlerts({
     }
   }
   
-  /**
-   * Format relative time in Romanian
-   */
-  const formatTimeAgo = (date: Date) => {
-    return formatDistanceToNow(date, { 
-      locale: ro, 
-      addSuffix: true 
-    })
-  }
+
   
   /**
    * Render loading state

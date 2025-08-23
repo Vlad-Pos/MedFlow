@@ -113,11 +113,5 @@ export declare function validateMedicalLicense(license: string): {
     isValid: boolean;
     error?: MedFlowError;
 };
-export declare function validatePatientData(data: {
-    name?: string;
-    symptoms?: string;
-}): {
-    isValid: boolean;
-    errors: MedFlowError[];
-};
+
 export declare const errorHandler: MedFlowErrorHandler;

@@ -486,22 +486,7 @@ export function validateMedicalLicense(license: string): { isValid: boolean; err
   return { isValid: true }
 }
 
-export function validatePatientData(data: { name?: string; symptoms?: string }): { isValid: boolean; errors: MedFlowError[] } {
-  const errors: MedFlowError[] = []
-  
-  if (!data.name || data.name.length < 2) {
-    errors.push(createValidationError('nume pacient', 'Numele pacientului trebuie să aibă cel puțin 2 caractere'))
-  }
-  
-  if (!data.symptoms || data.symptoms.length < 10) {
-    errors.push(createValidationError('simptome', 'Descrierea simptomelor trebuie să aibă cel puțin 10 caractere'))
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  }
-}
+
 
 // Export the singleton instance
 export const errorHandler = MedFlowErrorHandler.getInstance()

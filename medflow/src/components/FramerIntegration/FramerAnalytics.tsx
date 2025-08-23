@@ -3,6 +3,7 @@ import { useFramerIntegration } from '../../hooks/useFramerIntegration';
 import { useAuth } from '../../providers/AuthProvider';
 import { motion } from 'framer-motion';
 import { BarChart3, Users, MousePointer, Clock, ExternalLink, RefreshCw } from 'lucide-react';
+import { formatTimestamp } from '../../utils/timeUtils';
 
 export const FramerAnalytics: React.FC = () => {
   const { userContext, isFromFramer } = useFramerIntegration();
@@ -39,9 +40,7 @@ export const FramerAnalytics: React.FC = () => {
     loadAnalyticsData();
   };
 
-  const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString();
-  };
+
 
   const getTimeAgo = (timestamp: number) => {
     const now = Date.now();

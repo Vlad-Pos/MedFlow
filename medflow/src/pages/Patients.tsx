@@ -5,6 +5,7 @@ import PatientSearch from '../components/PatientSearch'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { MedFlowLoader, SimpleLoader } from '../components/ui'
 import { isDemoMode } from '../utils/demo'
+import { calculateAge, formatLastVisit } from '../utils/patientUtils'
 interface Patient {
   id: string
   name: string
@@ -98,27 +99,7 @@ export default function Patients() {
     }
   }, [])
 
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date()
-    const birthDate = new Date(dateOfBirth)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
-    }
-    return age
-  }
 
-  const formatLastVisit = (date: Date) => {
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 1) return 'ieri'
-    if (diffDays < 7) return `acum ${diffDays} zile`
-    if (diffDays < 30) return `acum ${Math.floor(diffDays / 7)} săptămâni`
-    return date.toLocaleDateString('ro-RO')
-  }
 
   if (loading) {
     return (

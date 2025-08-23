@@ -3,10 +3,7 @@ import { BackgroundType } from '../components/layout/RouteLayout'
 
 // Lazy load all route components
 export const routeComponents = {
-  WebsiteLanding: lazy(() => import('../pages/WebsiteLanding')),
   ModularLandingPage: lazy(() => import('../pages/ModularLandingPage')),
-  BasicWebsite: lazy(() => import('../pages/BasicWebsite')),
-  EnhancedBasicWebsite: lazy(() => import('../pages/EnhancedBasicWebsite')),
   SignIn: lazy(() => import('../pages/auth/SignIn')),
   SignUp: lazy(() => import('../pages/auth/SignUp')),
   ResetPassword: lazy(() => import('../pages/auth/ResetPassword')),
@@ -23,10 +20,9 @@ export const routeComponents = {
   DesignGuidanceTest: lazy(() => import('../pages/DesignGuidanceTest')),
   ScrollGradientDemo: lazy(() => import('../pages/ScrollGradientDemo')),
   TestStyling: lazy(() => import('../components/TestStyling')),
-  HomePage: lazy(() => import('../components/HomePage')),
-  ProfessionalWebsite: lazy(() => import('../pages/ProfessionalWebsite')),
   FramerWebsitePage: lazy(() => import('../pages/FramerWebsitePage')),
-  AnalyticsDashboard: lazy(() => import('../components/admin/AnalyticsDashboard'))
+  AnalyticsDashboard: lazy(() => import('../components/admin/AnalyticsDashboard')),
+  Calendar: lazy(() => import('../pages/Calendar'))
 } as const
 
 export interface RouteConfig {
@@ -40,17 +36,20 @@ export interface RouteConfig {
 }
 
 export const routes: RouteConfig[] = [
-  // Website routes (no navbar, website background)
+  // Authentication-first entry route (redirects unauthenticated users to signin)
   {
     path: '/',
-    component: 'WebsiteLanding',
-    background: 'website',
-    showNavbar: false,
-    showPageTransition: false
+    component: 'SignIn',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white'
   },
+
+  // Landing page routes (accessible after authentication)
   {
-    path: '/website',
-    component: 'WebsiteLanding',
+    path: '/landing',
+    component: 'ModularLandingPage',
     background: 'website',
     showNavbar: false,
     showPageTransition: false
@@ -63,37 +62,9 @@ export const routes: RouteConfig[] = [
     showPageTransition: false
   },
   {
-    path: '/basic',
-    component: 'BasicWebsite',
-    background: 'website',
-    showNavbar: false,
-    showPageTransition: false
-  },
-  {
-    path: '/enhanced',
-    component: 'EnhancedBasicWebsite',
-    background: 'website',
-    showNavbar: false,
-    showPageTransition: false
-  },
-  {
     path: '/test-styling',
     component: 'TestStyling',
     background: 'website',
-    showNavbar: false,
-    showPageTransition: false
-  },
-  {
-    path: '/homepage',
-    component: 'HomePage',
-    background: 'none',
-    showNavbar: false,
-    showPageTransition: false
-  },
-  {
-    path: '/professional',
-    component: 'ProfessionalWebsite',
-    background: 'none',
     showNavbar: false,
     showPageTransition: false
   },
@@ -191,6 +162,15 @@ export const routes: RouteConfig[] = [
   {
     path: '/chatbot',
     component: 'ChatbotPlaceholder',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white',
+    isPrivate: true
+  },
+  {
+    path: '/calendar',
+    component: 'Calendar',
     background: 'scroll',
     showNavbar: true,
     showPageTransition: true,

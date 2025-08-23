@@ -28,6 +28,7 @@ import {
   clearAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
+import { validateEmail, validatePassword } from '../../utils/validation'
 export default function SignIn() {
   // Hooks
   const { signIn } = useAuth()
@@ -99,23 +100,7 @@ export default function SignIn() {
     }
   }
   
-  // Validation functions for real-time feedback
-  const validateEmail = useCallback((email: string) => {
-    if (!email.trim()) return { isValid: true, errors: [] }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return {
-      isValid: emailRegex.test(email),
-      errors: emailRegex.test(email) ? [] : ['Formatul email-ului nu este valid']
-    }
-  }, [])
-  
-  const validatePassword = useCallback((password: string) => {
-    if (!password.trim()) return { isValid: true, errors: [] }
-    return {
-      isValid: password.length > 0,
-      errors: password.length > 0 ? [] : ['Parola este obligatorie']
-    }
-  }, [])
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-medflow-primary/5 via-white to-medflow-secondary/5 flex items-center justify-center p-4">

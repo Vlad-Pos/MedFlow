@@ -59,6 +59,7 @@ import {
   ReportVersion 
 } from '../types/patientReports'
 import { createAmendmentRequest, processAmendmentRequest, applyAmendments } from '../services/monthlyReports'
+import { formatDateTime } from '../utils/dateUtils'
 
 interface AmendmentManagerProps {
   report: PatientReport
@@ -352,17 +353,6 @@ export default function AmendmentManager({
     { id: 'pending' as const, name: 'Amendamente în curs', icon: Clock },
     { id: 'history' as const, name: 'Istoric versiuni', icon: History }
   ]
-
-  // Helper function to format date/time
-  const formatDateTime = (date: Date): string => {
-    return date.toLocaleDateString('ro-RO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden max-w-6xl w-full max-h-[90vh]">

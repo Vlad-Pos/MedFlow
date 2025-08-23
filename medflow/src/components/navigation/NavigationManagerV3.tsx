@@ -36,25 +36,32 @@ export function useNavigationItemsV3(): NavigationItems {
         priority: 2
       },
       { 
+        to: '/calendar', 
+        label: 'Calendar', 
+        icon: Calendar, 
+        description: 'Enhanced scheduling calendar with advanced features',
+        priority: 2.5
+      },
+      { 
         to: '/patients', 
         label: 'Pacienți', 
         icon: Users, 
         description: 'Gestionează informațiile și istoricul pacienților',
-        priority: 3
+        priority: 3.5
       },
       { 
         to: '/reports', 
         label: 'Rapoarte', 
         icon: FileText, 
         description: 'Generează și vizualizează rapoarte medicale',
-        priority: 4
+        priority: 4.5
       },
       { 
         to: '/profile', 
         label: 'Profil', 
         icon: User, 
         description: 'Gestionează profilul și setările contului',
-        priority: 5
+        priority: 5.5
       }
     ]
 
