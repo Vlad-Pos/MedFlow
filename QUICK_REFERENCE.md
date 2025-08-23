@@ -74,6 +74,14 @@ For complete brand voice information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md
 - **Accessibility features** required
 - **Performance optimization** mandatory
 
+### **NEW: Calendar System**
+- **Route**: `/calendar` - Professional scheduling system
+- **Component**: `SchedulingCalendar.tsx` - Modular, self-contained
+- **Language**: Complete Romanian professional integration
+- **Animations**: Professional, medical-grade interface
+- **Brand**: Integration with all 12 MedFlow brand colors
+- **Impact**: Zero interference with existing systems
+
 For complete technical information, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
 
 ---

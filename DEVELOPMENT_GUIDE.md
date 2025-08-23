@@ -41,7 +41,9 @@ src/
 │   ├── forms/          # Form components
 │   ├── layout/         # Layout components
 │   ├── medical/        # Medical-specific components
-│   └── animations/     # Animation components
+│   ├── animations/     # Animation components
+│   └── modules/        # Modular feature components
+│       └── calendar/   # NEW: Advanced Scheduling Calendar System
 ├── pages/              # Page components
 ├── providers/          # Context providers
 ├── services/           # External services
@@ -80,12 +82,33 @@ src/
 - **Container**: Content width constraints
 - **Grid**: Responsive grid layouts
 
+#### **5. NEW: Modular Calendar System (`src/components/modules/calendar/`)**
+- **SchedulingCalendar**: Main calendar component with professional interface
+- **Romanian Language Integration**: Complete Romanian professional language support
+- **Advanced Animation System**: Professional animations with spring physics
+- **Brand Color System**: Dynamic assignment of MedFlow's 12 brand colors
+- **Professional Standards**: Medical-grade UI/UX following healthcare standards
+- **Zero-Impact Architecture**: Completely separate from existing calendar systems
+
 ---
 
 ## 🎨 **DESIGN SYSTEM & STYLING**
 
 For complete brand information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
 For complete technical information, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
+
+### **Animation System Standards**
+- **Framer Motion**: Primary animation library for professional interfaces
+- **Spring Physics**: Responsive, natural-feeling animations
+- **Performance**: Optimized with reduced motion support
+- **Accessibility**: useReducedMotion hook for motion-sensitive users
+- **Professional Standards**: Subtle, medical-grade interface animations
+
+### **Calendar Animation Patterns**
+- **Event Cards**: Entrance, exit, hover, tap, staggered timing
+- **Modal Interfaces**: Scale, slide, spring physics for professional feel
+- **Interactive Elements**: Hover effects, tap feedback, smooth transitions
+- **Performance**: Reduced durations, optimized spring configurations
 
 ### **Tailwind CSS Configuration**
 ```javascript

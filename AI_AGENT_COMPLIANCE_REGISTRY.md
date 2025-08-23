@@ -41,6 +41,12 @@ This registry helps AI agents track their compliance with MedFlow documentation 
 - **Critical Elements**: Implementation guides, best practices
 - **Reading Time**: ~6-8 minutes
 
+### **🚀 NEW: Calendar System Documentation**
+- **Document**: `medflow/src/components/modules/calendar/README.md`
+- **Purpose**: Advanced Scheduling Calendar system implementation details
+- **Critical Elements**: Romanian language integration, animation system, brand compliance
+- **Reading Time**: ~4-6 minutes
+
 ---
 
 ## 📝 **Compliance Entry Template**
@@ -65,6 +71,9 @@ This registry helps AI agents track their compliance with MedFlow documentation 
 7. **Core Features**: [YOUR_ANSWER]
 8. **Documentation Process**: [YOUR_ANSWER]
 9. **Testing Process**: [YOUR_ANSWER]
+10. **Calendar System**: [YOUR_ANSWER]
+11. **Romanian Language**: [YOUR_ANSWER]
+12. **Animation Standards**: [YOUR_ANSWER]
 
 ### Compliance Status: ✅ COMPLIANT
 ### Work Authorization: ✅ READY TO PROCEED
@@ -95,6 +104,9 @@ This registry helps AI agents track their compliance with MedFlow documentation 
 7. **Core Features**: Patient management, appointment scheduling, document management, reporting system, analytics dashboard.
 8. **Documentation Process**: Add new features to FEATURES_DOCUMENTATION.md, update version numbers, maintain cross-references.
 9. **Testing Process**: Unit tests, integration tests, accessibility tests, performance tests with minimum 80% coverage.
+10. **Calendar System**: The new Advanced Scheduling Calendar is a completely modular system with zero impact on existing functionality, featuring Romanian language integration, professional animations, and brand color compliance.
+11. **Romanian Language**: Complete Romanian professional language integration including "Programare Nouă", "Nume pacient", "Ora Început", "Ora Sfârșit", and professional button text like "Anulează", "Creează Programarea".
+12. **Animation Standards**: Professional medical-grade animations using Framer Motion with spring physics, 60fps performance, reduced motion support, and subtle professional effects.
 
 ### Compliance Status: ✅ COMPLIANT
 ### Work Authorization: ✅ READY TO PROCEED

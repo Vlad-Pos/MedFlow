@@ -56,6 +56,12 @@ Build Time: < 10 seconds (development builds)
 - **Performance regression** detection and prevention
 - **Continuous optimization** and improvement
 
+### **Calendar Performance Standards**
+- **Animation Performance**: 60fps smooth animations with spring physics
+- **Loading Time**: Calendar loads within 1 second with proper state management
+- **Memory Usage**: Efficient state management with React hooks
+- **Accessibility**: Reduced motion support for motion-sensitive users
+
 ---
 
 ## 🧩 **COMPONENT ARCHITECTURE**
@@ -84,6 +90,14 @@ src/components/
 - **Accessibility features** required for all components
 - **Performance optimization** mandatory for all features
 - **Consistent naming** conventions and file structure
+
+### **NEW: Calendar Component Standards**
+- **Modular Architecture**: Completely self-contained calendar system
+- **Zero-Impact Integration**: No interference with existing calendar functionality
+- **Professional Animations**: Medical-grade interface with spring physics
+- **Romanian Language**: Complete Romanian professional language integration
+- **Brand Compliance**: Integration with all 12 MedFlow brand colors
+- **Performance**: Optimized animations with reduced motion support
 
 ---
 

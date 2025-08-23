@@ -99,6 +99,40 @@ This document defines all available maintenance tasks that serve dual purposes:
 - **Week 4**: Security & GDPR Audit
 - **Week 5**: Brand Consistency Audit (repeat cycle)
 
+---
+
+## 🚀 **NEW: Calendar System Maintenance**
+
+### **Task 5: Calendar System Health Check**
+**Purpose**: Ensure new Advanced Scheduling Calendar system maintains optimal performance
+**Scope**: Animation performance, state management, Romanian language compliance
+**Priority**: **MEDIUM** - Monthly requirement for new system
+**Frequency**: Monthly rotation, immediate when calendar issues reported
+
+**What This Tests**:
+- Understanding of calendar architecture
+- Knowledge of animation performance standards
+- Ability to identify calendar-specific issues
+- Romanian language compliance verification
+
+**What This Maintains**:
+- Calendar animation performance (60fps)
+- Romanian professional language standards
+- Brand color system integration
+- Zero-impact modular architecture
+
+### **Calendar Maintenance Checklist**
+- [ ] Animation performance verification (60fps smooth)
+- [ ] Romanian language text accuracy and professionalism
+- [ ] Brand color system functionality
+- [ ] Modal system responsiveness
+- [ ] Event management system reliability
+- [ ] Cross-browser compatibility (Safari, Chrome, Firefox)
+- [ ] Accessibility compliance (reduced motion support)
+- [ ] State management efficiency
+- [ ] Error boundary functionality
+- [ ] Navigation integration stability
+
 ### **Priority Override Rules**
 - **Brand violations detected** → Brand Consistency Audit (immediate)
 - **Performance issues reported** → Performance Optimization Analysis (immediate)

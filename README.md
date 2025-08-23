@@ -25,6 +25,13 @@ npm run build
 ### **For Users**
 Visit [medflow.app](https://medflow.app) to access the platform directly.
 
+### **🚀 NEW: Advanced Scheduling Calendar**
+- **Professional Romanian Interface**: Complete Romanian language integration
+- **Zero-Impact Integration**: Completely separate from existing systems
+- **Advanced Animations**: Medical-grade interface with professional animations
+- **Access**: Navigate to "Calendar" in the main navigation
+- **Route**: `/calendar` - Professional scheduling system
+
 ## 📚 Documentation Hub
 
 ### **🚀 [MAIN_GUIDE.md](./MAIN_GUIDE.md)**
@@ -56,6 +63,7 @@ Visit [medflow.app](https://medflow.app) to access the platform directly.
 - Configuration instructions and usage examples
 - Integration guides and troubleshooting
 - All implemented functionality in one place
+- **🚀 NEW: Advanced Scheduling Calendar System** - Complete documentation
 
 ### **🤖 [AI_AGENT_COMPLIANCE_REGISTRY.md](./AI_AGENT_COMPLIANCE_REGISTRY.md)**
 - Voluntary tracking system for AI agent compliance
