@@ -705,7 +705,7 @@ export function SchedulingCalendar() {
               
               {/* Week Day Headers */}
               <div className="grid grid-cols-7 gap-1 mb-2">
-                {["D", "L", "M", "M", "J", "V", "S"].map((day, i) => (
+                {weekDays.map((day, i) => (
                   <div key={i} className="text-center text-white/50 text-xs py-1">
                     {day}
                   </div>
