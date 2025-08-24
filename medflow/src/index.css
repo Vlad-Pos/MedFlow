@@ -175,15 +175,28 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  background-color: var(--medflow-surface-elevated);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: var(--medflow-surface-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  background-color: var(--medflow-surface-elevated);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: var(--medflow-surface-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  background-color: var(--medflow-surface-elevated);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--medflow-surface-dark);
 }
 
 /******** Utilities ********/
@@ -201,18 +214,34 @@ html {
   }
 }
 
+/* Modern button styles */
 .btn-primary {
-  @apply bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg inline-flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-medflow-accent/30 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  @apply bg-[var(--medflow-brand-1)] text-white px-4 py-2 rounded-md hover:bg-[var(--medflow-brand-2)] transition-colors duration-200 font-medium;
 }
 
 .btn-secondary {
-  @apply bg-medflow-surface/80 border border-white/20 text-medflow-text-primary hover:bg-medflow-surface-elevated/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medflow-accent/30 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  @apply bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)] px-4 py-2 rounded-full hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 font-medium;
 }
 
 .btn-ghost {
-  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)] px-4 py-2 rounded-md hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 font-medium;
+}
+
+/* Dark mode overrides for buttons */
+.dark .btn-secondary {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-secondary:hover {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-ghost {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-ghost:hover {
+  background-color: var(--medflow-surface-dark);
 }
 
 .input {
@@ -229,8 +258,26 @@ html {
   }
 }
 
-.textarea {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary dark:bg-gray-900 dark:border-gray-700 transition-all duration-200;
+/* Modern input styles */
+.input-primary {
+  @apply w-full rounded-md border border-[var(--medflow-border)] bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary transition-all duration-200;
+}
+
+.dark .input-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
+/* Modern textarea styles */
+.textarea-primary {
+  @apply w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+.dark .textarea-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
 }
 
 .card {
@@ -239,7 +286,15 @@ html {
 }
 
 .label {
-  @apply mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300;
+  margin-bottom: 0.25rem;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--medflow-text-secondary);
+}
+
+.dark .label {
+  color: var(--medflow-text-secondary);
 }
 
 .link {
@@ -265,7 +320,12 @@ html {
 
 /* Glass morphism effect */
 .glass {
-  @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-gray-800/20;
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .glass {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
 }
 
 /* Modern animations */
@@ -333,7 +393,15 @@ html {
 }
 
 .calendar-day {
-  @apply relative p-2 text-center border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 cursor-pointer;
+  @apply relative p-2 text-center border border-[var(--medflow-border)] hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 cursor-pointer;
+}
+
+.dark .calendar-day {
+  border-color: var(--medflow-border);
+}
+
+.dark .calendar-day:hover {
+  background-color: rgba(var(--medflow-brand-6), 0.5);
 }
 
 .calendar-day.today {
@@ -359,12 +427,38 @@ html {
   @apply space-y-2;
 }
 
+/* Form label styles */
 .form-label {
-  @apply flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300;
+  @apply mb-1 block text-sm font-medium text-[var(--medflow-text-secondary)];
 }
 
+.dark .form-label {
+  color: var(--medflow-text-secondary);
+}
+
+/* Form group styles */
+.form-group {
+  @apply space-y-2;
+}
+
+/* Form actions styles */
+.form-actions {
+  @apply flex items-center space-x-2 text-sm font-medium text-[var(--medflow-text-secondary)];
+}
+
+.dark .form-actions {
+  color: var(--medflow-text-secondary);
+}
+
+/* Form input styles */
 .form-input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-all duration-200;
+  @apply w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.dark .form-input {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
 }
 
 .form-input:focus {
@@ -402,7 +496,7 @@ html {
 
 /* Loading spinner */
 .spinner {
-  @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
+  @apply animate-spin rounded-full border-2 border-[var(--medflow-border)] border-t-blue-600;
 }
 
 /* Advanced Grid-Based Loader Animation - MedFlow Brand Compliant */
@@ -511,15 +605,27 @@ html {
 
 /* React Big Calendar tweak for dark mode */
 .rbc-calendar {
-  @apply bg-white dark:bg-gray-900;
+  background-color: white;
+}
+
+.dark .rbc-calendar {
+  background-color: var(--medflow-surface-dark);
 }
 
 .rbc-time-slot, .rbc-time-header {
-  @apply dark:border-gray-800;
+  border-color: transparent;
+}
+
+.dark .rbc-time-slot, .dark .rbc-time-header {
+  border-color: var(--medflow-border);
 }
 
 .rbc-today {
-  @apply bg-blue-50 dark:bg-blue-950/30;
+  background-color: rgb(239 246 255);
+}
+
+.dark .rbc-today {
+  background-color: rgba(30 58 138 / 0.3);
 }
 
 /* Modern card hover effects */
@@ -529,7 +635,14 @@ html {
 
 /* Glass morphism cards */
 .card-glass {
-  @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-gray-800/20;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .card-glass {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
 }
 
 /* Modern shadows */
@@ -834,4 +947,54 @@ button:hover {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+/* Modern card styles */
+.card-primary {
+  @apply bg-white rounded-xl shadow-lg border border-[var(--medflow-border)] p-6;
+}
+
+.dark .card-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+}
+
+/* Modern modal styles */
+.modal-backdrop {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .modal-backdrop {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
+}
+
+/* Modern select styles */
+.select-primary {
+  @apply bg-white rounded-lg border border-[var(--medflow-border)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.dark .select-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
+/* Modern border styles */
+.border-primary {
+  @apply border-[var(--medflow-border)];
+}
+
+.dark .border-primary {
+  border-color: var(--medflow-border);
+}
+
+/* Modern backdrop styles */
+.backdrop-primary {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .backdrop-primary {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
 }

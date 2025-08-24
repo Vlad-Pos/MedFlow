@@ -71,12 +71,12 @@ export default function ScrollGradientDemo() {
             <h2 className="text-5xl font-bold mb-8 text-white">
               Welcome to MedFlow
             </h2>
-            <p className="text-xl max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            <p className="text-xl max-w-2xl mx-auto text-[var(--medflow-text-primary)] leading-relaxed">
               This section represents the first 20% of scroll progress.
               The gradient should smoothly transition from <span className="font-mono text-purple-300">#8A7A9F</span> to <span className="font-mono text-purple-300">#7A48BF</span>.
             </p>
             <div className="mt-8 p-4 bg-white/10 rounded-lg">
-              <p className="text-sm text-gray-200">
+              <p className="text-sm text-[var(--medflow-text-secondary)]">
                 <strong>Expected Colors:</strong> Logo Color to Secondary Floating Button transition
               </p>
             </div>
@@ -89,12 +89,12 @@ export default function ScrollGradientDemo() {
             <h3 className="text-4xl font-bold mb-8 text-white">
               Professional Healthcare Management
             </h3>
-            <p className="text-lg max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            <p className="text-lg max-w-2xl mx-auto text-[var(--medflow-text-primary)] leading-relaxed">
               This section represents 20-40% scroll progress.
               The gradient should transition from <span className="font-mono text-purple-300">#7A48BF</span> to <span className="font-mono text-purple-300">#804AC8</span>.
             </p>
             <div className="mt-8 p-4 bg-white/10 rounded-lg">
-              <p className="text-sm text-gray-200">
+              <p className="text-sm text-[var(--medflow-text-secondary)]">
                 <strong>Expected Colors:</strong> Secondary Floating Button to Secondary Normal Button transition
               </p>
             </div>
@@ -107,12 +107,12 @@ export default function ScrollGradientDemo() {
             <h3 className="text-4xl font-bold mb-8 text-white">
               Advanced Analytics & Insights
             </h3>
-            <p className="text-lg max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            <p className="text-lg max-w-2xl mx-auto text-[var(--medflow-text-primary)] leading-relaxed">
               This section represents 40-60% scroll progress.
               The gradient should transition from <span className="font-mono text-purple-300">#804AC8</span> to <span className="font-mono text-purple-300">#25153A</span>.
             </p>
             <div className="mt-8 p-4 bg-white/10 rounded-lg">
-              <p className="text-sm text-gray-200">
+              <p className="text-sm text-[var(--medflow-text-secondary)]">
                 <strong>Expected Colors:</strong> Secondary Normal Button to Gradient transition
               </p>
             </div>
@@ -125,12 +125,12 @@ export default function ScrollGradientDemo() {
             <h3 className="text-4xl font-bold mb-8 text-white">
               Secure & Compliant
             </h3>
-            <p className="text-lg max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            <p className="text-lg max-w-2xl mx-auto text-[var(--medflow-text-primary)] leading-relaxed">
               This section represents 60-80% scroll progress.
               The gradient should transition from <span className="font-mono text-purple-300">#25153A</span> to <span className="font-mono text-purple-300">#231A2F</span>.
             </p>
             <div className="mt-8 p-4 bg-white/10 rounded-lg">
-              <p className="text-sm text-gray-200">
+              <p className="text-sm text-[var(--medflow-text-secondary)]">
                 <strong>Expected Colors:</strong> Gradient to Extra Color 1 transition
               </p>
             </div>
@@ -143,16 +143,16 @@ export default function ScrollGradientDemo() {
             <h3 className="text-4xl font-bold mb-8 text-white">
               Ready to Transform Your Practice?
             </h3>
-            <p className="text-lg max-w-2xl mx-auto text-gray-100 leading-relaxed">
+            <p className="text-lg max-w-2xl mx-auto text-[var(--medflow-text-primary)] leading-relaxed">
               This section represents 80-100% scroll progress.
               The gradient should transition from <span className="font-mono text-purple-300">#231A2F</span> to <span className="font-mono text-purple-300">#100B1A</span>.
             </p>
             <div className="mt-8 p-4 bg-white/10 rounded-lg">
-              <p className="text-sm text-gray-200">
+              <p className="text-sm text-[var(--medflow-text-secondary)]">
                 <strong>Expected Colors:</strong> Extra Color 1 to Secondary Background transition
               </p>
             </div>
-            <button className="mt-8 px-8 py-4 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors focus:outline-none focus:ring-4 focus:ring-white/50">
+            <button className="mt-8 px-8 py-4 bg-white text-[var(--medflow-text-primary)] rounded-lg font-semibold hover:bg-[var(--medflow-surface-elevated)] transition-colors focus:outline-none focus:ring-4 focus:ring-white/50">
               Get Started Today
             </button>
           </div>
@@ -166,7 +166,7 @@ export default function ScrollGradientDemo() {
           <div className="grid md:grid-cols-2 gap-6 text-left text-sm">
             <div>
               <h4 className="font-semibold text-white mb-2">Performance Tests:</h4>
-              <ul className="space-y-1 text-gray-200">
+              <ul className="space-y-1 text-[var(--medflow-text-secondary)]">
                 <li>• Smooth scrolling without jank</li>
                 <li>• Color transitions are fluid</li>
                 <li>• No performance degradation</li>
@@ -175,7 +175,7 @@ export default function ScrollGradientDemo() {
             </div>
             <div>
               <h4 className="font-semibold text-white mb-2">Color Tests:</h4>
-              <ul className="space-y-1 text-gray-200">
+              <ul className="space-y-1 text-[var(--medflow-text-secondary)]">
                 <li>• Colors match new brand scheme</li>
                 <li>• Transitions are smooth</li>
                 <li>• Contrast ratios maintained</li>
@@ -189,19 +189,19 @@ export default function ScrollGradientDemo() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 rounded bg-[#8A7A9F]"></div>
-                <span className="text-gray-200">#8A7A9F Logo</span>
+                <span className="text-[var(--medflow-text-secondary)]">#8A7A9F Logo</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 rounded bg-[#7A48BF]"></div>
-                <span className="text-gray-200">#7A48BF Secondary</span>
+                <span className="text-[var(--medflow-text-secondary)]">#7A48BF Secondary</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 rounded bg-[#804AC8]"></div>
-                <span className="text-gray-200">#804AC8 Normal</span>
+                <span className="text-[var(--medflow-text-secondary)]">#804AC8 Normal</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 rounded bg-[#25153A]"></div>
-                <span className="text-gray-200">#25153A Gradient</span>
+                <span className="text-[var(--medflow-text-secondary)]">#25153A Gradient</span>
               </div>
             </div>
           </div>

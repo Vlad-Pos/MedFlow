@@ -9,6 +9,7 @@ export const routeComponents = {
   ResetPassword: lazy(() => import('../pages/auth/ResetPassword')),
   Dashboard: lazy(() => import('../pages/Dashboard')),
   Appointments: lazy(() => import('../pages/Appointments')),
+  TestAppointments: lazy(() => import('../pages/TestAppointments')),
   Patients: lazy(() => import('../pages/Patients')),
   Analytics: lazy(() => import('../pages/Analytics')),
   SecureAnalytics: lazy(() => import('../pages/SecureAnalytics')),
@@ -22,6 +23,7 @@ export const routeComponents = {
   TestStyling: lazy(() => import('../components/TestStyling')),
   FramerWebsitePage: lazy(() => import('../pages/FramerWebsitePage')),
   AnalyticsDashboard: lazy(() => import('../components/admin/AnalyticsDashboard')),
+  AdminDashboard: lazy(() => import('../components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard }))),
   Calendar: lazy(() => import('../pages/Calendar'))
 } as const
 
@@ -115,6 +117,15 @@ export const routes: RouteConfig[] = [
     isPrivate: true
   },
   {
+    path: '/test-appointments',
+    component: 'TestAppointments',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white',
+    isPrivate: true
+  },
+  {
     path: '/patients',
     component: 'Patients',
     background: 'scroll',
@@ -126,6 +137,15 @@ export const routes: RouteConfig[] = [
   {
     path: '/analytics',
     component: 'SecureAnalytics',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white',
+    isPrivate: true
+  },
+  {
+    path: '/admin',
+    component: 'AdminDashboard',
     background: 'scroll',
     showNavbar: true,
     showPageTransition: true,

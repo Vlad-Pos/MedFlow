@@ -10,27 +10,10 @@ interface PageWrapperProps {
   showFooter?: boolean
 }
 
-export default function PageWrapper({
-  children,
-  className = '',
-  showNavigation = true,
-  showFooter = true
-}: PageWrapperProps) {
+export default function PageWrapper({ children, className = '' }: PageWrapperProps) {
   return (
-    <div className="min-h-screen bg-white">
-      {showNavigation && <Navigation />}
-      
-      <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className={`${showNavigation ? 'pt-16 lg:pt-20' : ''} ${className}`}
-      >
-        {children}
-      </motion.main>
-      
-      {showFooter && <Footer />}
+    <div className={`min-h-screen ${className}`}>
+      {children}
     </div>
   )
 }

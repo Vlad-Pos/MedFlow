@@ -25,7 +25,7 @@ export default function ChatbotPlaceholder() {
         animate="animate"
         className="space-y-6"
       >
-        {/* Header */}
+                {/* Header */}
         <div className="text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -38,10 +38,10 @@ export default function ChatbotPlaceholder() {
             </div>
           </motion.div>
           
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Asistent Medical AI
+          <h2 className="text-3xl font-bold text-[var(--medflow-text-primary)] dark:text-white mb-2">
+            Asistent MedFlow AI
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-tertiary)] max-w-4xl mx-auto whitespace-nowrap">
             Discutați cu asistentul nostru inteligent pentru programări, simptome și întrebări medicale
           </p>
         </div>
@@ -66,10 +66,10 @@ export default function ChatbotPlaceholder() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 + index * 0.1 }}
-              className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+              className="flex flex-col items-center p-4 bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] hover:shadow-md transition-shadow"
             >
               <feature.icon className={`w-6 h-6 ${feature.color} mb-2`} />
-              <span className="text-xs text-gray-600 dark:text-gray-400 text-center">
+              <span className="text-xs text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-tertiary)] text-center">
                 {feature.label}
               </span>
             </motion.div>
@@ -81,7 +81,7 @@ export default function ChatbotPlaceholder() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="max-w-4xl mx-auto"
+          className="w-full"
         >
           <AIChat />
         </motion.div>

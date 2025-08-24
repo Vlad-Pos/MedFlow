@@ -160,7 +160,7 @@ export default function PatientReports() {
   const [selectedReport, setSelectedReport] = useState<PatientReport | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  // reports based on search and filters
+  // Filter reports based on search and filters
   useEffect(() => {
     let filtered = reports
 
@@ -188,8 +188,8 @@ export default function PatientReports() {
       case 'draft': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'completed': return 'text-green-600 bg-green-50 border-green-200'
       case 'sent': return 'text-blue-600 bg-blue-50 border-blue-200'
-      case 'archived': return 'text-gray-600 bg-gray-50 border-gray-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'archived': return 'text-[var(--medflow-text-tertiary)] bg-[var(--medflow-surface-elevated)] border-[var(--medflow-border)]'
+      default: return 'text-[var(--medflow-text-tertiary)] bg-[var(--medflow-surface-elevated)] border-[var(--medflow-border)]'
     }
   }
 
@@ -209,7 +209,7 @@ export default function PatientReports() {
       case 'low': return 'text-green-600 bg-green-50'
       case 'medium': return 'text-yellow-600 bg-yellow-50'
       case 'high': return 'text-red-600 bg-red-50'
-      default: return 'text-gray-600 bg-gray-50'
+      default: return 'text-[var(--medflow-text-tertiary)] bg-[var(--medflow-surface-elevated)]'
     }
   }
 
@@ -224,417 +224,424 @@ export default function PatientReports() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        {/* Header */}
-      <motion.div variants={staggerItem} className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Rapoarte Medicale
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Gestionarea și analiza rapoartelor pacienților
-            </p>
-          </div>
-        </div>
-            
-            <button
-          onClick={() => setShowCreateForm(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Raport nou</span>
-            </button>
-      </motion.div>
-
-      {/* Search and Filters */}
-      <motion.div variants={staggerItem} className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Caută rapoarte, pacienți sau diagnostice..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:border-gray-700"
-          />
-        </div>
-
-        <div className="flex space-x-3">
-          <select
-            value={selectedReportType}
-            onChange={(e) => setSelectedReportType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:border-gray-700"
-          >
-            <option value="all">Toate tipurile</option>
-            <option value="consultation">Consultații</option>
-            <option value="diagnosis">Diagnostice</option>
-            <option value="treatment">Tratamente</option>
-            <option value="follow-up">Follow-up</option>
-            <option value="discharge">Externări</option>
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:border-gray-700"
-          >
-            <option value="all">Toate statusurile</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completate</option>
-            <option value="sent">Trimise</option>
-            <option value="archived">Arhivate</option>
-          </select>
-              </div>
-            </motion.div>
-
-      {/* AI Analytics Summary */}
-            <motion.div
-        variants={staggerItem}
-        className="grid grid-cols-1 md:grid-cols-4 gap-6"
-      >
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <Brain className="w-5 h-5 text-purple-600" />
-            <h4 className="font-semibold text-gray-900 dark:text-white">AI Analize</h4>
-          </div>
-          <div className="text-3xl font-bold text-purple-600 mb-2">
-            {filteredReports.filter(r => r.aiAnalysis).length}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Rapoarte cu analiză AI
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
-            <h4 className="font-semibold text-gray-900 dark:text-white">Risc Mare</h4>
-          </div>
-          <div className="text-3xl font-bold text-red-600 mb-2">
-            {filteredReports.filter(r => r.aiAnalysis?.riskLevel === 'high').length}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Pacienți cu risc crescut
-                  </p>
-                </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <TrendingUp className="w-5 h-5 text-green-600" />
-            <h4 className="font-semibold text-gray-900 dark:text-white">Îmbunătățiri</h4>
-                </div>
-          <div className="text-3xl font-bold text-green-600 mb-2">
-            {filteredReports.filter(r => r.status === 'completed').length}
-              </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Tratamente completate
-                  </p>
-                </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3 mb-4">
-            <Star className="w-5 h-5 text-yellow-600" />
-            <h4 className="font-semibold text-gray-900 dark:text-white">Calitate</h4>
-                </div>
-          <div className="text-3xl font-bold text-yellow-600 mb-2">94%</div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Scor calitate rapoarte
-          </p>
-              </div>
-            </motion.div>
-
-      {/* Reports List */}
-            <motion.div
+    <div className="min-h-screen text-[var(--medflow-text-primary)] p-6">
+      <motion.div 
         variants={staggerContainer}
-        className="space-y-4"
+        initial="hidden"
+        animate="visible"
+        className="max-w-7xl mx-auto space-y-6"
       >
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="loader mb-4"></div>
-              <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
-                Se încarcă rapoartele...
+        {/* Header */}
+        <motion.div variants={staggerItem} className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-3 bg-gradient-to-r from-[var(--medflow-brand-1)] to-[var(--medflow-brand-2)] rounded-xl">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-[var(--medflow-text-primary)]">
+                Rapoarte Medicale
+              </h2>
+              <p className="text-lg text-[var(--medflow-text-tertiary)]">
+                Gestionarea și analiza rapoartelor pacienților
               </p>
             </div>
           </div>
-        ) : filteredReports.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Nu au fost găsite rapoarte
-            </h4>
-            <p className="text-gray-600 dark:text-gray-400">
-              Încercați să modificați criteriile de căutare sau să creați un raport nou.
+            
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-[var(--medflow-brand-2)] text-white rounded-lg hover:bg-[var(--medflow-brand-3)] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Raport nou</span>
+          </button>
+        </motion.div>
+
+        {/* Search and Filters */}
+        <motion.div variants={staggerItem} className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--medflow-text-muted)]" />
+            <input
+              type="text"
+              placeholder="Caută rapoarte, pacienți sau diagnostice..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-[var(--medflow-brand-1)] focus:border-[var(--medflow-brand-1)] bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)] placeholder-[var(--medflow-text-muted)]"
+            />
+          </div>
+
+          <div className="flex space-x-3">
+            <select
+              value={selectedReportType}
+              onChange={(e) => setSelectedReportType(e.target.value)}
+              className="px-4 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-[var(--medflow-brand-1)] focus:border-[var(--medflow-brand-1)] bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)]"
+            >
+              <option value="all">Toate tipurile</option>
+              <option value="consultation">Consultații</option>
+              <option value="diagnosis">Diagnostice</option>
+              <option value="treatment">Tratamente</option>
+              <option value="follow-up">Follow-up</option>
+              <option value="discharge">Externări</option>
+            </select>
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-4 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-[var(--medflow-brand-1)] focus:border-[var(--medflow-brand-1)] bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)]"
+            >
+              <option value="all">Toate statusurile</option>
+              <option value="draft">Draft</option>
+              <option value="completed">Completate</option>
+              <option value="sent">Trimise</option>
+              <option value="archived">Arhivate</option>
+            </select>
+          </div>
+        </motion.div>
+
+        {/* AI Analytics Summary */}
+        <motion.div
+          variants={staggerItem}
+          className="grid grid-cols-1 md:grid-cols-4 gap-6"
+        >
+          <div className="bg-[var(--medflow-surface-elevated)] rounded-xl p-6 border border-[var(--medflow-border)]">
+            <div className="flex items-center space-x-3 mb-4">
+              <Brain className="w-5 h-5 text-[var(--medflow-brand-1)]" />
+              <h4 className="font-semibold text-[var(--medflow-text-primary)]">AI Analize</h4>
+            </div>
+            <div className="text-3xl font-bold text-[var(--medflow-brand-1)] mb-2">
+              {filteredReports.filter(r => r.aiAnalysis).length}
+            </div>
+            <p className="text-sm text-[var(--medflow-text-tertiary)]">
+              Rapoarte cu analiză AI
             </p>
           </div>
-        ) : (
-          filteredReports.map((report, index) => {
-            const ReportIcon = getReportTypeIcon(report.reportType)
-            return (
-              <motion.div
-                key={report.id}
-                variants={cardVariants}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <ReportIcon className="w-5 h-5 text-purple-600" />
-                  </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {report.title}
-              </h3>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(report.status)}`}>
-                          {report.status.toUpperCase()}
-                        </span>
+          <div className="bg-[var(--medflow-surface-elevated)] rounded-xl p-6 border border-[var(--medflow-border)]">
+            <div className="flex items-center space-x-3 mb-4">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <h4 className="font-semibold text-[var(--medflow-text-primary)]">Risc Mare</h4>
+            </div>
+            <div className="text-3xl font-bold text-red-600 mb-2">
+              {filteredReports.filter(r => r.aiAnalysis?.riskLevel === 'high').length}
+            </div>
+            <p className="text-sm text-[var(--medflow-text-tertiary)]">
+              Pacienți cu risc crescut
+            </p>
+          </div>
+
+          <div className="bg-[var(--medflow-surface-elevated)] rounded-xl p-6 border border-[var(--medflow-border)]">
+            <div className="flex items-center space-x-3 mb-4">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              <h4 className="font-semibold text-[var(--medflow-text-primary)]">Îmbunătățiri</h4>
+            </div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              {filteredReports.filter(r => r.status === 'completed').length}
+            </div>
+            <p className="text-sm text-[var(--medflow-text-tertiary)]">
+              Tratamente completate
+            </p>
+          </div>
+
+          <div className="bg-[var(--medflow-surface-elevated)] rounded-xl p-6 border border-[var(--medflow-border)]">
+            <div className="flex items-center space-x-3 mb-4">
+              <Star className="w-5 h-5 text-yellow-600" />
+              <h4 className="font-semibold text-[var(--medflow-text-primary)]">Calitate</h4>
+            </div>
+            <div className="text-3xl font-bold text-yellow-600 mb-2">94%</div>
+            <p className="text-sm text-[var(--medflow-text-tertiary)]">
+              Scor calitate rapoarte
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Reports List */}
+        <motion.div
+          variants={staggerContainer}
+          className="space-y-4"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <LoadingSpinner />
+                <p className="text-lg font-medium text-[var(--medflow-text-tertiary)] mt-4">
+                  Se încarcă rapoartele...
+                </p>
+              </div>
+            </div>
+          ) : filteredReports.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 text-[var(--medflow-text-muted)] mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-[var(--medflow-text-primary)] mb-2">
+                Nu au fost găsite rapoarte
+              </h4>
+              <p className="text-[var(--medflow-text-tertiary)]">
+                Încercați să modificați criteriile de căutare sau să creați un raport nou.
+              </p>
+            </div>
+          ) : (
+            filteredReports.map((report, index) => {
+              const ReportIcon = getReportTypeIcon(report.reportType)
+              return (
+                <motion.div
+                  key={report.id}
+                  variants={cardVariants}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-[var(--medflow-surface-elevated)] rounded-xl border border-[var(--medflow-border)] p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="p-3 bg-[var(--medflow-brand-1)]/10 rounded-lg">
+                        <ReportIcon className="w-5 h-5 text-[var(--medflow-brand-1)]" />
                       </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        <div className="flex items-center space-x-1">
-                          <User className="w-3 h-3" />
-                          <span>{report.patientName}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>{report.date.toLocaleDateString('ro-RO')}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Stethoscope className="w-3 h-3" />
-                          <span>{report.doctorName}</span>
-                        </div>
+
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)]">
+                            {report.title}
+                          </h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(report.status)}`}>
+                            {report.status.toUpperCase()}
+                          </span>
                         </div>
                         
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                          Diagnostic:
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {report.content.diagnosis}
-                        </p>
-                      </div>
-
-                      {/* AI Analysis */}
-                      {report.aiAnalysis && (
-                        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Brain className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              Analiză AI
-                            </span>
-                            <span className={`px-2 py-1 text-xs font-medium rounded ${getRiskLevelColor(report.aiAnalysis.riskLevel)}`}>
-                              Risc {report.aiAnalysis.riskLevel}
-                          </span>
-                            <span className="text-xs text-gray-500">
-                              {report.aiAnalysis.confidence}% încredere
-                            </span>
+                        <div className="flex items-center space-x-4 text-sm text-[var(--medflow-text-tertiary)] mb-3">
+                          <div className="flex items-center space-x-1">
+                            <User className="w-3 h-3" />
+                            <span>{report.patientName}</span>
                           </div>
-                          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                            {report.aiAnalysis.insights.slice(0, 2).map((insight, idx) => (
-                              <li key={idx} className="flex items-start space-x-1">
-                                <span className="text-purple-600">•</span>
-                                <span>{insight}</span>
-                              </li>
-                            ))}
-                          </ul>
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="w-3 h-3" />
+                            <span>{report.date.toLocaleDateString('ro-RO')}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Stethoscope className="w-3 h-3" />
+                            <span>{report.doctorName}</span>
+                          </div>
                         </div>
-                      )}
+                        
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-[var(--medflow-text-primary)] mb-1">
+                            Diagnostic:
+                          </p>
+                          <p className="text-sm text-[var(--medflow-text-tertiary)]">
+                            {report.content.diagnosis}
+                          </p>
+                        </div>
 
-                      {/* Attachments */}
-                      {report.attachments.length > 0 && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                          <FileText className="w-3 h-3" />
-                          <span>{report.attachments.length} atașamente</span>
-                        </div>
-                      )}
+                        {/* AI Analysis */}
+                        {report.aiAnalysis && (
+                          <div className="mb-4 p-3 bg-[var(--medflow-surface-elevated)] rounded-lg border border-[var(--medflow-border)]">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Brain className="w-4 h-4 text-[var(--medflow-brand-1)]" />
+                              <span className="text-sm font-medium text-[var(--medflow-text-primary)]">
+                                Analiză AI
+                              </span>
+                              <span className={`px-2 py-1 text-xs font-medium rounded ${getRiskLevelColor(report.aiAnalysis.riskLevel)}`}>
+                                Risc {report.aiAnalysis.riskLevel}
+                              </span>
+                              <span className="text-xs text-[var(--medflow-text-muted)]">
+                                {report.aiAnalysis.confidence}% încredere
+                              </span>
+                            </div>
+                            <ul className="text-sm text-[var(--medflow-text-tertiary)] space-y-1">
+                              {report.aiAnalysis.insights.slice(0, 2).map((insight, idx) => (
+                                <li key={idx} className="flex items-start space-x-1">
+                                  <span className="text-[var(--medflow-brand-1)]">•</span>
+                                  <span>{insight}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Attachments */}
+                        {report.attachments.length > 0 && (
+                          <div className="flex items-center space-x-2 text-sm text-[var(--medflow-text-tertiary)]">
+                            <FileText className="w-3 h-3" />
+                            <span>{report.attachments.length} atașamente</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
+                    {/* Actions */}
+                    <div className="flex items-center space-x-2">
                       <button
-                      onClick={() => setSelectedReport(report)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="Vezi raportul"
+                        onClick={() => setSelectedReport(report)}
+                        className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
+                        title="Vezi raportul"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       
-                    <button
-                      onClick={() => handleExportReport(report, 'pdf')}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="Exportă PDF"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                    
-                        <button
-                      onClick={() => handleShareReport(report)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="Partajează"
-                    >
-                      <Share2 className="w-4 h-4" />
-                        </button>
-                      
-                    <div className="relative">
                       <button
-                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title="Mai multe opțiuni"
+                        onClick={() => handleExportReport(report, 'pdf')}
+                        className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
+                        title="Exportă PDF"
                       >
-                        <ChevronDown className="w-4 h-4" />
+                        <Download className="w-4 h-4" />
                       </button>
-                    </div>
+                      
+                      <button
+                        onClick={() => handleShareReport(report)}
+                        className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
+                        title="Partajează"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      
+                      <div className="relative">
+                        <button
+                          className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
+                          title="Mai multe opțiuni"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
-            )
-          })
+              )
+            })
           )}
-      </motion.div>
+        </motion.div>
 
-      {/* Report Details Modal */}
-      <AnimatePresence>
-        {selectedReport && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={() => setSelectedReport(null)}
-          >
+        {/* Report Details Modal */}
+        <AnimatePresence>
+          {selectedReport && (
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              onClick={() => setSelectedReport(null)}
             >
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {selectedReport.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {selectedReport.patientName} • {selectedReport.date.toLocaleDateString('ro-RO')}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleExportReport(selectedReport, 'pdf')}
-                      className="flex items-center space-x-1 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Exportă</span>
-                    </button>
-                    <button
-                      onClick={() => setSelectedReport(null)}
-                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-[var(--medflow-surface-elevated)] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6 border-b border-[var(--medflow-border)]">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-semibold text-[var(--medflow-text-primary)]">
+                        {selectedReport.title}
+                      </h3>
+                      <p className="text-[var(--medflow-text-tertiary)]">
+                        {selectedReport.patientName} • {selectedReport.date.toLocaleDateString('ro-RO')}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleExportReport(selectedReport, 'pdf')}
+                        className="flex items-center space-x-1 px-3 py-2 text-sm bg-[var(--medflow-brand-2)] text-white rounded-lg hover:bg-[var(--medflow-brand-3)] transition-colors"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Exportă</span>
+                      </button>
+                      <button
+                        onClick={() => setSelectedReport(null)}
+                        className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="p-6 space-y-6">
-                {/* Report Content Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Simptome</h4>
-                    <ul className="space-y-1">
-                      {selectedReport.content.symptoms.map((symptom, index) => (
-                        <li key={index} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>{symptom}</span>
-                        </li>
-                      ))}
-                    </ul>
+                
+                <div className="p-6 space-y-6">
+                  {/* Report Content Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3">Simptome</h4>
+                      <ul className="space-y-1">
+                        {selectedReport.content.symptoms.map((symptom, index) => (
+                          <li key={index} className="flex items-center space-x-2 text-sm text-[var(--medflow-text-tertiary)]">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span>{symptom}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3">Recomandări</h4>
+                      <ul className="space-y-1">
+                        {selectedReport.content.recommendations.map((rec, index) => (
+                          <li key={index} className="flex items-start space-x-2 text-sm text-[var(--medflow-text-tertiary)]">
+                            <Star className="w-3 h-3 text-yellow-500 flex-shrink-0 mt-0.5" />
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Recomandări</h4>
-                    <ul className="space-y-1">
-                      {selectedReport.content.recommendations.map((rec, index) => (
-                        <li key={index} className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Star className="w-3 h-3 text-yellow-500 flex-shrink-0 mt-0.5" />
-                          <span>{rec}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3">Diagnostic</h4>
+                    <p className="text-[var(--medflow-text-tertiary)]">
+                      {selectedReport.content.diagnosis}
+                    </p>
                   </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Diagnostic</h4>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {selectedReport.content.diagnosis}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Plan de tratament</h4>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {selectedReport.content.treatment}
-                  </p>
-                </div>
-
-                {selectedReport.content.medications && (
+                  
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Medicație</h4>
-                    <ul className="space-y-1">
-                      {selectedReport.content.medications.map((med, index) => (
-                        <li key={index} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                          <Heart className="w-3 h-3 text-red-500" />
-                          <span>{med}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3">Plan de tratament</h4>
+                    <p className="text-[var(--medflow-text-tertiary)]">
+                      {selectedReport.content.treatment}
+                    </p>
                   </div>
-                )}
 
-                {selectedReport.aiAnalysis && (
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
-                      <Brain className="w-4 h-4 text-purple-600" />
-                      <span>Analiză AI detaliată</span>
-                    </h4>
-                    <div className="space-y-3">
-                      <div>
-                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Insights</h5>
-                        <ul className="space-y-1">
-                          {selectedReport.aiAnalysis.insights.map((insight, index) => (
-                            <li key={index} className="text-sm text-gray-600 dark:text-gray-400">
-                              • {insight}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Recomandări AI</h5>
-                        <ul className="space-y-1">
-                          {selectedReport.aiAnalysis.recommendations.map((rec, index) => (
-                            <li key={index} className="text-sm text-gray-600 dark:text-gray-400">
-                              → {rec}
-                            </li>
-                          ))}
-                        </ul>
+                  {selectedReport.content.medications && (
+                    <div>
+                      <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3">Medicație</h4>
+                      <ul className="space-y-1">
+                        {selectedReport.content.medications.map((med, index) => (
+                          <li key={index} className="flex items-center space-x-2 text-sm text-[var(--medflow-text-tertiary)]">
+                            <Heart className="w-3 h-3 text-red-500" />
+                            <span>{med}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {selectedReport.aiAnalysis && (
+                    <div className="p-4 bg-[var(--medflow-brand-1)]/10 rounded-lg border border-[var(--medflow-border)]">
+                      <h4 className="font-semibold text-[var(--medflow-text-primary)] mb-3 flex items-center space-x-2">
+                        <Brain className="w-4 h-4 text-[var(--medflow-brand-1)]" />
+                        <span>Analiză AI detaliată</span>
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <h5 className="font-medium text-[var(--medflow-text-primary)] mb-2">Insights</h5>
+                          <ul className="space-y-1">
+                            {selectedReport.aiAnalysis.insights.map((insight, index) => (
+                              <li key={index} className="text-sm text-[var(--medflow-text-tertiary)]">
+                                • {insight}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-[var(--medflow-text-primary)] mb-2">Recomandări AI</h5>
+                          <ul className="space-y-1">
+                            {selectedReport.aiAnalysis.recommendations.map((rec, index) => (
+                              <li key={index} className="text-sm text-[var(--medflow-text-tertiary)]">
+                                → {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
-    )
+  )
 }

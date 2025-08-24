@@ -298,7 +298,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
         {/* Enhanced Header with MedFlow Branding */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex items-center space-x-4">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-semibold text-[var(--medflow-text-primary)] dark:text-white">
               Calendar Medical
             </h2>
             
@@ -335,13 +335,13 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
             {/* View Toggle */}
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+            <div className="flex items-center space-x-2 bg-[var(--medflow-brand-6)] dark:bg-[var(--medflow-surface-dark)] rounded-lg p-1">
               <button
                 onClick={() => setView('week')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'week'
                     ? 'bg-medflow-primary text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    : 'text-[var(--medflow-text-tertiary)] hover:text-[var(--medflow-text-primary)] dark:text-[var(--medflow-text-tertiary)] dark:hover:text-white'
                 }`}
               >
                 Săptămână
@@ -351,7 +351,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === 'month'
                     ? 'bg-medflow-primary text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                    : 'text-[var(--medflow-text-tertiary)] hover:text-[var(--medflow-text-primary)] dark:text-[var(--medflow-text-tertiary)] dark:hover:text-white'
                 }`}
               >
                 Lună
@@ -362,19 +362,19 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
             <div className="flex items-center space-x-2">
               <button
                 onClick={handlePrevious}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                 aria-label="Săptămâna/Luna anterioară"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               
-              <span className="text-lg font-medium text-gray-900 dark:text-white min-w-[140px] text-center">
+              <span className="text-lg font-medium text-[var(--medflow-text-primary)] dark:text-white min-w-[140px] text-center">
                 {format(currentDate, 'MMMM yyyy', { locale: ro })}
               </span>
               
               <button
                 onClick={handleNext}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-lg hover:bg-[var(--medflow-surface-dark)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                 aria-label="Săptămâna/Luna următoare"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -450,7 +450,7 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-800"
+                className="bg-white dark:bg-[var(--medflow-surface-dark)] rounded-xl p-6 w-full max-w-md shadow-2xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-6">
@@ -459,17 +459,17 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
                       <Plus className="w-5 h-5 text-medflow-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] dark:text-white">
                         Programare rapidă
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-tertiary)]">
                         Adăugați o programare nouă rapid
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowQuickAdd(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="p-2 rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                     aria-label="Închide dialogul"
                   >
                     <X className="w-5 h-5" />
@@ -490,72 +490,72 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
                 
                 <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleQuickAdd(); }}>
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium mb-2 text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                       Nume pacient *
                     </label>
                     <input
                       type="text"
                       value={quickAddData.patientName}
                       onChange={(e) => setQuickAddData({ ...quickAddData, patientName: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
+                      className="w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] transition-colors"
                       placeholder="Ex: Ion Popescu"
                       required
                       aria-describedby="patient-name-help"
                     />
-                    <p id="patient-name-help" className="text-xs text-gray-500 mt-1">
+                    <p id="patient-name-help" className="text-xs text-[var(--medflow-text-muted)] mt-1">
                       Introduceți numele complet al pacientului
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      <label className="block text-sm font-medium mb-2 text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                         Data *
                       </label>
-                      <input
-                        type="date"
-                        value={quickAddData.date}
-                        onChange={(e) => setQuickAddData({ ...quickAddData, date: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
-                        required
-                      />
+                                              <input
+                          type="date"
+                          value={quickAddData.date}
+                          onChange={(e) => setQuickAddData({ ...quickAddData, date: e.target.value })}
+                          className="w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] transition-colors"
+                          required
+                        />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                      <label className="block text-sm font-medium mb-2 text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                         Ora *
                       </label>
-                      <input
-                        type="time"
-                        value={quickAddData.time}
-                        onChange={(e) => setQuickAddData({ ...quickAddData, time: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors"
-                        required
-                      />
+                                              <input
+                          type="time"
+                          value={quickAddData.time}
+                          onChange={(e) => setQuickAddData({ ...quickAddData, time: e.target.value })}
+                          className="w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] transition-colors"
+                          required
+                        />
                     </div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium mb-2 text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                       Motivul consultației (opțional)
                     </label>
                     <textarea
                       value={quickAddData.symptoms}
                       onChange={(e) => setQuickAddData({ ...quickAddData, symptoms: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-700 transition-colors resize-none"
+                      className="w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] transition-colors resize-none"
                       rows={3}
                       placeholder="Ex: Dureri de cap frecvente, control de rutină..."
                       aria-describedby="symptoms-help"
                     />
-                    <p id="symptoms-help" className="text-xs text-gray-500 mt-1">
+                    <p id="symptoms-help" className="text-xs text-[var(--medflow-text-muted)] mt-1">
                       Adăugați o scurtă descriere a motivului consultației
                     </p>
                   </div>
                   
-                  <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex space-x-3 pt-4 border-t border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
                     <button
                       type="button"
                       onClick={() => setShowQuickAdd(false)}
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                      className="flex-1 px-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors font-medium"
                     >
                       Anulează
                     </button>
@@ -577,12 +577,12 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
         </AnimatePresence>
 
         {/* Enhanced Calendar Grid with Loading States */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-lg">
+        <div className="bg-white dark:bg-[var(--medflow-surface-dark)] rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] overflow-hidden shadow-lg">
           {calendarState.loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <div className="loader mb-4"></div>
-                <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-lg font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                   Se încarcă calendarul medical...
                 </p>
               </div>
@@ -650,14 +650,14 @@ function WeekView({
     <div className="overflow-x-auto">
       <div className="min-w-[800px] lg:min-w-full">
         {/* Header */}
-        <div className="grid grid-cols-8 border-b border-gray-200 dark:border-gray-800">
+        <div className="grid grid-cols-8 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
           <div className="p-3"></div>
           {days.map((day, index) => (
-            <div key={index} className="p-3 text-center border-l border-gray-200 dark:border-gray-800">
-              <div className={`text-sm font-medium ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+            <div key={index} className="p-3 text-center border-l border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
+              <div className={`text-sm font-medium ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--medflow-text-primary)] dark:text-white'}`}>
                 {format(day, 'EEE', { locale: ro })}
               </div>
-              <div className={`text-lg ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+              <div className={`text-lg ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : 'text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-tertiary)]'}`}>
                 {format(day, 'd')}
               </div>
             </div>
@@ -666,16 +666,16 @@ function WeekView({
 
         {/* Time slots */}
         <div className="grid grid-cols-8">
-          <div className="border-r border-gray-200 dark:border-gray-800">
+          <div className="border-r border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
             {timeSlots.map((time, index) => (
-              <div key={index} className="h-12 border-b border-gray-100 dark:border-gray-800 flex items-center justify-end pr-2">
-                <span className="text-xs text-gray-500 dark:text-gray-400">{time}</span>
-              </div>
+                              <div key={index} className="h-12 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)] flex items-center justify-end pr-2">
+                  <span className="text-xs text-[var(--medflow-text-muted)] dark:text-[var(--medflow-text-tertiary)]">{time}</span>
+                </div>
             ))}
           </div>
           
           {days.map((day, dayIndex) => (
-            <div key={dayIndex} className="relative border-r border-gray-200 dark:border-gray-800">
+            <div key={dayIndex} className="relative border-r border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
               {timeSlots.map((time, timeIndex) => {
                 const slotKey = `${format(day, 'yyyy-MM-dd')}-${time}`
                 const dayAppointments = appointments.filter(appt => {
@@ -686,10 +686,10 @@ function WeekView({
                 return (
                   <div
                     key={timeIndex}
-                    className={`h-12 border-b border-gray-100 dark:border-gray-800 relative transition-colors ${
+                    className={`h-12 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)] relative transition-colors ${
                       selectedTimeSlot === slotKey 
                         ? 'bg-blue-50 dark:bg-blue-900/20' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                        : 'hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)]/50'
                     }`}
                     onClick={() => {
                       setSelectedTimeSlot(slotKey)
@@ -793,9 +793,9 @@ function MonthView({
   return (
     <div>
       {/* Month header */}
-      <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800">
+              <div className="grid grid-cols-7 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
         {['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum'].map((day) => (
-          <div key={day} className="p-3 text-center text-sm font-medium text-gray-900 dark:text-white">
+          <div key={day} className="p-3 text-center text-sm font-medium text-[var(--medflow-text-primary)] dark:text-white">
             {day}
           </div>
         ))}
@@ -809,16 +809,16 @@ function MonthView({
           return (
             <div
               key={index}
-              className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-gray-800 ${
-                !isSameMonth(day, new Date()) ? 'bg-gray-50 dark:bg-gray-900/50' : ''
+              className={`min-h-[120px] p-2 border-r border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)] ${
+                !isSameMonth(day, new Date()) ? 'bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)]/50' : ''
               }`}
             >
               <div className={`text-sm font-medium mb-1 ${
                 isToday(day) 
                   ? 'text-blue-600 dark:text-blue-400' 
                   : !isSameMonth(day, new Date())
-                  ? 'text-gray-400'
-                  : 'text-gray-900 dark:text-white'
+                  ? 'text-[var(--medflow-text-muted)]'
+                  : 'text-[var(--medflow-text-primary)] dark:text-white'
               }`}>
                 {format(day, 'd')}
               </div>
@@ -859,7 +859,7 @@ function MonthView({
                 ))}
                 
                 {dayAppointments.length > 3 && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-[var(--medflow-text-muted)] dark:text-[var(--medflow-text-tertiary)]">
                     +{dayAppointments.length - 3} mai multe
                   </div>
                 )}

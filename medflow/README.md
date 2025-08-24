@@ -10,6 +10,7 @@ MedFlow este o aplicație web **enterprise-grade** pentru gestionarea cabinetelo
 - **Documente digitale** cu încărcare securizată și management integrat
 - **Analitica avansată** cu rapoarte detaliate și AI insights
 - **Sistem de notificări** cu șabloane personalizabile
+- **Asistent AI Chatbot** cu interfață modernă și integrare completă cu brandul MedFlow
 - **Mod întunecat** pentru confortul vizual
 - **Multi-dispozitiv** cu sincronizare în timp real
 

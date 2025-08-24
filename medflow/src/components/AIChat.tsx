@@ -15,22 +15,17 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
-  Send, 
-  Bot, 
   User, 
   Calendar, 
   Heart, 
   Brain,
-  MessageCircle,
   Mic,
   MicOff,
-  Languages,
   ThumbsUp,
   ThumbsDown,
-  Download,
-  Settings
+  ArrowUp
 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { staggerContainer, staggerItem, fadeInVariants } from '../utils/animations'
@@ -142,8 +137,7 @@ export default function AIChat() {
   const [isLoading, setIsLoading] = useState(false)
   const [config, setConfig] = useState<AIConfig>(DEFAULT_CONFIG)
   const [isListening, setIsListening] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const [conversationSummary, setConversationSummary] = useState('')
+  const [messageRatings, setMessageRatings] = useState<Record<string, 'positive' | 'negative' | null>>({})
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -387,6 +381,24 @@ export default function AIChat() {
     inputRef.current?.focus()
   }, [])
 
+  // Handle AI response rating
+  const handleAIRating = useCallback((messageId: string, rating: 'positive' | 'negative') => {
+    console.log(`AI Response ${messageId} rated as: ${rating}`)
+    
+    // Store the rating in local state
+    setMessageRatings(prev => ({
+      ...prev,
+      [messageId]: rating
+    }))
+    
+    // TODO: Send rating to backend for AI improvement
+    // This could include:
+    // - Message ID
+    // - Rating (positive/negative)
+    // - User feedback for training
+    // - Response quality metrics
+  }, [])
+
   // Voice input (placeholder)
   const toggleVoiceInput = useCallback(() => {
     if (!config.features.voiceInput) return
@@ -394,106 +406,30 @@ export default function AIChat() {
     // TODO: Implement actual voice recognition
   }, [isListening, config.features.voiceInput])
 
-  // Export conversation
-  const exportConversation = useCallback(() => {
-    const conversationText = messages
-      .map(msg => `[${msg.timestamp.toLocaleString()}] ${msg.role.toUpperCase()}: ${msg.content}`)
-      .join('\n')
-    
-    const blob = new Blob([conversationText], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `medflow-conversation-${new Date().toISOString().split('T')[0]}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }, [messages])
+
 
   return (
     <motion.div
         variants={fadeInVariants}
         initial="initial"
         animate="animate"
-        className="h-[600px] flex flex-col bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
+        className="h-[90vh] w-full flex flex-col bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-xl shadow-lg border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-center p-6 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
           <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full">
+            <div className="flex items-center justify-center w-10 h-10 bg-[var(--medflow-brand-1)] rounded-full shadow-md">
               <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
-                MedFlow AI Assistant
+              <h3 className="text-2xl font-semibold text-[var(--medflow-text-primary)] dark:text-white">
+                MedFlow AI
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Asistent medical inteligent
-              </p>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-            
-            <button
-              onClick={exportConversation}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Export conversation"
-            >
-              <Download className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
-        {/* Settings Panel */}
-        <AnimatePresence>
-          {showSettings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
-            >
-              <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    AI Features
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-xs text-green-600 dark:text-green-400">
-                      ● Active
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="flex items-center space-x-2">
-                    <Languages className="w-3 h-3 text-blue-500" />
-                    <span>Multilingual Support</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Heart className="w-3 h-3 text-red-500" />
-                    <span>Sentiment Analysis</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-3 h-3 text-green-500" />
-                    <span>Smart Scheduling</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mic className="w-3 h-3 text-purple-500" />
-                    <span>Voice Input</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -506,33 +442,51 @@ export default function AIChat() {
               <motion.div
                 key={message.id}
                 variants={staggerItem}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-center'}`}
               >
-                <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+                <div className={`${message.role === 'user' ? 'max-w-[70%] order-2' : 'max-w-[85%] order-1'}`}>
                   {/* Message bubble */}
-                  <div
-                    className={`
-                      px-4 py-2 rounded-2xl
-                      ${message.role === 'user'
-                        ? 'bg-blue-600 text-white ml-auto'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-                      }
-                    `}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    
-                    {/* Metadata */}
-                    <div className="flex items-center justify-between mt-2 text-xs opacity-70">
-                      <span>{message.timestamp.toLocaleTimeString()}</span>
-                      {message.sentiment && (
-                        <div className="flex items-center space-x-1">
-                          {message.sentiment === 'positive' && <ThumbsUp className="w-3 h-3" />}
-                          {message.sentiment === 'negative' && <ThumbsDown className="w-3 h-3" />}
-                          {message.sentiment === 'neutral' && <MessageCircle className="w-3 h-3" />}
-                        </div>
-                      )}
+                  {message.role === 'user' ? (
+                    /* User Message - Right-aligned box */
+                    <div className="px-4 py-2 bg-[var(--medflow-brand-1)] text-white rounded-2xl shadow-sm text-base leading-6 font-normal ml-auto mt-3">
+                      {message.content}
                     </div>
-                  </div>
+                  ) : (
+                    /* AI Message - Centered text (no box) */
+                    <div className="text-center text-[var(--medflow-text-primary)] dark:text-white text-lg leading-7 font-normal mt-3">
+                      {message.content}
+                      
+                      {/* AI Response Rating */}
+                      <div className="flex items-center justify-end mt-2 space-x-1">
+                        <button
+                          onClick={() => handleAIRating(message.id, 'positive')}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            messageRatings[message.id] === 'positive'
+                              ? 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                          aria-label="Rate AI response positively"
+                        >
+                          <ThumbsUp className={`w-3.5 h-3.5 transition-colors ${
+                            messageRatings[message.id] === 'positive' ? 'fill-current' : 'hover:fill-current'
+                          }`} />
+                        </button>
+                        <button
+                          onClick={() => handleAIRating(message.id, 'negative')}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            messageRatings[message.id] === 'negative'
+                              ? 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                          aria-label="Rate AI response negatively"
+                        >
+                          <ThumbsDown className={`w-3.5 h-3.5 transition-colors ${
+                            messageRatings[message.id] === 'negative' ? 'fill-current' : 'hover:fill-current'
+                          }`} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Suggestions */}
                   {message.suggestions && message.suggestions.length > 0 && (
@@ -574,20 +528,7 @@ export default function AIChat() {
                   )}
                 </div>
 
-                {/* Avatar */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.role === 'user' ? 'order-1 ml-2' : 'order-2 mr-2'
-                }`}>
-                  {message.role === 'user' ? (
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
+
               </motion.div>
             ))}
           </motion.div>
@@ -599,10 +540,10 @@ export default function AIChat() {
               animate={{ opacity: 1 }}
               className="flex justify-start"
             >
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+              <div className="flex items-center space-x-3 px-6 py-4 bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-2xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] shadow-sm">
                 <LoadingSpinner size="sm" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  AI gândește...
+                <span className="text-base text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-tertiary)] font-normal">
+                  🤔 AI gândește...
                 </span>
               </div>
             </motion.div>
@@ -612,18 +553,18 @@ export default function AIChat() {
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 border-t border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
           <div className="flex items-end space-x-2">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-2xl px-4 py-2">
+              <div className="flex items-center space-x-3 bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-2xl px-4 py-3 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
                 <input
                   ref={inputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Scrieți mesajul dvs. aici..."
-                  className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  placeholder="Scrieți întrebarea dvs. medicală..."
+                  className="flex-1 bg-transparent border-none outline-none text-[var(--medflow-text-primary)] dark:text-[var(--medflow-text-primary)] placeholder-gray-500 dark:placeholder-gray-400 text-lg font-normal"
                   disabled={isLoading}
                 />
                 
@@ -633,7 +574,7 @@ export default function AIChat() {
                     className={`p-2 rounded-full transition-colors ${
                       isListening 
                         ? 'bg-red-500 text-white' 
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                        : 'text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
                     }`}
                     aria-label={isListening ? 'Stop listening' : 'Start voice input'}
                   >
@@ -646,29 +587,14 @@ export default function AIChat() {
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
-              className="p-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-3 bg-[var(--medflow-brand-1)] text-white rounded-2xl hover:bg-[var(--medflow-brand-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md hover:shadow-lg"
               aria-label="Send message"
             >
-              <Send className="w-4 h-4" />
+              <ArrowUp className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Quick actions */}
-          <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
-            <div className="flex items-center space-x-4">
-              <span>AI Model: {config.model}</span>
-              <span>Language: {config.language}</span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <span>{messages.length} messages</span>
-              {conversationSummary && (
-                <button className="text-blue-600 dark:text-blue-400 hover:underline">
-                  View Summary
-                </button>
-              )}
-            </div>
-          </div>
+
         </div>
       </motion.div>
     )

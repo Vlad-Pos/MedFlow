@@ -81,7 +81,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
   if (!analyticsData) {
     return (
-      <div className="min-h-screen bg-[var(--medflow-brand-6)] p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📊</div>
@@ -94,7 +94,7 @@ export const AnalyticsDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--medflow-brand-6)] p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

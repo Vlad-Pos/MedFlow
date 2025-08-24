@@ -19,14 +19,14 @@ export default function SecureAnalytics() {
     <RoleProtection 
       requiredRole="ADMIN"
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-4">🔒</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h1>
-            <p className="text-gray-600 mb-4">
+            <h1 className="text-2xl font-bold text-[var(--medflow-text-primary)] mb-2">Access Restricted</h1>
+            <p className="text-[var(--medflow-text-tertiary)] mb-4">
               You need administrator privileges to access analytics.
             </p>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-[var(--medflow-text-muted)]">
               Contact your system administrator for access.
             </div>
           </div>

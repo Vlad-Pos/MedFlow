@@ -34,6 +34,7 @@ import {
   clearAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
+import { LEGACY_ROLE_MAPPING, LEGACY_ROLE_DISPLAY_NAMES, type LegacyUserRole } from '../../types/auth'
 
 export default function SignUp() {
   // Hooks
@@ -46,7 +47,7 @@ export default function SignUp() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: '' as 'doctor' | 'nurse' | ''
+    role: '' as LegacyUserRole | ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -94,7 +95,7 @@ export default function SignUp() {
     }
     
     // Ensure role is valid before calling signUp
-    if (formData.role !== 'doctor' && formData.role !== 'nurse') {
+    if (!formData.role || !Object.keys(LEGACY_ROLE_MAPPING).includes(formData.role)) {
       setError('Rolul selectat nu este valid.')
       return
     }
@@ -124,14 +125,15 @@ export default function SignUp() {
     }
   }
   
-  // Role options for medical professionals
+  // Role options for medical professionals (using legacy names for UI familiarity)
   const roleOptions = [
-    { value: 'doctor', label: 'Doctor - Medic specialist/primar' },
-    { value: 'nurse', label: 'Asistent medical - Infirmier/ă' }
+    { value: 'doctor', label: LEGACY_ROLE_DISPLAY_NAMES.doctor },
+    { value: 'nurse', label: LEGACY_ROLE_DISPLAY_NAMES.nurse }
   ]
 
   return (
-    <motion.div 
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -174,7 +176,7 @@ export default function SignUp() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
+          className="card space-y-6 shadow-xl border border-white/10" 
           onSubmit={handleSubmit}
           noValidate
         >
@@ -385,6 +387,7 @@ export default function SignUp() {
       >
         <p>Datele sunt criptate și protejate conform standardelor medicale și GDPR</p>
       </motion.div>
-    </motion.div>
-    )
+          </motion.div>
+    </div>
+  )
 }

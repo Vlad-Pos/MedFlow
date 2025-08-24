@@ -33,8 +33,8 @@ export function RoleProtection({
   if (!isAuthenticated) {
     return fallback || (
       <div className="p-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-600 mb-4">Authentication Required</h2>
-        <p className="text-gray-500">Please sign in to access this content.</p>
+        <h2 className="text-2xl font-bold text-[var(--medflow-text-secondary)] mb-4">Authentication Required</h2>
+        <p className="text-[var(--medflow-text-muted)]">Please sign in to access this content.</p>
       </div>
     )
   }
@@ -60,7 +60,7 @@ export function RoleProtection({
         showAccessDenied ? (
           <div className="p-6 text-center">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-            <p className="text-gray-600">
+            <p className="text-[var(--medflow-text-secondary)]">
               This content requires {requiredRole} role access.
               Your current role: {role || 'USER'}
             </p>
@@ -83,7 +83,7 @@ export function RoleProtection({
         showAccessDenied ? (
           <div className="p-6 text-center">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-            <p className="text-gray-600">
+            <p className="text-[var(--medflow-text-secondary)]">
               You don't have permission to {requiredPermission.action} {requiredPermission.resource}.
             </p>
           </div>

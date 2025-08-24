@@ -241,10 +241,10 @@ function Notification({ notification, onClose }: NotificationProps) {
         }
       default:
         return {
-          bgColor: 'bg-gray-50 dark:bg-gray-900/20',
-          borderColor: 'border-gray-200 dark:border-gray-700',
-          textColor: 'text-gray-800 dark:text-gray-200',
-          iconColor: 'text-gray-500'
+                  bgColor: 'bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)]/20',
+        borderColor: 'border-[var(--medflow-border)] dark:border-[var(--medflow-border)]',
+        textColor: 'text-[var(--medflow-text-primary)] dark:text-[var(--medflow-text-secondary)]',
+        iconColor: 'text-[var(--medflow-text-muted)]'
         }
     }
   }

@@ -278,7 +278,7 @@ export default function ProfileEnhanced() {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
           Vă rugăm să vă autentificați pentru a accesa profilul.
         </p>
       </div>
@@ -290,7 +290,7 @@ export default function ProfileEnhanced() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="loader mb-4"></div>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
+          <p className="text-lg font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
             Se încarcă profilul...
           </p>
         </div>
@@ -308,10 +308,10 @@ export default function ProfileEnhanced() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-[var(--medflow-text-primary)] dark:text-white">
               Profilul Medical
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)] mt-1">
               Gestionați informațiile personale și profesionale
             </p>
           </div>
@@ -323,7 +323,7 @@ export default function ProfileEnhanced() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setEditMode(false)}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 border border-[var(--medflow-border)] text-[var(--medflow-text-secondary)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] transition-colors"
                 >
                   <X className="w-4 h-4" />
                   <span>Anulează</span>
@@ -395,9 +395,9 @@ export default function ProfileEnhanced() {
         </AnimatePresence>
 
         {/* Profile Content */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-lg">
+        <div className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] overflow-hidden shadow-lg">
           {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
+                      <div className="border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
             <div className="flex overflow-x-auto">
               {tabs.map((tab) => {
                 const Icon = tab.icon
@@ -408,7 +408,7 @@ export default function ProfileEnhanced() {
                     className={`flex items-center space-x-2 px-6 py-4 font-medium text-sm whitespace-nowrap transition-colors ${
                       activeTab === tab.id
                         ? 'border-b-2 border-medflow-primary text-medflow-primary'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        : 'text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)] hover:text-[var(--medflow-text-primary)] dark:hover:text-white'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -429,57 +429,57 @@ export default function ProfileEnhanced() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Nume complet
-                    </label>
+                                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
+                  Nume complet
+                </label>
                     <input
                       type="text"
                       value={profile.displayName}
                       onChange={(e) => handleProfileChange('displayName', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: Dr. Ion Popescu"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Email
-                    </label>
+                                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
+                  Email
+                </label>
                     <input
                       type="email"
                       value={profile.email}
                       disabled
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 opacity-50 cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] opacity-50 cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-[var(--medflow-text-muted)] mt-1">
                       Email-ul nu poate fi modificat din motive de securitate
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Telefon
-                    </label>
+                                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
+                  Telefon
+                </label>
                     <input
                       type="tel"
                       value={profile.phone || ''}
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: +40 721 123 456"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Rol
                     </label>
                     <select
                       value={profile.role}
                       onChange={(e) => handleProfileChange('role', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="doctor">Doctor</option>
                       <option value="nurse">Asistent medical</option>
@@ -488,17 +488,17 @@ export default function ProfileEnhanced() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                     Adresă
                   </label>
-                  <textarea
-                    value={profile.address || ''}
-                    onChange={(e) => handleProfileChange('address', e.target.value)}
-                    disabled={!editMode}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
-                    placeholder="Introduceți adresa completă..."
-                  />
+                                      <textarea
+                      value={profile.address || ''}
+                      onChange={(e) => handleProfileChange('address', e.target.value)}
+                      disabled={!editMode}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+                      placeholder="Introduceți adresa completă..."
+                    />
                 </div>
               </motion.div>
             )}
@@ -512,21 +512,21 @@ export default function ProfileEnhanced() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Specializare
-                    </label>
+                                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
+                  Specializare
+                </label>
                     <input
                       type="text"
                       value={profile.specialization || ''}
                       onChange={(e) => handleProfileChange('specialization', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: Cardiologie, Medicina de familie"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Număr licență
                     </label>
                     <input
@@ -534,13 +534,13 @@ export default function ProfileEnhanced() {
                       value={profile.licenseNumber || ''}
                       onChange={(e) => handleProfileChange('licenseNumber', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: MED123456"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Clinică/Spital
                     </label>
                     <input
@@ -548,13 +548,13 @@ export default function ProfileEnhanced() {
                       value={profile.clinic || ''}
                       onChange={(e) => handleProfileChange('clinic', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: Spitalul Clinic Municipal"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Experiență (ani)
                     </label>
                     <input
@@ -564,14 +564,14 @@ export default function ProfileEnhanced() {
                       disabled={!editMode}
                       min="0"
                       max="50"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="Ex: 10"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                     Educație
                   </label>
                   <textarea
@@ -579,14 +579,14 @@ export default function ProfileEnhanced() {
                     onChange={(e) => handleProfileChange('education', e.target.value)}
                     disabled={!editMode}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+                    className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed resize-none"
                     placeholder="Universitatea de medicină, specializări, cursuri..."
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Ora de început program
                     </label>
                     <input
@@ -597,12 +597,12 @@ export default function ProfileEnhanced() {
                         end: profile.workingHours?.end || '18:00' 
                       })}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Ora de sfârșit program
                     </label>
                     <input
@@ -613,7 +613,7 @@ export default function ProfileEnhanced() {
                         end: e.target.value 
                       })}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -642,13 +642,13 @@ export default function ProfileEnhanced() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-[var(--medflow-text-primary)] dark:text-white">
                     Schimbarea parolei
                   </h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                         Parola curentă
                       </label>
                       <div className="relative">
@@ -656,7 +656,7 @@ export default function ProfileEnhanced() {
                           type={showPasswords.current ? 'text' : 'password'}
                           value={passwordData.currentPassword}
                           onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600"
+                          className="w-full px-4 py-3 pr-12 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)]"
                           placeholder="Introduceți parola curentă"
                         />
                         <button
@@ -665,16 +665,16 @@ export default function ProfileEnhanced() {
                           className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                           {showPasswords.current ? (
-                            <EyeOff className="w-5 h-5 text-gray-400" />
+                            <EyeOff className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           ) : (
-                            <Eye className="w-5 h-5 text-gray-400" />
+                            <Eye className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           )}
                         </button>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                         Parola nouă
                       </label>
                       <div className="relative">
@@ -682,7 +682,7 @@ export default function ProfileEnhanced() {
                           type={showPasswords.new ? 'text' : 'password'}
                           value={passwordData.newPassword}
                           onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600"
+                          className="w-full px-4 py-3 pr-12 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)]"
                           placeholder="Introduceți parola nouă"
                         />
                         <button
@@ -691,16 +691,16 @@ export default function ProfileEnhanced() {
                           className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                           {showPasswords.new ? (
-                            <EyeOff className="w-5 h-5 text-gray-400" />
+                            <EyeOff className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           ) : (
-                            <Eye className="w-5 h-5 text-gray-400" />
+                            <Eye className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           )}
                         </button>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                         Confirmați parola nouă
                       </label>
                       <div className="relative">
@@ -708,7 +708,7 @@ export default function ProfileEnhanced() {
                           type={showPasswords.confirm ? 'text' : 'password'}
                           value={passwordData.confirmPassword}
                           onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600"
+                          className="w-full px-4 py-3 pr-12 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)]"
                           placeholder="Confirmați parola nouă"
                         />
                         <button
@@ -717,9 +717,9 @@ export default function ProfileEnhanced() {
                           className="absolute inset-y-0 right-0 flex items-center pr-3"
                         >
                           {showPasswords.confirm ? (
-                            <EyeOff className="w-5 h-5 text-gray-400" />
+                            <EyeOff className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           ) : (
-                            <Eye className="w-5 h-5 text-gray-400" />
+                            <Eye className="w-5 h-5 text-[var(--medflow-text-muted)]" />
                           )}
                         </button>
                       </div>
@@ -757,12 +757,12 @@ export default function ProfileEnhanced() {
                     }}
                   />
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-lg">
                     <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white">
+                      <h4 className="font-medium text-[var(--medflow-text-primary)] dark:text-white">
                         🤖 Asistență AI
                       </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                         Activați funcționalitățile AI pentru recomandări și analize
                       </p>
                     </div>
@@ -770,11 +770,11 @@ export default function ProfileEnhanced() {
                       onClick={() => handlePreferenceChange('aiAssistance', !profile.preferences?.aiAssistance)}
                       disabled={!editMode}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        profile.preferences?.aiAssistance ? 'bg-medflow-primary' : 'bg-gray-300'
+                        profile.preferences?.aiAssistance ? 'bg-medflow-primary' : 'bg-[var(--medflow-surface-elevated)]'
                       } disabled:opacity-50`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        className={`inline-block h-4 w-4 transform rounded-full bg-[var(--medflow-surface-elevated)] transition-transform ${
                           profile.preferences?.aiAssistance ? 'translate-x-6' : 'translate-x-1'
                         }`}
                       />
@@ -782,14 +782,14 @@ export default function ProfileEnhanced() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                       Limba interfață
                     </label>
                     <select
                       value={profile.preferences?.language || 'ro'}
                       onChange={(e) => handlePreferenceChange('language', e.target.value)}
                       disabled={!editMode}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="ro">Română</option>
                       <option value="en">English</option>

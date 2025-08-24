@@ -75,6 +75,15 @@ export function useNavigationItemsV3(): NavigationItems {
         description: 'Advanced analytics and performance metrics for administrators',
         priority: 0.5
       })
+      
+      // Admin Dashboard for admin users - high priority
+      coreNavItems.unshift({
+        to: '/admin', 
+        label: 'Admin', 
+        icon: Users, 
+        description: 'User management and system administration',
+        priority: 0.3
+      })
     }
 
     // Add Framer websites integration for all users

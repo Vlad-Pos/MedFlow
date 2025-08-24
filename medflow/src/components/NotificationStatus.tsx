@@ -124,15 +124,15 @@ export default function NotificationStatus({
     
     if (!notification.sent) {
       return (
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-[var(--medflow-surface-elevated)] rounded-lg">
           <div className="flex items-center">
-            <Clock className="w-4 h-4 text-gray-400 mr-2" />
+            <Clock className="w-4 h-4 text-[var(--medflow-text-muted)] mr-2" />
             <div>
-              <span className="text-sm font-medium text-gray-700">{typeLabel}</span>
-              <p className="text-xs text-gray-500">{expectedTime}</p>
+              <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">{typeLabel}</span>
+              <p className="text-xs text-[var(--medflow-text-muted)]">{expectedTime}</p>
             </div>
           </div>
-          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+          <span className="text-xs text-[var(--medflow-text-muted)] bg-[var(--medflow-surface-elevated)] px-2 py-1 rounded">
             În așteptare
           </span>
         </div>
@@ -152,12 +152,12 @@ export default function NotificationStatus({
     const StatusIcon = statusIcon
     
     return (
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-[var(--medflow-surface-elevated)] rounded-lg">
         <div className="flex items-center">
           <ChannelIcon className={`w-4 h-4 text-${channelColor}-500 mr-2`} />
           <div>
-            <span className="text-sm font-medium text-gray-700">{typeLabel}</span>
-            <p className="text-xs text-gray-500">
+            <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">{typeLabel}</span>
+            <p className="text-xs text-[var(--medflow-text-muted)]">
               {channelName} • {notification.sentAt && 
                 new Date(notification.sentAt.toDate()).toLocaleString('ro-RO')
               }
@@ -188,18 +188,18 @@ export default function NotificationStatus({
   }
   
   return (
-    <div className={`bg-white rounded-lg border ${className}`}>
+    <div className={`bg-[var(--medflow-surface-elevated)] rounded-lg border ${className}`}>
         {/* Header */}
         <div 
-          className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+          className="p-4 cursor-pointer hover:bg-[var(--medflow-surface-elevated)] transition-colors"
           onClick={() => setShowDetails(!showDetails)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <overallStatus.icon className={`w-5 h-5 text-${overallStatus.color}-500 mr-3`} />
               <div>
-                <h4 className="font-medium text-gray-900">Stare Notificări</h4>
-                <p className="text-sm text-gray-600">{overallStatus.label}</p>
+                <h4 className="font-medium text-[var(--medflow-text-primary)]">Stare Notificări</h4>
+                <p className="text-sm text-[var(--medflow-text-secondary)]">{overallStatus.label}</p>
               </div>
             </div>
             
@@ -216,7 +216,7 @@ export default function NotificationStatus({
                 animate={{ rotate: showDetails ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[var(--medflow-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </motion.div>
@@ -248,13 +248,13 @@ export default function NotificationStatus({
                 </div>
               </div>
             ) : notifications.optedOut ? (
-              <div className="flex items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <XCircle className="w-5 h-5 text-gray-500 mr-3" />
+              <div className="flex items-center p-3 bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)] rounded-lg">
+                <XCircle className="w-5 h-5 text-[var(--medflow-text-muted)] mr-3" />
                 <div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">
                     Pacientul s-a dezabonat de la notificări
                   </span>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[var(--medflow-text-muted)]">
                     Dezabonat pe {notifications.optOutDate && 
                       new Date(notifications.optOutDate.toDate()).toLocaleDateString('ro-RO')
                     }
@@ -277,7 +277,7 @@ export default function NotificationStatus({
             
             {/* Notification Details */}
             <div className="space-y-2">
-              <h5 className="text-sm font-medium text-gray-700">Detalii Notificări:</h5>
+              <h5 className="text-sm font-medium text-[var(--medflow-text-secondary)]">Detalii Notificări:</h5>
               
               {renderNotificationDetail(notifications.firstNotification, 'first')}
               {renderNotificationDetail(notifications.secondNotification, 'second')}
@@ -316,7 +316,7 @@ export default function NotificationStatus({
               </button>
               
               <button
-                className="text-xs text-gray-600 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded transition-colors"
+                className="text-xs text-[var(--medflow-text-secondary)] hover:text-[var(--medflow-text-primary)] bg-[var(--medflow-surface-elevated)] hover:bg-[var(--medflow-surface-dark)] px-3 py-1 rounded transition-colors"
                 onClick={() => {
                   // TODO: Implement view notification logs functionality
                   console.log('View notification logs for appointment:', appointment.id)

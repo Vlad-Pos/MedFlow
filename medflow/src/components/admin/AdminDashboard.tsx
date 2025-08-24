@@ -33,12 +33,21 @@ export function AdminDashboard() {
     expiration: '24h'
   })
 
+  // Debug logging for role access
+  console.log('AdminDashboard Debug:', {
+    isAdmin,
+    isSuperAdmin,
+    permissions,
+    userRole: permissions
+  })
+
   // Load users on component mount
   useEffect(() => {
-    if (permissions.users.canRead) {
+    // SUPER_ADMIN can always access, or if we have user read permissions
+    if (isSuperAdmin || permissions.users?.canRead) {
       loadUsers()
     }
-  }, [permissions.users.canRead])
+  }, [isSuperAdmin, permissions.users?.canRead])
 
   const loadUsers = async () => {
     try {
@@ -75,26 +84,23 @@ export function AdminDashboard() {
     }
   }
 
-  // Access control - only show for admins
-  if (!isAdmin) {
+  // Access control - SUPER_ADMIN bypasses all restrictions
+  if (!isSuperAdmin && !isAdmin) {
     return (
       <div className="p-6 text-center">
         <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to access the admin dashboard.</p>
+        <p className="text-sm text-gray-500 mt-2">Required: ADMIN or SUPER_ADMIN role</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--medflow-brand-6)] p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--medflow-text-primary)] mb-2">Admin Dashboard</h1>
-          <p className="text-[var(--medflow-text-secondary)]">
-            Manage users, roles, and system administration
-            {isSuperAdmin && ' (Super Admin Access)'}
-          </p>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-300">Manage your medical practice administration</p>
         </div>
 
         {/* Error Display */}
@@ -140,16 +146,16 @@ export function AdminDashboard() {
           />
         )}
 
-        {selectedTab === 'users' && permissions.users.canRead && (
+        {selectedTab === 'users' && (isSuperAdmin || permissions.users?.canRead) && (
           <UsersTab 
             users={users}
             onRoleUpdate={handleRoleUpdate}
-            canManageUsers={permissions.users.canManage}
-            canUpdateRoles={permissions.users.canWrite}
+            canManageUsers={isSuperAdmin || permissions.users?.canManage}
+            canUpdateRoles={isSuperAdmin || permissions.users?.canWrite}
           />
         )}
 
-        {selectedTab === 'invitations' && permissions.users.canWrite && (
+        {selectedTab === 'invitations' && (isSuperAdmin || permissions.users?.canWrite) && (
           <InvitationsTab 
             invitations={invitations}
             stats={stats}

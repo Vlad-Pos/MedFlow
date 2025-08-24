@@ -36,11 +36,20 @@ export const formatDateTime = (date: Date): string => {
 /**
  * Formats time for display
  */
-export const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString('ro-RO', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+export const formatTime = (date: Date | undefined | null): string => {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return '--:--'
+  }
+  
+  try {
+    return date.toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    console.warn('Error formatting time:', error, date)
+    return '--:--'
+  }
 }
 
 /**

@@ -50,7 +50,7 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
       case 'high': return 'text-red-600 bg-red-100'
       case 'medium': return 'text-orange-600 bg-orange-100'
       case 'low': return 'text-yellow-600 bg-yellow-100'
-      default: return 'text-gray-600 bg-gray-100'
+      default: return 'text-[var(--medflow-text-secondary)] bg-[var(--medflow-surface-elevated)]'
     }
   }
   
@@ -68,12 +68,12 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
       initial={{ opacity: 0, scale: 0.95, y: -10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -10 }}
-      className="absolute z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 top-full left-0 mt-2"
+              className="absolute z-50 w-80 bg-white border border-[var(--medflow-border)] rounded-lg shadow-lg p-4 top-full left-0 mt-2"
     >
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+        className="absolute top-2 right-2 p-1 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] transition-colors"
       >
         <X className="w-4 h-4" />
       </button>
@@ -84,28 +84,28 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
           <Flag className="w-4 h-4 text-red-600" />
         </div>
         <div>
-          <h4 className="font-semibold text-gray-900">{summary.patientName}</h4>
-          <p className="text-sm text-gray-600">Pacient semnalizat</p>
+                  <h4 className="font-semibold text-[var(--medflow-text-primary)]">{summary.patientName}</h4>
+        <p className="text-sm text-[var(--medflow-text-secondary)]">Pacient semnalizat</p>
         </div>
       </div>
       
       {/* Statistics */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="text-center p-2 bg-gray-50 rounded">
-          <div className="text-lg font-bold text-gray-900">{summary.activeFlags}</div>
-          <div className="text-xs text-gray-600">Semnalizări active</div>
-        </div>
+                  <div className="text-center p-2 bg-[var(--medflow-surface-elevated)] rounded">
+            <div className="text-lg font-bold text-[var(--medflow-text-primary)]">{summary.activeFlags}</div>
+            <div className="text-xs text-[var(--medflow-text-secondary)]">Semnalizări active</div>
+          </div>
         
-        <div className="text-center p-2 bg-gray-50 rounded">
-          <div className="text-lg font-bold text-gray-900">{summary.totalFlags}</div>
-          <div className="text-xs text-gray-600">Total semnalizări</div>
-        </div>
+                  <div className="text-center p-2 bg-[var(--medflow-surface-elevated)] rounded">
+            <div className="text-lg font-bold text-[var(--medflow-text-primary)]">{summary.totalFlags}</div>
+            <div className="text-xs text-[var(--medflow-text-secondary)]">Total semnalizări</div>
+          </div>
       </div>
       
       {/* Risk Level */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Nivel de risc:</span>
+          <span className="text-sm font-medium text-[var(--medflow-text-secondary)]">Nivel de risc:</span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(summary.riskLevel)}`}>
             {getRiskLabel(summary.riskLevel)}
           </span>
@@ -114,7 +114,7 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
       
       {/* Severity Breakdown */}
       <div className="mb-4">
-        <h5 className="text-sm font-medium text-gray-700 mb-2">Distribuție severitate:</h5>
+        <h5 className="text-sm font-medium text-[var(--medflow-text-secondary)] mb-2">Distribuție severitate:</h5>
         <div className="space-y-2">
           {summary.flagsBySeverity.high > 0 && (
             <div className="flex items-center justify-between text-sm">
@@ -140,7 +140,7 @@ function FlagTooltip({ summary, onViewDetails, onClose }: FlagTooltipProps) {
       {/* Last Activity */}
       {summary.lastFlagDate && (
         <div className="mb-4">
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-[var(--medflow-text-secondary)]">
             <Clock className="w-4 h-4 mr-2" />
             <span>
               Ultima semnalizare: {formatDistanceToNow(summary.lastFlagDate?.toDate(), { 
@@ -235,7 +235,7 @@ export default function PatientFlagIndicator({
       case 'high': return 'text-red-600 bg-red-100 border-red-300'
       case 'medium': return 'text-orange-600 bg-orange-100 border-orange-300'
       case 'low': return 'text-yellow-600 bg-yellow-100 border-yellow-300'
-      default: return 'text-gray-600 bg-gray-100 border-gray-300'
+      default: return 'text-[var(--medflow-text-secondary)] bg-[var(--medflow-surface-elevated)] border-[var(--medflow-border)]'
     }
   }
   

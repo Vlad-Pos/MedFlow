@@ -87,7 +87,8 @@ export default function ResetPassword() {
   }
 
   return (
-    <motion.div 
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -130,7 +131,7 @@ export default function ResetPassword() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
+        className="card space-y-6 shadow-xl border border-white/10" 
         onSubmit={handleSubmit}
         noValidate
       >
@@ -315,6 +316,7 @@ export default function ResetPassword() {
       >
         <p>Link-urile de resetare sunt securizate și expiră automat pentru protecția contului</p>
       </motion.div>
-    </motion.div>
-    )
+          </motion.div>
+    </div>
+  )
 }

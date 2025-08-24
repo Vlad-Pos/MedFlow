@@ -332,7 +332,7 @@ export default function Appointments() {
       case 'scheduled': return 'bg-medflow-primary/10 text-medflow-primary border border-medflow-primary/20'
       case 'completed': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
       case 'no_show': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 border border-red-200 dark:border-red-800'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+              default: return 'bg-[var(--medflow-brand-6)] text-[var(--medflow-text-secondary)] dark:bg-[var(--medflow-surface-dark)] dark:text-[var(--medflow-text-tertiary)] border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]'
     }
   }
 
@@ -588,10 +588,10 @@ export default function Appointments() {
                         <div className="w-16 h-16 bg-medflow-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Calendar className="w-8 h-8 text-medflow-primary" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        <h3 className="text-xl font-semibold text-[var(--medflow-text-primary)] dark:text-white mb-2">
                           Nu există programări încă
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                        <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)] mb-6 max-w-sm mx-auto">
                           Creați prima programare pentru a începe să gestionați calendarul medical.
                         </p>
                         <button
@@ -625,7 +625,7 @@ export default function Appointments() {
                 {selectedId && (
                   <button
                     onClick={handleSaved}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    className="p-1 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-tertiary)] dark:hover:text-[var(--medflow-text-secondary)] transition-colors"
                     title="Închide editarea"
                   >
                     <XCircle className="w-5 h-5" />
@@ -644,7 +644,7 @@ export default function Appointments() {
               animate={{ opacity: 1, y: 0 }}
               className="card"
             >
-              <h4 className="mb-3 font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+              <h4 className="mb-3 font-medium text-[var(--medflow-text-primary)] dark:text-white flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
                 <span>Documente</span>
               </h4>
@@ -657,7 +657,7 @@ export default function Appointments() {
                         key={doc.id}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center justify-between p-2 rounded border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        className="flex items-center justify-between p-2 rounded border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)]/50 transition-colors"
                       >
                         <a 
                           href={doc.fileUrl} 
@@ -666,20 +666,20 @@ export default function Appointments() {
                         >
                           {doc.fileName}
                         </a>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                        <span className="text-xs text-[var(--medflow-text-muted)] dark:text-[var(--medflow-text-muted)] ml-2">
                           {formatDateTime(safeConvertToDate(doc.createdAt))}
                         </span>
                       </motion.div>
                     ))}
                     {(docs[selectedId]?.length || 0) === 0 && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                      <div className="text-sm text-[var(--medflow-text-muted)] dark:text-[var(--medflow-text-muted)] text-center py-4">
                         Nu există documente încărcate.
                       </div>
                     )}
                   </div>
                 </>
               ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                <div className="text-sm text-[var(--medflow-text-muted)] dark:text-[var(--medflow-text-muted)] text-center py-4">
                   Salvați mai întâi programarea pentru a încărca documente.
                 </div>
               )}

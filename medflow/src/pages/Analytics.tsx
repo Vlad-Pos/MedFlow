@@ -244,7 +244,7 @@ export default function Analytics() {
               {monthlyStats.length > 0 && monthlyStats[monthlyStats.length - 1].appointments > 50 && (
                 <li className="text-green-600">• Performanță excelentă în ultima lună!</li>
               )}
-              <li className="text-gray-600">• Verificați rapoartele lunare pentru tendințe</li>
+                              <li className="text-[var(--medflow-text-tertiary)]">• Verificați rapoartele lunare pentru tendințe</li>
             </ul>
           </div>
         </div>

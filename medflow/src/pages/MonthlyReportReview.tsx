@@ -398,7 +398,7 @@ export default function MonthlyReportReview() {
       case 'final': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
       case 'ready_for_submission': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       case 'submitted': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
+      default: return 'bg-[var(--medflow-brand-6)] text-[var(--medflow-text-secondary)] dark:bg-[var(--medflow-surface-dark)] dark:text-[var(--medflow-text-tertiary)]'
     }
   }
 
@@ -408,7 +408,7 @@ export default function MonthlyReportReview() {
       case 'submitted': return 'text-blue-600'
       case 'accepted': return 'text-emerald-600'
       case 'rejected': return 'text-red-600'
-      default: return 'text-gray-600'
+      default: return 'text-[var(--medflow-text-tertiary)]'
     }
   }
 
@@ -417,7 +417,7 @@ export default function MonthlyReportReview() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <MedFlowLoader size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
             Se încarcă datele lunare...
           </p>
         </div>
@@ -435,10 +435,10 @@ export default function MonthlyReportReview() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-[var(--medflow-text-primary)] dark:text-white">
               Revizuire Rapoarte Lunare
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
               Gestionează și pregătește rapoartele pentru trimiterea către autorități
             </p>
           </div>
@@ -448,7 +448,7 @@ export default function MonthlyReportReview() {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-800 dark:text-white"
+              className="px-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:text-white"
             >
               <option value="">Selectează luna</option>
               {availableMonths.map(month => (
@@ -464,7 +464,7 @@ export default function MonthlyReportReview() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 text-[var(--medflow-text-tertiary)] bg-[var(--medflow-surface-elevated)] border border-[var(--medflow-border)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] dark:border-[var(--medflow-border)] dark:text-[var(--medflow-text-secondary)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>Actualizează</span>
@@ -474,11 +474,11 @@ export default function MonthlyReportReview() {
 
         {!selectedMonth ? (
           <div className="text-center py-16">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <Calendar className="w-16 h-16 text-[var(--medflow-text-muted)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--medflow-text-primary)] dark:text-white mb-2">
               Selectează o lună pentru revizuire
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
               Alege luna pentru care dorești să revizuiești rapoartele medicale.
             </p>
           </div>
@@ -491,17 +491,17 @@ export default function MonthlyReportReview() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                  className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] p-6 rounded-xl shadow-sm border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <p className="text-sm font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                         Rapoarte finalizate
                       </p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold text-[var(--medflow-text-primary)] dark:text-white">
                         {monthlySummary.finalizedReports}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--medflow-text-muted)]">
                         din {monthlySummary.totalReports} total
                       </p>
                     </div>
@@ -515,17 +515,17 @@ export default function MonthlyReportReview() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                  className="bg-[var(--medflow-surface-dark)] p-6 rounded-xl shadow-sm border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <p className="text-sm font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                         Pregătite pentru trimitere
                       </p>
                       <p className="text-2xl font-bold text-green-600">
                         {monthlySummary.readyForSubmission}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--medflow-text-muted)]">
                         {monthlySummary.reviewProgress.toFixed(1)}% revizuite
                       </p>
                     </div>
@@ -539,17 +539,17 @@ export default function MonthlyReportReview() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                  className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-border)] p-6 rounded-xl shadow-sm border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <p className="text-sm font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                         Amendamente în curs
                       </p>
                       <p className="text-2xl font-bold text-yellow-600">
                         {monthlySummary.pendingAmendments}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--medflow-text-muted)]">
                         necesită atenție
                       </p>
                     </div>
@@ -563,14 +563,14 @@ export default function MonthlyReportReview() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                  className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] p-6 rounded-xl shadow-sm border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <p className="text-sm font-medium text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                         Termen limită
                       </p>
-                      <p className={`text-2xl font-bold ${isMonthOverdue(selectedMonth) ? 'text-red-600' : 'text-gray-900 dark:text-white'}`}>
+                      <p className={`text-2xl font-bold ${isMonthOverdue(selectedMonth) ? 'text-red-600' : 'text-[var(--medflow-text-primary)] dark:text-white'}`}>
                         {monthlySummary.submissionDeadline ? 
                           monthlySummary.submissionDeadline.toLocaleDateString('ro-RO', { 
                             day: 'numeric', 
@@ -579,7 +579,7 @@ export default function MonthlyReportReview() {
                           'N/A'
                         }
                       </p>
-                      <p className={`text-xs ${isMonthOverdue(selectedMonth) ? 'text-red-500' : 'text-gray-500'}`}>
+                      <p className={`text-xs ${isMonthOverdue(selectedMonth) ? 'text-red-500' : 'text-[var(--medflow-text-muted)]'}`}>
                         {isMonthOverdue(selectedMonth) ? 'Expirat' : 'Până la trimitere'}
                       </p>
                     </div>
@@ -598,24 +598,24 @@ export default function MonthlyReportReview() {
             )}
 
             {/* Actions Bar */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] p-4 rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
               <div className="flex items-center space-x-4">
                 {/* Search */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--medflow-text-muted)] w-4 h-4" />
                   <input
                     type="text"
                     placeholder="Caută după pacient sau diagnostic..."
                     value={filters.searchQuery}
                     onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
-                    className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-gray-700 dark:text-white"
+                    className="pl-10 pr-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:text-white"
                   />
                 </div>
 
                 {/* Filter Toggle */}
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg hover:bg-[var(--medflow-surface-dark)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filtre</span>
@@ -623,7 +623,7 @@ export default function MonthlyReportReview() {
 
                 {/* Selection Info */}
                 {selectedCount > 0 && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center space-x-2 text-sm text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                     <CheckSquare className="w-4 h-4" />
                     <span>{selectedCount} selectate</span>
                   </div>
@@ -652,7 +652,7 @@ export default function MonthlyReportReview() {
                     
                     <button
                       onClick={() => setSubmissionStatusDialog({ isOpen: true, batchId: null })}
-                      className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                     >
                       <Activity className="w-4 h-4" />
                       <span>Status trimiteri</span>
@@ -662,7 +662,7 @@ export default function MonthlyReportReview() {
 
                 <button
                   onClick={handleSelectAll}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] transition-colors"
                 >
                   {filteredReports.every(report => selectedReports[report.id]) ? (
                     <Square className="w-4 h-4" />
@@ -681,11 +681,11 @@ export default function MonthlyReportReview() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700"
+                  className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] p-4 rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)] mb-2">
                         Status rapoarte
                       </label>
                       <select
@@ -695,7 +695,7 @@ export default function MonthlyReportReview() {
                           const values = Array.from(e.target.selectedOptions, option => option.value)
                           setFilters(prev => ({ ...prev, selectedStatuses: values }))
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-medflow-primary dark:bg-gray-700 dark:text-white"
+                        className="w-full px-3 py-2 border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-medflow-primary dark:bg-[var(--medflow-surface-dark)] dark:text-white"
                       >
                         <option value="final">Finalizat</option>
                         <option value="ready_for_submission">Pregătit pentru trimitere</option>
@@ -704,7 +704,7 @@ export default function MonthlyReportReview() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="block text-sm font-medium text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                         Filtre rapide
                       </label>
                       
@@ -713,9 +713,9 @@ export default function MonthlyReportReview() {
                           type="checkbox"
                           checked={filters.showOnlyNeedsReview}
                           onChange={(e) => setFilters(prev => ({ ...prev, showOnlyNeedsReview: e.target.checked }))}
-                          className="rounded border-gray-300 text-medflow-primary focus:ring-medflow-primary"
+                          className="rounded border-[var(--medflow-border)] text-medflow-primary focus:ring-medflow-primary"
                         />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                           Doar cele ce necesită revizuire
                         </span>
                       </label>
@@ -725,9 +725,9 @@ export default function MonthlyReportReview() {
                           type="checkbox"
                           checked={filters.showOnlyWithAmendments}
                           onChange={(e) => setFilters(prev => ({ ...prev, showOnlyWithAmendments: e.target.checked }))}
-                          className="rounded border-gray-300 text-medflow-primary focus:ring-medflow-primary"
+                          className="rounded border-[var(--medflow-border)] text-medflow-primary focus:ring-medflow-primary"
                         />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                           Doar cu amendamente
                         </span>
                       </label>
@@ -737,9 +737,9 @@ export default function MonthlyReportReview() {
                           type="checkbox"
                           checked={filters.includeSubmitted}
                           onChange={(e) => setFilters(prev => ({ ...prev, includeSubmitted: e.target.checked }))}
-                          className="rounded border-gray-300 text-medflow-primary focus:ring-medflow-primary"
+                          className="rounded border-[var(--medflow-border)] text-medflow-primary focus:ring-medflow-primary"
                         />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-[var(--medflow-text-secondary)] dark:text-[var(--medflow-text-secondary)]">
                           Include rapoartele trimise
                         </span>
                       </label>
@@ -750,14 +750,14 @@ export default function MonthlyReportReview() {
             </AnimatePresence>
 
             {/* Reports List */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-xl border border-[var(--medflow-border)] dark:border-[var(--medflow-border)] overflow-hidden">
               {filteredReports.length === 0 ? (
                 <div className="py-16 text-center">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <FileText className="w-16 h-16 text-[var(--medflow-text-muted)] mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-[var(--medflow-text-primary)] dark:text-white mb-2">
                     Nu există rapoarte pentru luna selectată
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                     {selectedMonth ? 
                       `Nu s-au găsit rapoarte pentru ${new Date(selectedMonth + '-01').toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' })}` :
                       'Selectează o lună pentru a vedea rapoartele disponibile'
@@ -765,14 +765,14 @@ export default function MonthlyReportReview() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                <div className="divide-y divide-[var(--medflow-border)] dark:divide-[var(--medflow-border)]">
                   {filteredReports.map((report, index) => (
                     <motion.div
                       key={report.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                      className={`p-6 hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)]/50 transition-colors ${
                         selectedReports[report.id] ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                       }`}
                     >
@@ -783,13 +783,13 @@ export default function MonthlyReportReview() {
                             type="checkbox"
                             checked={selectedReports[report.id] || false}
                             onChange={() => handleSelectReport(report.id)}
-                            className="rounded border-gray-300 text-medflow-primary focus:ring-medflow-primary"
+                            className="rounded border-[var(--medflow-border)] text-medflow-primary focus:ring-medflow-primary"
                           />
 
                           {/* Report Info */}
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-semibold text-gray-900 dark:text-white">
+                              <h3 className="font-semibold text-[var(--medflow-text-primary)] dark:text-white">
                                 {report.patientName}
                               </h3>
                               
@@ -821,7 +821,7 @@ export default function MonthlyReportReview() {
                               )}
                             </div>
 
-                            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center space-x-4 text-sm text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                               <span>Diagnostic: {report.diagnosis.primary}</span>
                               <span>•</span>
                               <span>Creat: {formatDateTime(report.createdAt.toDate())}</span>
@@ -853,7 +853,7 @@ export default function MonthlyReportReview() {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
-                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] rounded-lg transition-colors"
                             title="Vezi detalii"
                           >
                             {expandedReport === report.id ? (
@@ -864,7 +864,7 @@ export default function MonthlyReportReview() {
                           </button>
 
                           <button
-                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] rounded-lg transition-colors"
                             title="Vezi raportul"
                           >
                             <Eye className="w-4 h-4" />
@@ -890,7 +890,7 @@ export default function MonthlyReportReview() {
                           )}
 
                           <button
-                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] hover:bg-[var(--medflow-surface-elevated)] dark:hover:bg-[var(--medflow-surface-dark)] rounded-lg transition-colors"
                             title="Descarcă raportul"
                           >
                             <Download className="w-4 h-4" />
@@ -905,19 +905,19 @@ export default function MonthlyReportReview() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+                            className="mt-4 pt-4 border-t border-[var(--medflow-border)] dark:border-[var(--medflow-border)]"
                           >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                               <div>
-                                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Plângerea pacientului</h4>
-                                <p className="text-gray-600 dark:text-gray-400">{report.patientComplaint}</p>
+                                <h4 className="font-medium text-[var(--medflow-text-primary)] dark:text-white mb-2">Plângerea pacientului</h4>
+                                <p className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">{report.patientComplaint}</p>
                               </div>
                               
                               <div>
-                                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Tratament prescris</h4>
+                                <h4 className="font-medium text-[var(--medflow-text-primary)] dark:text-white mb-2">Tratament prescris</h4>
                                 <div className="space-y-1">
                                   {report.prescribedMedications.map((med, i) => (
-                                    <p key={i} className="text-gray-600 dark:text-gray-400">
+                                    <p key={i} className="text-[var(--medflow-text-tertiary)] dark:text-[var(--medflow-text-tertiary)]">
                                       {med.name} - {med.dosage} - {med.frequency}
                                     </p>
                                   ))}
@@ -980,15 +980,15 @@ export default function MonthlyReportReview() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
+                className="bg-[var(--medflow-surface-elevated)] dark:bg-[var(--medflow-surface-dark)] rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
               >
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between p-6 border-b border-[var(--medflow-border)] dark:border-[var(--medflow-border)]">
+                  <h2 className="text-xl font-bold text-[var(--medflow-text-primary)] dark:text-white">
                     Status Trimiteri Guvern
                   </h2>
                   <button
                     onClick={() => setSubmissionStatusDialog({ isOpen: false, batchId: null })}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    className="p-2 text-[var(--medflow-text-muted)] hover:text-[var(--medflow-text-secondary)] dark:hover:text-[var(--medflow-text-secondary)] transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>

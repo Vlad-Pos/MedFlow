@@ -103,7 +103,7 @@ export default function SignIn() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-medflow-primary/5 via-white to-medflow-secondary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
         {/* Header Section */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
@@ -141,7 +141,7 @@ export default function SignIn() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="card space-y-6 bg-medflow-surface/95 backdrop-blur-sm shadow-xl border border-white/10" 
+          className="card space-y-6 shadow-xl border border-white/10" 
           onSubmit={handleSubmit}
           noValidate
         >

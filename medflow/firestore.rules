@@ -46,14 +46,29 @@ service cloud.firestore {
                get(/databases/$(database)/documents/users/$(getUserId())).data.role == role));
     }
     
+    // Direct role check for admin functions (avoids circular dependency)
+    function hasAdminRole() {
+      return isAuthenticated() && 
+             (isDemoMode() || 
+              (exists(/databases/$(database)/documents/users/$(getUserId())) &&
+               get(/databases/$(database)/documents/users/$(getUserId())).data.role in ['ADMIN', 'SUPER_ADMIN']));
+    }
+    
     // Check if user is admin or super admin
     function isAdmin() {
-      return isDemoMode() || hasRole('ADMIN') || hasRole('SUPER_ADMIN');
+      return isDemoMode() || hasAdminRole();
     }
     
     // Check if user is super admin
     function isSuperAdmin() {
       return isDemoMode() || hasRole('SUPER_ADMIN');
+    }
+    
+    // Check if request is from system (for automated processes)
+    function isSystem() {
+      return isDemoMode() || 
+             (request.auth != null && 
+              request.auth.token.system == true);
     }
     
     // Check if user is doctor (legacy support)
@@ -92,8 +107,8 @@ service cloud.firestore {
     }
     
     // Check if timestamp is recent (within last 5 minutes)
-    function isRecentTimestamp(timestamp) {
-      return timestamp > request.time - duration.value(5, 'm');
+    function isRecentTimestamp(ts) {
+      return ts > request.time - duration.value(5, 'm');
     }
     
     // Validate Romanian phone number
@@ -1019,13 +1034,13 @@ service cloud.firestore {
     // REPORT AUDIT LOGS
     // ==========================================
     
-    // Report audit logs collection (write-only for security)
+    // Report audit logs collection (admin read access)
     match /report_audit_logs/{logId} {
-      // No direct read access to audit logs via client
-      allow read: if false;
+      // Admin read access for audit purposes
+      allow read: if isAuthenticated() && isAdmin();
       
       // Only system can write audit logs
-      allow write: if false;
+      allow write: if isSystem();
     }
     
     // ==========================================
@@ -1042,19 +1057,6 @@ service cloud.firestore {
       // - Patient consent verification
       // - Medical professional licensing verification
       // - Audit logging for all access
-    }
-    
-    // ==========================================
-    // AUDIT LOGS
-    // ==========================================
-    
-    // Audit logs collection (write-only for security)
-    match /audit_logs/{logId} {
-      // No read access to audit logs via client
-      allow read: if false;
-      
-      // Only system can write audit logs
-      allow write: if false;
     }
     
     // ==========================================

@@ -32,6 +32,15 @@ export function useRole() {
     const role = user.role || 'USER'
     const permissions = user.permissions || []
 
+    // Debug logging for role recognition
+    console.log('useRole Debug:', {
+      userRole: user.role,
+      finalRole: role,
+      permissions: permissions,
+      uid: user.uid,
+      email: user.email
+    })
+
     return {
       role,
       permissions,

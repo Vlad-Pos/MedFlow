@@ -12,29 +12,38 @@
  * @author MedFlow Team
  * @version 2.0
  */
-import type { User } from 'firebase/auth';
-export type AppUser = (User & {
-    role?: 'doctor' | 'nurse';
-    aiPreferences?: {
-        smartSuggestions: boolean;
-        autoComplete: boolean;
-        medicalAssistance: boolean;
-    };
-    verified?: boolean;
-    lastActivity?: Date;
-}) | null;
-interface AuthContextValue {
-    user: AppUser;
-    initializing: boolean;
-    signIn: (email: string, password: string) => Promise<void>;
-    signUp: (email: string, password: string, displayName: string, role: 'doctor' | 'nurse') => Promise<void>;
-    resetPassword: (email: string) => Promise<void>;
-    logout: () => Promise<void>;
-    refreshUserData: () => Promise<void>;
-    updateUserPreferences: (preferences: Record<string, unknown>) => Promise<void>;
+import type { ReactNode } from 'react'
+import type { AppUser, UserRole, LegacyUserRole } from '../types/auth'
+
+export interface AuthContextValue {
+  user: AppUser | null
+  initializing: boolean
+  // Core authentication methods
+  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, displayName: string) => Promise<void>
+  resetPassword: (email: string) => Promise<void>
+  logout: () => Promise<void>
+  // Enhanced security methods
+  refreshUserData: () => Promise<void>
+  updateUserPreferences: (preferences: Record<string, unknown>) => Promise<void>
 }
-export declare function AuthProvider({ children }: {
-    children: React.ReactNode;
-}): import("react/jsx-runtime").JSX.Element;
-export declare function useAuth(): AuthContextValue;
-export {};
+
+export interface AuthProviderProps {
+  children: ReactNode
+}
+
+// Legacy type definitions for backward compatibility (DEPRECATED)
+export interface LegacyAuthContextValue {
+  user: AppUser | null
+  initializing: boolean
+  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, displayName: string, role: LegacyUserRole) => Promise<void>
+  resetPassword: (email: string) => Promise<void>
+  logout: () => Promise<void>
+  refreshUserData: () => Promise<void>
+  updateUserPreferences: (preferences: Record<string, unknown>) => Promise<void>
+}
+
+// Export both for backward compatibility
+export type { AuthContextValue as default }
+export type { LegacyAuthContextValue }

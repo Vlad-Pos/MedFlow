@@ -13,8 +13,8 @@
 
 import React, { Suspense, useState } from 'react'
 import { SchedulingCalendar } from '../components/modules/calendar'
-import LoadingSpinner from '../components/LoadingSpinner'
-import { ErrorBoundary } from '../components/ErrorBoundary'
+import { LoadingSpinner } from '../components/ui/feedback/LoadingSpinner'
+import { ErrorBoundary } from '../components/ui/feedback/ErrorBoundary'
 
 /**
  * Calendar Page Component
@@ -24,7 +24,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary'
  */
 export default function CalendarPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#100B1A] to-[#25153A]">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">

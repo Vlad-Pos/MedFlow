@@ -2,6 +2,7 @@
 // This file consolidates types to replace 'any' usage
 
 import type { PatientFlag } from './patientFlagging'
+import type { UserRole } from './auth'
 
 // Generic types for common patterns
 export type Optional<T> = T | undefined
@@ -63,16 +64,16 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 // User and authentication types
 export interface User {
   id: string
-  email: string
   name: string
+  email: string
   role: UserRole
-  avatar?: string
   preferences?: UserPreferences
   createdAt: Date
   updatedAt: Date
 }
 
-export type UserRole = 'doctor' | 'nurse' | 'admin' | 'patient'
+// UserRole is now imported from auth.ts for consistency
+// export type UserRole = 'doctor' | 'nurse' | 'admin' | 'patient'
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'system'
