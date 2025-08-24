@@ -399,6 +399,12 @@ export function SchedulingCalendar() {
     setShowCreateEvent(true)
     // Reset form state when opening
     setNewEventTitle('')
+    // Set the date to the currently selected date from the calendar
+    // Fix timezone issue by using local date formatting
+    const year = currentDateObj.getFullYear()
+    const month = String(currentDateObj.getMonth() + 1).padStart(2, '0')
+    const day = String(currentDateObj.getDate()).padStart(2, '0')
+    setNewEventDate(`${year}-${month}-${day}`)
     setNewEventStartTime('09:00')
     setNewEventEndTime('10:00')
     setNewEventDescription('')
@@ -679,6 +685,26 @@ export function SchedulingCalendar() {
               damping: 20
             }}
           >
+            {/* Programare Nouă Button - Above mini calendar, aligned with top bar */}
+            <motion.button 
+              onClick={handleCreateEvent}
+              className="mb-8 -mt-1 flex items-center justify-center gap-2 rounded-lg bg-[#7A48BF] hover:bg-[#804AC8] px-4 py-2.5 text-white transition-colors duration-200 w-full"
+              title="Programare Nouă"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 8px 25px rgba(122, 72, 191, 0.4)"
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 400, 
+                damping: 17 
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="text-sm font-medium">Programare Nouă</span>
+            </motion.button>
+
             {/* Mini Calendar */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -732,7 +758,7 @@ export function SchedulingCalendar() {
                         key={i}
                         className={`text-xs rounded-full w-7 h-7 flex items-center justify-center ${
                           isSelected ? "bg-[#7A48BF] text-white" : 
-                          isToday ? "bg-[#804AC8] text-white" :
+                          isToday ? "bg-[#8A7A9F] text-white" :
                           isCurrentMonth ? "text-white hover:bg-white/20" : "text-white/50"
                         } transition-colors cursor-pointer`}
                         whileHover={{ 
@@ -1052,23 +1078,7 @@ export function SchedulingCalendar() {
             </div>
 
             {/* Floating Action Button */}
-            <motion.button 
-              onClick={handleCreateEvent}
-              className="mt-6 flex items-center justify-center gap-2 rounded-full bg-[#7A48BF] hover:bg-[#804AC8] p-4 text-white w-14 h-14 self-start transition-colors duration-200"
-              title="Programare Nouă"
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 12px 30px rgba(122, 72, 191, 0.5)"
-              }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 400, 
-                damping: 17 
-              }}
-            >
-              <Plus className="h-6 w-6" />
-            </motion.button>
+            {/* This button is now moved above the mini-calendar */}
           </motion.div>
         </main>
 
