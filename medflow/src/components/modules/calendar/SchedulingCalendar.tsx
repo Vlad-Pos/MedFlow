@@ -65,6 +65,24 @@ export function SchedulingCalendar() {
     }
   }
 
+  // Force capitalization for month names - direct fix
+  const forceCapitalizeMonth = (date: Date): string => {
+    const day = date.getDate()
+    const month = date.getMonth()
+    const year = date.getFullYear()
+    
+    // Romanian month names
+    const romanianMonths = [
+      'ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie',
+      'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'
+    ]
+    
+    const monthName = romanianMonths[month]
+    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+    
+    return `${day} ${capitalizedMonth}`
+  }
+
   // Romanian medical appointment statuses and categories
   const APPOINTMENT_STATUS = {
     SCHEDULED: 'Programat',
@@ -100,7 +118,7 @@ export function SchedulingCalendar() {
     return formatDateWithCapitalization(new Date(), 'MMMM yyyy')
   })
   const [currentDate, setCurrentDate] = useState(() => {
-    return formatDateWithCapitalization(new Date(), 'd MMMM')
+    return forceCapitalizeMonth(new Date())
   })
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [showCreateEvent, setShowCreateEvent] = useState(false)
@@ -109,7 +127,7 @@ export function SchedulingCalendar() {
   
   // Helper function to set current date with proper capitalization
   const setCurrentDateWithCapitalization = useCallback((date: Date) => {
-    setCurrentDate(formatDateWithCapitalization(date, 'd MMMM'))
+    setCurrentDate(forceCapitalizeMonth(date))
     setCurrentMonth(formatDateWithCapitalization(date, 'MMMM yyyy'))
   }, [])
   
@@ -120,7 +138,7 @@ export function SchedulingCalendar() {
   useEffect(() => {
     const now = new Date()
     setCurrentDateObj(now)
-    setCurrentDate(formatDateWithCapitalization(now, 'd MMMM'))
+    setCurrentDate(forceCapitalizeMonth(now))
     setCurrentMonth(formatDateWithCapitalization(now, 'MMMM yyyy'))
     setIsLoaded(true)
   }, [])
