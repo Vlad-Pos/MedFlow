@@ -52,6 +52,19 @@ export function SchedulingCalendar() {
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
   }
 
+  // Robust date formatting function that ensures capitalization
+  const formatDateWithCapitalization = (date: Date, formatString: string): string => {
+    try {
+      // Try with Romanian locale first
+      const formatted = format(date, formatString, { locale: ro })
+      return capitalizeMonth(formatted)
+    } catch (error) {
+      // Fallback to English if Romanian locale fails
+      const formatted = format(date, formatString)
+      return capitalizeMonth(formatted)
+    }
+  }
+
   // Romanian medical appointment statuses and categories
   const APPOINTMENT_STATUS = {
     SCHEDULED: 'Programat',
@@ -83,8 +96,12 @@ export function SchedulingCalendar() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('week')
   const [currentDateObj, setCurrentDateObj] = useState(new Date())
-  const [currentMonth, setCurrentMonth] = useState(capitalizeMonth(format(new Date(), 'MMMM yyyy', { locale: ro })))
-  const [currentDate, setCurrentDate] = useState(capitalizeMonth(format(new Date(), 'd MMMM', { locale: ro })))
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    return formatDateWithCapitalization(new Date(), 'MMMM yyyy')
+  })
+  const [currentDate, setCurrentDate] = useState(() => {
+    return formatDateWithCapitalization(new Date(), 'd MMMM')
+  })
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [showCreateEvent, setShowCreateEvent] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(false)
@@ -92,8 +109,8 @@ export function SchedulingCalendar() {
   
   // Helper function to set current date with proper capitalization
   const setCurrentDateWithCapitalization = useCallback((date: Date) => {
-    setCurrentDate(capitalizeMonth(format(date, 'd MMMM', { locale: ro })))
-    setCurrentMonth(capitalizeMonth(format(date, 'MMMM yyyy', { locale: ro })))
+    setCurrentDate(formatDateWithCapitalization(date, 'd MMMM'))
+    setCurrentMonth(formatDateWithCapitalization(date, 'MMMM yyyy'))
   }, [])
   
   // Performance optimization: respect user's motion preferences
@@ -103,8 +120,8 @@ export function SchedulingCalendar() {
   useEffect(() => {
     const now = new Date()
     setCurrentDateObj(now)
-    setCurrentDate(capitalizeMonth(format(now, 'd MMMM', { locale: ro })))
-    setCurrentMonth(capitalizeMonth(format(now, 'MMMM yyyy', { locale: ro })))
+    setCurrentDate(formatDateWithCapitalization(now, 'd MMMM'))
+    setCurrentMonth(formatDateWithCapitalization(now, 'MMMM yyyy'))
     setIsLoaded(true)
   }, [])
 
