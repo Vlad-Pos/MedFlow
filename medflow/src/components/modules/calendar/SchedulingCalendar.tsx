@@ -162,35 +162,6 @@ export function SchedulingCalendar() {
     setCurrentView(view)
   }, [])
 
-  // Smart navigation functions based on current view
-  const goToPrevious = useCallback(() => {
-    switch (currentView) {
-      case 'day':
-        goToPreviousDay()
-        break
-      case 'week':
-        goToPreviousWeek()
-        break
-      case 'month':
-        goToPreviousMonth()
-        break
-    }
-  }, [currentView])
-
-  const goToNext = useCallback(() => {
-    switch (currentView) {
-      case 'day':
-        goToNextDay()
-        break
-      case 'week':
-        goToNextWeek()
-        break
-      case 'month':
-        goToNextMonth()
-        break
-    }
-  }, [currentView])
-
   // Day and week navigation functions
   const goToPreviousDay = useCallback(() => {
     const newDate = new Date(currentDateObj)
@@ -219,6 +190,35 @@ export function SchedulingCalendar() {
     setCurrentDateObj(newDate)
     setCurrentDateWithCapitalization(newDate)
   }, [currentDateObj, setCurrentDateWithCapitalization])
+
+  // Smart navigation functions based on current view
+  const goToPrevious = useCallback(() => {
+    switch (currentView) {
+      case 'day':
+        goToPreviousDay()
+        break
+      case 'week':
+        goToPreviousWeek()
+        break
+      case 'month':
+        goToPreviousMonth()
+        break
+    }
+  }, [currentView, goToPreviousDay, goToPreviousWeek, goToPreviousMonth])
+
+  const goToNext = useCallback(() => {
+    switch (currentView) {
+      case 'day':
+        goToNextDay()
+        break
+      case 'week':
+        goToNextWeek()
+        break
+      case 'month':
+        goToNextMonth()
+        break
+    }
+  }, [currentView, goToNextDay, goToNextWeek, goToNextMonth])
 
   // Form state for creating new events
   const [newEventTitle, setNewEventTitle] = useState('')
