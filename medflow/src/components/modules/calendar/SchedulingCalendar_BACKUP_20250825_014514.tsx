@@ -80,7 +80,7 @@ export function SchedulingCalendar() {
     const monthName = romanianMonths[month]
     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1)
     
-    return `${day} ${capitalizedMonth} ${year}`
+    return `${day} ${capitalizedMonth}`
   }
 
   // Romanian medical appointment statuses and categories
@@ -129,14 +129,6 @@ export function SchedulingCalendar() {
   const setCurrentDateWithCapitalization = useCallback((date: Date) => {
     setCurrentDate(forceCapitalizeMonth(date))
     setCurrentMonth(formatDateWithCapitalization(date, 'MMMM yyyy'))
-  }, [])
-
-  // Go to today function that properly navigates calendar views
-  const goToToday = useCallback(() => {
-    const today = new Date()
-    setCurrentDateObj(today)
-    setCurrentDate(forceCapitalizeMonth(today))
-    setCurrentMonth(formatDateWithCapitalization(today, 'MMMM yyyy'))
   }, [])
   
   // Performance optimization: respect user's motion preferences
@@ -597,26 +589,11 @@ export function SchedulingCalendar() {
             })
             
             return (
-              <motion.div
+              <div
                 key={i}
-                className={`p-2 min-h-[80px] rounded-lg border border-[#7A48BF]/20 cursor-pointer transition-colors ${
-                  isCurrentMonth ? 'bg-[#100B1A]/40 hover:bg-[#100B1A]/60' : 'bg-[#100B1A]/20'
+                className={`p-2 min-h-[80px] rounded-lg border border-[#7A48BF]/20 ${
+                  isCurrentMonth ? 'bg-[#100B1A]/40' : 'bg-[#100B1A]/20'
                 } ${isToday ? 'ring-2 ring-[#7A48BF]' : ''}`}
-                onClick={() => {
-                  setCurrentDateObj(date)
-                  setCurrentDateWithCapitalization(date)
-                  setCurrentView('day')
-                }}
-                whileHover={{ 
-                  scale: 1.02,
-                  boxShadow: isCurrentMonth ? "0 4px 15px rgba(122, 72, 191, 0.2)" : "none"
-                }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 400, 
-                  damping: 17 
-                }}
               >
                 <div className={`text-sm font-medium mb-2 ${
                   isCurrentMonth ? 'text-white' : 'text-white/50'
@@ -640,7 +617,7 @@ export function SchedulingCalendar() {
                     +{dayEvents.length - 2} mai multe
                   </div>
                 )}
-              </motion.div>
+              </div>
             )
           })}
         </div>
@@ -762,7 +739,7 @@ export function SchedulingCalendar() {
               </div>
               
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1" key={`mini-calendar-${currentDateObj.toDateString()}`}>
+              <div className="grid grid-cols-7 gap-1">
                 {/* Generate proper calendar days for current month */}
                 {(() => {
                   const firstDay = startOfMonth(currentDateObj)
@@ -778,7 +755,7 @@ export function SchedulingCalendar() {
                     
                     return (
                       <motion.div
-                        key={`${date.toDateString()}-${i}`}
+                        key={i}
                         className={`text-xs rounded-full w-7 h-7 flex items-center justify-center ${
                           isSelected ? "bg-[#7A48BF] text-white" : 
                           isToday ? "bg-[#8A7A9F] text-white" :
@@ -844,33 +821,6 @@ export function SchedulingCalendar() {
                             }
                           }}
                         />
-                        
-                        {/* Color Selection */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-white/70">Culoare:</span>
-                          <div className="flex gap-1">
-                            {[
-                              "bg-[#7A48BF]", // Primary purple
-                              "bg-[#804AC8]", // Lighter purple
-                              "bg-[#8A7A9F]", // Light purple/gray
-                              "bg-[#6B46C1]", // Darker purple
-                              "bg-[#A855F7]", // Bright purple
-                              "bg-[#C084FC]", // Light purple
-                            ].map((color) => (
-                              <button
-                                key={color}
-                                onClick={() => updateCalendarColor(cal.id, color)}
-                                className={`w-4 h-4 rounded-full border-2 transition-all ${
-                                  cal.color === color 
-                                    ? "border-white ring-2 ring-[#7A48BF] ring-offset-1 ring-offset-[#100B1A] scale-110 shadow-lg" 
-                                    : "border-white/30 hover:border-white/60 hover:scale-105"
-                                } ${color}`}
-                                title={`Selectează ${color}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        
                         <div className="flex gap-2">
                           <button
                             onClick={() => {
@@ -926,22 +876,14 @@ export function SchedulingCalendar() {
               }}
             >
               <div className="flex items-center gap-4">
-                <motion.button
-                  onClick={goToToday}
-                  className="bg-[#7A48BF] hover:bg-[#804AC8] text-white px-4 py-2 rounded-lg transition-colors duration-200"
-                  whileHover={{ 
-                    scale: 1.02,
-                    boxShadow: "0 8px 25px rgba(122, 72, 191, 0.4)"
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 400, 
-                    damping: 17 
-                  }}
+                <AnimatedButton
+                  variant="primary"
+                  size="md"
+                  className="bg-[#7A48BF] hover:bg-[#804AC8] text-white"
+                  onClick={() => setCurrentDateWithCapitalization(new Date())}
                 >
                   Astăzi
-                </motion.button>
+                </AnimatedButton>
                 <div className="flex">
                   <IconButton
                     icon={<ChevronLeft className="h-5 w-5" />}
@@ -1028,6 +970,9 @@ export function SchedulingCalendar() {
                       <motion.div 
                         key={i} 
                         className="p-2 text-center border-l border-[#7A48BF]/20"
+                        whileHover={{ 
+                          backgroundColor: "rgba(122, 72, 191, 0.1)"
+                        }}
                         transition={{ 
                           type: "spring", 
                           stiffness: 400, 
@@ -1038,7 +983,8 @@ export function SchedulingCalendar() {
                         <motion.div
                           className={`text-lg font-medium mt-1 text-white ${getWeekDates()[i] === new Date().getDate() ? "bg-[#7A48BF] rounded-full w-8 h-8 flex items-center justify-center mx-auto" : ""}`}
                           whileHover={{ 
-                            scale: getWeekDates()[i] === new Date().getDate() ? 1 : 1.05
+                            scale: getWeekDates()[i] === new Date().getDate() ? 1 : 1.05,
+                            backgroundColor: getWeekDates()[i] === new Date().getDate() ? "rgba(122, 72, 191, 1)" : "rgba(255, 255, 255, 0.2)"
                           }}
                           whileTap={{ scale: 0.98 }}
                           transition={{ 
@@ -1427,19 +1373,21 @@ export function SchedulingCalendar() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-white text-sm font-medium mb-2">Durată</label>
+                    <label className="block text-white text-sm font-medium mb-2">Ora Sfârșit</label>
                     <select
                       value={newEventEndTime}
                       onChange={(e) => setNewEventEndTime(e.target.value)}
                       className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
                     >
-                      <option value="">Selectați durata</option>
-                      <option value="15">15 Min</option>
-                      <option value="20">20 Min</option>
-                      <option value="30">30 Min</option>
-                      <option value="45">45 Min</option>
-                      <option value="60">1 Ora</option>
-                      <option value="90">1 Ora 30 Min</option>
+                      <option value="">Selectați ora</option>
+                      {Array.from({ length: 13 }, (_, i) => i + 8).map(hour => [
+                        <option key={`${hour}-00`} value={`${hour.toString().padStart(2, '0')}:00`}>
+                          {hour.toString().padStart(2, '0')}:00
+                        </option>,
+                        <option key={`${hour}-30`} value={`${hour.toString().padStart(2, '0')}:30`}>
+                          {hour.toString().padStart(2, '0')}:30
+                        </option>
+                      ]).flat()}
                     </select>
                   </div>
                 </div>
