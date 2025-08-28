@@ -691,7 +691,7 @@ export function SchedulingCalendar() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white" style={{ height: 'calc(100% + 8px)' }}>
+    <div className="bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white" style={{ height: 'calc(100vh - 83px)' }}>
       <ErrorBoundary>
         <main className="flex h-full min-h-full">
           {/* Sidebar */}
@@ -1029,7 +1029,7 @@ export function SchedulingCalendar() {
               {currentView === 'week' && (
                 <div className="bg-[#100B1A]/60 backdrop-blur-lg rounded-xl border border-[#7A48BF]/20 shadow-xl min-h-full flex flex-col">
                   {/* Week Header */}
-                  <div className="grid grid-cols-8 border-b border-[#7A48BF]/20 flex-shrink-0">
+                  <div className="grid grid-cols-8 border-b border-[#7A48BF]/20">
                     <div className="p-2 text-center text-white/50 text-xs"></div>
                     {weekDays.map((day, i) => (
                       <motion.div 
@@ -1061,7 +1061,7 @@ export function SchedulingCalendar() {
                   </div>
 
                   {/* Time Grid - Now properly contained within the purple container */}
-                  <div className="grid grid-cols-8 flex-1">
+                  <div className="grid grid-cols-8">
                     {/* Time Labels */}
                     <div className="text-white/70">
                       {timeSlots.map((time, i) => (
