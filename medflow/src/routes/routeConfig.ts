@@ -24,7 +24,8 @@ export const routeComponents = {
   FramerWebsitePage: lazy(() => import('../pages/FramerWebsitePage')),
   AnalyticsDashboard: lazy(() => import('../components/admin/AnalyticsDashboard')),
   AdminDashboard: lazy(() => import('../components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard }))),
-  Calendar: lazy(() => import('../pages/Calendar'))
+  Calendar: lazy(() => import('../pages/Calendar')),
+  TestCalendar: lazy(() => import('../pages/TestCalendar'))
 } as const
 
 export interface RouteConfig {
@@ -195,6 +196,15 @@ export const routes: RouteConfig[] = [
     showNavbar: true,
     showPageTransition: true,
     containerClass: 'min-h-screen text-white',
+    isPrivate: true
+  },
+  {
+    path: '/test-calendar',
+    component: 'TestCalendar',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white m-0 p-0 w-full max-w-none',
     isPrivate: true
   },
 

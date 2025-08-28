@@ -44,6 +44,13 @@ export function useNavigationItems() {
       priority: 2
     },
     { 
+      to: '/test-appointments', 
+      label: '🏥 Consultation Hub', 
+      icon: Calendar, 
+      description: 'Professional consultation workflow and patient management',
+      priority: 2.5
+    },
+    { 
       to: '/patients', 
       label: 'Pacienți', 
       icon: Users, 

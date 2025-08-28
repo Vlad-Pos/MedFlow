@@ -36,6 +36,13 @@ export function useNavigationItemsV3(): NavigationItems {
         priority: 2
       },
       { 
+        to: '/test-appointments', 
+        label: 'Consultation', 
+        icon: Calendar, 
+        description: 'Professional consultation workflow and patient management',
+        priority: 2.3
+      },
+      { 
         to: '/calendar', 
         label: 'Calendar', 
         icon: Calendar, 

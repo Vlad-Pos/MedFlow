@@ -338,7 +338,7 @@ export function SchedulingCalendar() {
 
   // Calendar configuration with Romanian week days
   const weekDays = ["L", "M", "M", "J", "V", "S", "D"] // Romanian abbreviations
-  const timeSlots = Array.from({ length: 9 }, (_, i) => i + 8) // 8 AM to 4 PM
+  const timeSlots = Array.from({ length: 15 }, (_, i) => i + 8) // 8 AM to 10 PM (22:00)
 
   // Generate dynamic week dates for the current week
   const getWeekDates = () => {
@@ -513,7 +513,7 @@ export function SchedulingCalendar() {
 
     return (
       <div className="bg-[#100B1A]/60 backdrop-blur-lg rounded-xl border border-[#7A48BF]/20 shadow-xl p-6">
-        <div className="text-center mb-6">
+        <div className="text-center flex flex-col justify-center items-center min-h-[120px]">
           <h2 className="text-2xl font-bold text-white mb-2">
             {capitalizeMonth(format(selectedDate, 'EEEE, d MMMM yyyy', { locale: ro }))}
           </h2>
@@ -577,7 +577,7 @@ export function SchedulingCalendar() {
     return (
       <div className="bg-[#100B1A]/60 backdrop-blur-lg rounded-xl border border-[#7A48BF]/20 shadow-xl p-6">
         {/* Month Header */}
-        <div className="grid grid-cols-7 gap-1 mb-4">
+        <div className="grid grid-cols-7 gap-1 mb-4 flex items-center">
           {weekDays.map(day => (
             <div key={day} className="text-center text-white/70 font-medium py-2 text-sm">
               {day}
@@ -691,9 +691,9 @@ export function SchedulingCalendar() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white">
+    <div className="bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white" style={{ height: 'calc(100% + 8px)' }}>
       <ErrorBoundary>
-        <main className="flex h-screen">
+        <main className="flex h-full min-h-full">
           {/* Sidebar */}
           <motion.div
             key="calendar-sidebar"
@@ -901,7 +901,7 @@ export function SchedulingCalendar() {
           {/* Calendar View */}
           <motion.div
             key="calendar-main-view"
-            className="flex-1 flex flex-col"
+            className="flex-1 flex flex-col h-full"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ 
@@ -1016,7 +1016,14 @@ export function SchedulingCalendar() {
             </motion.div>
 
             {/* Calendar Views */}
-            <div className="flex-1 overflow-auto p-4">
+            <div 
+              className="flex-1 overflow-auto p-4" 
+              style={{ 
+                maxHeight: 'calc(100vh - 200px)',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#7A48BF #100B1A'
+              }}
+            >
               {currentView === 'day' && renderDayView()}
               {currentView === 'month' && renderMonthView()}
               {currentView === 'week' && (

@@ -1,653 +1,621 @@
-/**
- * 🏥 MedFlow - Consultation Hub (Test Environment)
- * 
- * Complete consultation hub rebuild with 3-panel layout:
- * - LEFT PANEL: Mini calendar imported from /calendar
- * - RIGHT PANEL: Patient selection and current patient display
- * - BOTTOM PANEL: Report writing form
- * 
- * This is a safe testing environment for the new consultation workflow.
- * 
- * @author MedFlow Team
- * @version 3.0 - Consultation Hub
- */
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isToday, isSameDay, addDays, subDays } from 'date-fns'
-import { ro } from 'date-fns/locale'
 import { Link } from 'react-router-dom'
-import {
-  Calendar,
-  List,
-  Plus,
-  FileText,
-  User,
-  XCircle,
-  Edit,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  ClipboardList,
-  Files,
-  Search,
-  Stethoscope,
-  Heart,
-  Activity,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Save,
-  Send,
-  Eye,
-  Phone,
-  Mail,
-  MapPin,
-  Calendar as CalendarIcon,
-  Settings,
-  Users,
-  MapPin as LocationIcon
+import { motion } from 'framer-motion'
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  eachDayOfInterval, 
+  startOfWeek, 
+  endOfWeek, 
+  isToday, 
+  isSameDay 
+} from 'date-fns'
+import { ro } from 'date-fns/locale'
+import { 
+  Calendar, 
+  User, 
+  FileText, 
+  Search, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Plus, 
+  Eye, 
+  Edit, 
+  Save, 
+  Send, 
+  ChevronLeft, 
+  ChevronRight, 
+  X 
 } from 'lucide-react'
 
-// Import existing components from other pages
-import { useAuth } from '../providers/AuthProvider'
-import { isDemoMode } from '../utils/demo'
-import { formatDateTime } from '../utils/dateUtils'
-
-// Types
+// Professional interfaces for medical data
 interface Patient {
   id: string
   name: string
-  email?: string
+  dateOfBirth?: Date
   phone?: string
-  dateOfBirth?: string
-  lastVisit?: Date
+  email?: string
+  address?: string
   totalAppointments: number
   notes?: string
-  address?: string
-  createdAt?: Date
 }
 
 interface Appointment {
   id: string
-  patientName: string
   patientId: string
-  patientEmail?: string
-  patientPhone?: string
+  patientName: string
   dateTime: Date
-  symptoms: string
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled'
   notes?: string
-  status: 'scheduled' | 'completed' | 'no_show' | 'confirmed' | 'declined'
-  doctorId: string
 }
 
 interface ConsultationReport {
-  id: string
-  patientId: string
-  appointmentId: string
   symptoms: string
   diagnosis: string
   treatment: string
   additionalDetails: string
-  status: 'draft' | 'completed'
-  createdAt: Date
-  updatedAt: Date
 }
 
 interface CalendarEvent {
-  id: number
+  id: string
+  day: number
   title: string
+  description?: string
   startTime: string
   endTime: string
-  color: string
-  day: number
-  description: string
-  location: string
-  attendees: string[]
-  organizer: string
+  patientName: string
 }
 
-export default function TestAppointments() {
-  const { user } = useAuth()
+// Professional demo data for testing
+const demoPatients: Patient[] = [
+  {
+    id: '1',
+    name: 'Maria Popescu',
+    dateOfBirth: new Date('1985-03-15'),
+    phone: '+40 721 234 567',
+    email: 'maria.popescu@email.com',
+    address: 'Strada Victoriei 15, București',
+    totalAppointments: 12,
+    notes: 'Patient with chronic condition, requires regular monitoring'
+  },
+  {
+    id: '2',
+    name: 'Ion Vasilescu',
+    dateOfBirth: new Date('1978-11-22'),
+    phone: '+40 722 345 678',
+    email: 'ion.vasilescu@email.com',
+    address: 'Bulevardul Unirii 45, București',
+    totalAppointments: 8,
+    notes: 'New patient, first consultation scheduled'
+  },
+  {
+    id: '3',
+    name: 'Elena Dumitrescu',
+    dateOfBirth: new Date('1992-07-08'),
+    phone: '+40 723 456 789',
+    email: 'elena.dumitrescu@email.com',
+    address: 'Strada Lipscani 23, București',
+    totalAppointments: 15,
+    notes: 'Regular patient, excellent treatment compliance'
+  }
+]
+
+const demoAppointments: Appointment[] = [
+  {
+    id: '1',
+    patientId: '1',
+    patientName: 'Maria Popescu',
+    dateTime: new Date(),
+    status: 'confirmed',
+    notes: 'Follow-up consultation'
+  },
+  {
+    id: '2',
+    patientId: '2',
+    patientName: 'Ion Vasilescu',
+    dateTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    status: 'scheduled',
+    notes: 'Initial consultation'
+  }
+]
+
+const demoCalendarEvents: CalendarEvent[] = [
+  {
+    id: '1',
+    day: new Date().getDate(),
+    title: 'Maria Popescu',
+    description: 'Follow-up consultation',
+    startTime: '09:00',
+    endTime: '09:30',
+    patientName: 'Maria Popescu'
+  },
+  {
+    id: '2',
+    day: new Date().getDate(),
+    title: 'Ion Vasilescu',
+    description: 'Initial consultation',
+    startTime: '11:00',
+    endTime: '11:30',
+    patientName: 'Ion Vasilescu'
+  }
+]
+
+// Professional utility functions
+const formatDateTime = (date: Date): string => {
+  return format(date, 'HH:mm, EEEE, d MMMM yyyy', { locale: ro })
+}
+
+const calculateAge = (birthDate: Date): number => {
+  const today = new Date()
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth()
   
-  // State management
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+  
+  return age
+}
+
+// Professional Consultation Hub Component
+const TestAppointments: React.FC = () => {
+  // Professional state management
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null)
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([])
+  const [patients, setPatients] = useState<Patient[]>(demoPatients)
+  const [appointments, setAppointments] = useState<Appointment[]>(demoAppointments)
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  
-  // Report form state
-  const [reportForm, setReportForm] = useState({
+  const [reportForm, setReportForm] = useState<ConsultationReport>({
     symptoms: '',
     diagnosis: '',
     treatment: '',
     additionalDetails: ''
   })
-  
-  // Calendar state - IMPORTED FROM /calendar
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
-  const [currentView, setCurrentView] = useState<'week' | 'month'>('week')
   const [showCreateEvent, setShowCreateEvent] = useState(false)
   
-  // Calendar form state - IMPORTED FROM /calendar
-  const [newEventTitle, setNewEventTitle] = useState('')
-  const [newEventDate, setNewEventDate] = useState(new Date().toISOString().split('T')[0])
-  const [newEventStartTime, setNewEventStartTime] = useState('09:00')
-  const [newEventEndTime, setNewEventEndTime] = useState('10:00')
-  const [newEventDescription, setNewEventDescription] = useState('')
-  
-  // Demo data for testing
-  const demoPatients: Patient[] = [
-    {
-      id: '1',
-      name: 'Ana Popescu',
-      email: 'ana.popescu@email.com',
-      phone: '0740123456',
-      dateOfBirth: '1985-03-15',
-      lastVisit: new Date('2024-01-15'),
-      totalAppointments: 8,
-      notes: 'Controale regulate pentru hipertensiune',
-      address: 'București, Sector 1',
-      createdAt: new Date('2023-06-15')
-    },
-    {
-      id: '2',
-      name: 'Ion Marinescu',
-      email: 'ion.marinescu@email.com',
-      phone: '0741234567',
-      dateOfBirth: '1978-07-22',
-      lastVisit: new Date('2024-01-12'),
-      totalAppointments: 15,
-      notes: 'Diabet zaharat tip 2, necesită monitorizare glicemie',
-      address: 'Cluj-Napoca, str. Memorandumului 15',
-      createdAt: new Date('2023-04-10')
-    },
-    {
-      id: '3',
-      name: 'Maria Ionescu',
-      phone: '0742345678',
-      dateOfBirth: '1990-11-10',
-      lastVisit: new Date('2024-01-08'),
-      totalAppointments: 3,
-      address: 'Timișoara, bd. Liviu Rebreanu 45',
-      createdAt: new Date('2023-12-01')
-    },
-    {
-      id: '4',
-      name: 'Gheorghe Dumitrescu',
-      email: 'gheorghe.d@email.com',
-      phone: '0743456789',
-      dateOfBirth: '1965-05-30',
-      lastVisit: new Date('2024-01-05'),
-      totalAppointments: 22,
-      notes: 'Pacient cronic, controale lunare obligatorii',
-      address: 'Iași, str. Păcurari 12',
-      createdAt: new Date('2022-08-20')
-    },
-    {
-      id: '5',
-      name: 'Elena Vasilescu',
-      email: 'elena.v@email.com',
-      phone: '0744567890',
-      dateOfBirth: '1995-12-05',
-      lastVisit: new Date('2024-01-20'),
-      totalAppointments: 2,
-      notes: 'Pacient nou, consultații pentru migrene',
-      address: 'Constanța, str. Mircea cel Bătrân 8',
-      createdAt: new Date('2024-01-01')
-    }
-  ]
+  // Professional form validation states
+  const [formErrors, setFormErrors] = useState<Record<string, string[]>>({})
+  const [isFormValid, setIsFormValid] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const demoAppointments: Appointment[] = [
-    {
-      id: '1',
-      patientName: 'Ana Popescu',
-      patientId: '1',
-      patientEmail: 'ana.popescu@email.com',
-      patientPhone: '0740123456',
-      dateTime: new Date(new Date().setHours(9, 0, 0, 0)),
-      symptoms: 'Palpitații, dispnee de efort',
-      status: 'confirmed',
-      doctorId: user?.uid || 'demo'
-    },
-    {
-      id: '2',
-      patientName: 'Ion Marinescu',
-      patientId: '2',
-      patientEmail: 'ion.marinescu@email.com',
-      patientPhone: '0741234567',
-      dateTime: new Date(new Date().setHours(11, 0, 0, 0)),
-      symptoms: 'Control diabet zaharat',
-      status: 'scheduled',
-      doctorId: user?.uid || 'demo'
-    },
-    {
-      id: '3',
-      patientName: 'Maria Ionescu',
-      patientId: '3',
-      patientPhone: '0742345678',
-      dateTime: new Date(new Date().setHours(14, 0, 0, 0)),
-      symptoms: 'Migrene frecvente',
-      status: 'scheduled',
-      doctorId: user?.uid || 'demo'
-    }
-  ]
-
-  // Calendar events - IMPORTED FROM /calendar
-  const demoCalendarEvents: CalendarEvent[] = [
-    {
-      id: 1,
-      title: "Consultație Popescu Maria",
-      startTime: "09:00",
-      endTime: "10:00",
-      color: "bg-[#7A48BF]",
-      day: 1,
-      description: "Consultare cardiologie - control periodic",
-      location: "Cabinet 3",
-      attendees: ["Popescu Maria", "Dr. Ionescu"],
-      organizer: "Dr. Ionescu",
-    },
-    {
-      id: 2,
-      title: "Analize sânge - Dumitrescu Ion",
-      startTime: "12:00",
-      endTime: "13:00",
-      color: "bg-[#804AC8]",
-      day: 1,
-      description: "Recoltare sânge pentru analize complete",
-      location: "Laborator",
-      attendees: ["Dumitrescu Ion", "Asistenta Popa"],
-      organizer: "Asistenta Popa",
-    },
-    {
-      id: 3,
-      title: "Vaccinare copil - Stanescu Andrei",
-      startTime: "10:00",
-      endTime: "11:00",
-      color: "bg-[#8A7A9F]",
-      day: 3,
-      description: "Vaccinare rutină copil 2 ani",
-      location: "Cabinet pediatrie",
-      attendees: ["Stanescu Andrei", "Mama Stanescu"],
-      organizer: "Dr. Popescu",
-    }
-  ]
-
-  // Initialize data
-  useEffect(() => {
-    if (isDemoMode()) {
-      setTimeout(() => {
-        setPatients(demoPatients)
-        setAppointments(demoAppointments)
-        setCalendarEvents(demoCalendarEvents)
-        setLoading(false)
-      }, 800)
-    } else {
-      // TODO: Load from Firebase
-      setLoading(false)
-    }
-  }, [])
-
-  // Filter today's appointments
-  useEffect(() => {
-    const today = new Date()
-    const filtered = appointments.filter(appt => 
-      isSameDay(new Date(appt.dateTime), today)
+  // Professional computed values with memoization
+  const todayAppointments = useMemo(() => {
+    return appointments.filter(appointment => 
+      isSameDay(appointment.dateTime, new Date())
     )
-    setTodayAppointments(filtered)
   }, [appointments])
 
-  // Calendar navigation functions - IMPORTED FROM /calendar
-  const goToPreviousMonth = useCallback(() => {
-    const newDate = new Date(currentDate)
-    newDate.setMonth(newDate.getMonth() - 1)
-    setCurrentDate(newDate)
-  }, [currentDate])
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return patients
+    const query = searchQuery.toLowerCase()
+    return patients.filter(patient => 
+      patient.name.toLowerCase().includes(query) ||
+      (patient.email && patient.email.toLowerCase().includes(query)) ||
+      (patient.phone && patient.phone.includes(query))
+    )
+  }, [patients, searchQuery])
 
-  const goToNextMonth = useCallback(() => {
-    const newDate = new Date(currentDate)
-    newDate.setMonth(newDate.getMonth() + 1)
-    setCurrentDate(newDate)
-  }, [currentDate])
+  const selectedDateEvents = useMemo(() => {
+    return demoCalendarEvents.filter(event => event.day === selectedDate.getDate())
+  }, [selectedDate, demoCalendarEvents])
 
-  const goToPreviousWeek = useCallback(() => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() - 7)
-    setCurrentDate(newDate)
-  }, [currentDate])
-
-  const goToNextWeek = useCallback(() => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() + 7)
-    setCurrentDate(newDate)
-  }, [currentDate])
-
-  // Calendar utility functions - IMPORTED FROM /calendar
-  const getWeekDates = useCallback(() => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 })
-    const end = endOfWeek(currentDate, { weekStartsOn: 1 })
-    const dates = eachDayOfInterval({ start, end })
-    return dates.map(date => date.getDate())
-  }, [currentDate])
-
-  const getMonthDates = useCallback(() => {
-    const start = startOfMonth(currentDate)
-    const end = endOfMonth(currentDate)
-    const dates = eachDayOfInterval({ start, end })
-    return dates
-  }, [currentDate])
-
-  // Calendar event functions - IMPORTED FROM /calendar
-  const createEvent = useCallback(() => {
-    if (!newEventTitle.trim() || !newEventDate || !newEventStartTime || !newEventEndTime) {
-      alert('Please fill in all required fields')
-      return
+  const patientStats = useMemo(() => {
+    if (!currentPatient) return null
+    return {
+      totalAppointments: currentPatient.totalAppointments,
+      lastVisit: appointments
+        .filter(a => a.patientId === currentPatient.id)
+        .sort((a, b) => b.dateTime.getTime() - a.dateTime.getTime())[0]
     }
+  }, [currentPatient, appointments])
 
-    const newEvent: CalendarEvent = {
-      id: Date.now(),
-      title: newEventTitle,
-      startTime: newEventStartTime,
-      endTime: newEventEndTime,
-      color: "bg-[#7A48BF]",
-      day: new Date(newEventDate).getDate(),
-      description: newEventDescription,
-      location: "Cabinet",
-      attendees: [newEventTitle],
-      organizer: "Dr. " + (user?.displayName || "User")
+  // Professional form validation
+  const validateField = useCallback((field: keyof ConsultationReport, value: string): string[] => {
+    const errors: string[] = []
+    
+    switch (field) {
+      case 'symptoms':
+        if (!value.trim()) errors.push('Symptoms are required')
+        if (value.trim().length < 10) errors.push('Symptoms must be at least 10 characters')
+        break
+      case 'diagnosis':
+        if (!value.trim()) errors.push('Diagnosis is required')
+        if (value.trim().length < 5) errors.push('Diagnosis must be at least 5 characters')
+        break
+      case 'treatment':
+        if (!value.trim()) errors.push('Treatment plan is required')
+        if (value.trim().length < 10) errors.push('Treatment plan must be at least 10 characters')
+        break
+      case 'additionalDetails':
+        // Optional field - no validation required
+        break
     }
+    
+    return errors
+  }, [])
 
-    setCalendarEvents(prev => [...prev, newEvent])
+  const validateForm = useCallback(() => {
+    const errors: Record<string, string[]> = {}
+    let isValid = true
     
-    // Reset form
-    setNewEventTitle('')
-    setNewEventDate(new Date().toISOString().split('T')[0])
-    setNewEventStartTime('09:00')
-    setNewEventEndTime('10:00')
-    setNewEventDescription('')
+    Object.keys(reportForm).forEach(field => {
+      const fieldErrors = validateField(field as keyof ConsultationReport, reportForm[field as keyof ConsultationReport])
+      if (fieldErrors.length > 0) {
+        errors[field] = fieldErrors
+        isValid = false
+      }
+    })
     
-    setShowCreateEvent(false)
-    
-    // TODO: Sync with main calendar
-    console.log('New event created:', newEvent)
-  }, [newEventTitle, newEventDate, newEventStartTime, newEventEndTime, newEventDescription, user])
+    setFormErrors(errors)
+    setIsFormValid(isValid)
+    return isValid
+  }, [reportForm, validateField])
 
-  // Patient selection functions
+  // Professional form handlers
+  const handleReportFormChange = useCallback((field: keyof ConsultationReport, value: string) => {
+    setReportForm(prev => ({ ...prev, [field]: value }))
+    
+    // Real-time validation
+    const fieldErrors = validateField(field, value)
+    setFormErrors(prev => ({
+      ...prev,
+      [field]: fieldErrors
+    }))
+    
+    // Update overall form validity
+    const newForm = { ...reportForm, [field]: value }
+    const isValid = Object.keys(newForm).every(key => {
+      const fieldKey = key as keyof ConsultationReport
+      return validateField(fieldKey, newForm[fieldKey]).length === 0
+    })
+    setIsFormValid(isValid)
+  }, [reportForm, validateField])
+
+  // Professional patient management
   const selectPatient = useCallback((patient: Patient) => {
     setCurrentPatient(patient)
-    // Clear report form when selecting new patient
+    // Clear form when switching patients
     setReportForm({
       symptoms: '',
       diagnosis: '',
       treatment: '',
       additionalDetails: ''
     })
+    setFormErrors({})
+    setIsFormValid(false)
   }, [])
 
   const searchPatients = useCallback((query: string) => {
     setSearchQuery(query)
-    if (!query.trim()) {
-      setPatients(demoPatients)
-      return
-    }
-    
-    const filtered = demoPatients.filter(patient =>
-      patient.name.toLowerCase().includes(query.toLowerCase()) ||
-      patient.email?.toLowerCase().includes(query.toLowerCase()) ||
-      patient.phone?.includes(query)
-    )
-    setPatients(filtered)
   }, [])
 
-  // Report form functions
-  const handleReportFormChange = useCallback((field: keyof typeof reportForm, value: string) => {
-    setReportForm(prev => ({ ...prev, [field]: value }))
-  }, [])
-
-  const saveReportDraft = useCallback(() => {
+  // Professional report management
+  const saveReportDraft = useCallback(async () => {
     if (!currentPatient) return
     
-    const draft: ConsultationReport = {
-      id: `draft-${Date.now()}`,
-      patientId: currentPatient.id,
-      appointmentId: '', // Will be linked when appointment is selected
-      symptoms: reportForm.symptoms,
-      diagnosis: reportForm.diagnosis,
-      treatment: reportForm.treatment,
-      additionalDetails: reportForm.additionalDetails,
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date()
+    try {
+      setIsSubmitting(true)
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // In real implementation, save to Firebase/localStorage
+      console.log('Report draft saved:', { patient: currentPatient, report: reportForm })
+      
+      // Show success feedback
+      alert('Report draft saved successfully')
+    } catch (error) {
+      console.error('Failed to save draft:', error)
+      alert('Failed to save draft. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
-    
-    // TODO: Save to Firebase
-    console.log('Saving draft report:', draft)
-    
-    // Show success message
-    alert('Draft saved successfully!')
   }, [currentPatient, reportForm])
 
-  const submitReport = useCallback(() => {
-    if (!currentPatient) {
-      alert('Please select a patient first')
-      return
+  const submitReport = useCallback(async () => {
+    if (!currentPatient || !isFormValid) return
+    
+    try {
+      setIsSubmitting(true)
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // In real implementation, submit to Firebase and update patient history
+      console.log('Report submitted:', { patient: currentPatient, report: reportForm })
+      
+      // Clear form after successful submission
+      setReportForm({
+        symptoms: '',
+        diagnosis: '',
+        treatment: '',
+        additionalDetails: ''
+      })
+      setFormErrors({})
+      setIsFormValid(false)
+      
+      // Show success feedback
+      alert('Consultation report submitted successfully')
+    } catch (error) {
+      console.error('Failed to submit report:', error)
+      alert('Failed to submit report. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
-    
-    if (!reportForm.symptoms || !reportForm.diagnosis || !reportForm.treatment) {
-      alert('Please fill in all required fields (symptoms, diagnosis, treatment)')
-      return
-    }
-    
-    const report: ConsultationReport = {
-      id: `report-${Date.now()}`,
-      patientId: currentPatient.id,
-      appointmentId: '', // Will be linked when appointment is selected
-      symptoms: reportForm.symptoms,
-      diagnosis: reportForm.diagnosis,
-      treatment: reportForm.treatment,
-      additionalDetails: reportForm.additionalDetails,
-      status: 'completed',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-    
-    // TODO: Save to Firebase and send to /reports
-    console.log('Submitting report:', report)
-    
-    // Show success message
-    alert('Report submitted successfully!')
-    
-    // Clear form
-    setReportForm({
-      symptoms: '',
-      diagnosis: '',
-      treatment: '',
-      additionalDetails: ''
-    })
-  }, [currentPatient, reportForm])
+  }, [currentPatient, reportForm, isFormValid])
 
-  // Loading state
-  if (loading) {
+  // Professional data synchronization
+  const syncData = useCallback(async () => {
+    try {
+      // In real implementation, sync with Firebase
+      // For now, use demo data
+      setPatients(demoPatients)
+      setAppointments(demoAppointments)
+    } catch (error) {
+      console.error('Failed to sync data:', error)
+    }
+  }, [])
+
+  // Professional data loading
+  useEffect(() => {
+    syncData()
+  }, [syncData])
+
+  // Professional form validation on mount
+  useEffect(() => {
+    validateForm()
+  }, [validateForm])
+
+  // Professional MiniCalendar Component (Extracted from /calendar)
+  const MiniCalendar: React.FC<{
+    currentDate: Date
+    selectedDate: Date
+    events: CalendarEvent[]
+    onDateSelect: (date: Date) => void
+    onNewAppointment: () => void
+    compact?: boolean
+  }> = ({
+    currentDate,
+    selectedDate,
+    events,
+    onDateSelect,
+    onNewAppointment,
+    compact = false
+  }) => {
+    // State for mini calendar
+    const [currentMonth, setCurrentMonth] = useState('')
+    const [currentDateObj, setCurrentDateObj] = useState(currentDate)
+    
+    // Romanian week days
+    const weekDays = ["L", "M", "M", "J", "V", "S", "D"]
+    
+    // Helper functions
+    const capitalizeMonth = (text: string): string => {
+      return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+    }
+
+    const formatDateWithCapitalization = (date: Date, formatString: string): string => {
+      try {
+        const formatted = format(date, formatString, { locale: ro })
+        return capitalizeMonth(formatted)
+      } catch (error) {
+        const formatted = format(date, formatString)
+        return capitalizeMonth(formatted)
+      }
+    }
+
+    // Navigation functions
+    const goToPreviousMonth = useCallback(() => {
+      const newDate = new Date(currentDateObj)
+      newDate.setMonth(newDate.getMonth() - 1)
+      setCurrentDateObj(newDate)
+      setCurrentMonth(formatDateWithCapitalization(newDate, 'MMMM yyyy'))
+    }, [currentDateObj])
+
+    const goToNextMonth = useCallback(() => {
+      const newDate = new Date(currentDateObj)
+      newDate.setMonth(newDate.getMonth() + 1)
+      setCurrentDateObj(newDate)
+      setCurrentMonth(formatDateWithCapitalization(newDate, 'MMMM yyyy'))
+    }, [currentDateObj])
+
+    // Date selection handler
+    const setCurrentDateHandler = useCallback((date: Date) => {
+      setCurrentDateObj(date)
+      setCurrentMonth(formatDateWithCapitalization(date, 'MMMM yyyy'))
+      onDateSelect(date)
+    }, [onDateSelect])
+
+    // Initialize month display
+    useEffect(() => {
+      setCurrentMonth(formatDateWithCapitalization(currentDateObj, 'MMMM yyyy'))
+    }, [currentDateObj])
+
+    // Get events for a specific date
+    const getEventsForDate = useCallback((date: Date) => {
+      return events.filter(event => {
+        const eventDate = new Date(currentDateObj.getFullYear(), currentDateObj.getMonth(), event.day)
+        return isSameDay(eventDate, date)
+      })
+    }, [events, currentDateObj])
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <div className="text-white text-xl">Loading Consultation Hub...</div>
+      <div className={`bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 ${compact ? 'h-auto' : ''}`}>
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+          <Calendar className="w-5 h-5 mr-2 text-purple-400" />
+          Mini Calendar
+        </h2>
+        
+        {/* Mini Calendar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-medium">{currentMonth}</h3>
+            <div className="flex gap-1">
+              <motion.button
+                className="p-1 text-white/70 hover:text-white transition-colors"
+                onClick={goToPreviousMonth}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </motion.button>
+              <motion.button
+                className="p-1 text-white/70 hover:text-white transition-colors"
+                onClick={goToNextMonth}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </motion.button>
+            </div>
+          </div>
+          
+          {/* Week Day Headers */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {weekDays.map((day, i) => (
+              <div key={i} className="text-center text-white/50 text-xs py-1">
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1" key={`mini-calendar-${currentDateObj.toDateString()}`}>
+            {(() => {
+              const firstDay = startOfMonth(currentDateObj)
+              const lastDay = endOfMonth(currentDateObj)
+              const startDate = startOfWeek(firstDay, { weekStartsOn: 1 })
+              const endDate = endOfWeek(lastDay, { weekStartsOn: 1 })
+              const days = eachDayOfInterval({ start: startDate, end: endDate })
+              
+              return days.map((date, i) => {
+                const isCurrentMonth = date.getMonth() === currentDateObj.getMonth()
+                const isTodayDate = isToday(date)
+                const isSelectedDate = isSameDay(date, selectedDate)
+                const dateEvents = getEventsForDate(date)
+                
+                return (
+                  <motion.div
+                    key={`${date.toDateString()}-${i}`}
+                    className={`text-xs rounded-full w-7 h-7 flex items-center justify-center ${
+                      isSelectedDate ? "bg-[#7A48BF] text-white" : 
+                      isTodayDate ? "bg-[#8A7A9F] text-white" :
+                      isCurrentMonth ? "text-white hover:bg-white/20" : "text-white/50"
+                    } transition-colors cursor-pointer relative`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 400, 
+                      damping: 17 
+                    }}
+                    onClick={() => setCurrentDateHandler(date)}
+                    title={`${format(date, 'EEEE, MMMM d, yyyy', { locale: ro })}${dateEvents.length > 0 ? ` - ${dateEvents.length} appointment(s)` : ''}`}
+                  >
+                    {date.getDate()}
+                    {/* Event indicator */}
+                    {dateEvents.length > 0 && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full"></div>
+                    )}
+                  </motion.div>
+                )
+              })
+            })()}
+          </div>
         </div>
-      </div>
-    )
-  }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">{error}</div>
+        {/* Daily Schedule View */}
+        <div className="mt-6">
+          <h3 className="text-lg font-medium text-white mb-3">Daily Schedule</h3>
+          <div className="bg-gray-800/50 rounded-lg p-4 max-h-[600px] overflow-y-scroll" style={{ border: '2px solid red' }}>
+            {(() => {
+              // Generate 24-hour time slots
+              const timeSlots = Array.from({ length: 24 }, (_, i) => {
+                const hour = i.toString().padStart(2, '0')
+                const time = `${hour}:00`
+                const events = selectedDateEvents.filter(event => event.startTime.startsWith(hour))
+                return { time, events }
+              })
+              
+              return timeSlots.map((slot, index) => (
+                <div key={index} className="flex items-center py-2 border-b border-gray-700 last:border-b-0">
+                  <div className="w-16 text-sm text-gray-400 font-mono">
+                    {slot.time}
+                  </div>
+                  <div className="flex-1 ml-4">
+                    {slot.events.length > 0 ? (
+                      slot.events.map((event, eventIndex) => (
+                        <div key={eventIndex} className="bg-purple-600/20 border border-purple-500/30 rounded-lg p-2 mb-2">
+                          <div className="font-medium text-white text-sm">{event.title}</div>
+                          <div className="text-gray-300 text-xs">{event.startTime} - {event.endTime}</div>
+                          <div className="text-gray-400 text-xs">{event.description}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-xs">No appointments</div>
+                    )}
+                  </div>
+                </div>
+              ))
+            })()}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-6 space-y-2">
           <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            onClick={onNewAppointment}
+            className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
           >
-            Reîncearcă
+            <Plus className="w-4 h-4 mr-2" />
+            New Appointment
+          </button>
+          <button className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center">
+            <Calendar className="w-4 h-4 mr-2" />
+            View Full Calendar
           </button>
         </div>
       </div>
     )
   }
 
+  // Professional Consultation Hub UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black">
       {/* Header */}
-      <div className="bg-black/50 backdrop-blur-sm border-b border-purple-500/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">
-                🏥 Consultation Hub
-              </h1>
-              <p className="text-purple-200 mt-2">
-                Complete patient consultation workflow with integrated calendar and reporting
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/appointments"
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
-              >
-                <span>← Back to Main Appointments</span>
-              </Link>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Consultation</h1>
+            <p className="text-purple-300 text-lg">Professional medical consultation workflow</p>
           </div>
+          <Link 
+            to="/appointments" 
+            className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center"
+          >
+            ← Back to Main Appointments
+          </Link>
         </div>
-      </div>
 
-      {/* Main Content - 3-Panel Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-200px)]">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* LEFT PANEL - Mini Calendar (IMPORTED FROM /calendar) */}
+          {/* LEFT PANEL - Mini Calendar */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 h-full">
-              <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-purple-400" />
-                Mini Calendar
-              </h2>
-              
-              {/* Calendar Controls - IMPORTED FROM /calendar */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setCurrentView('week')}
-                    className={`px-3 py-1 rounded text-sm transition-colors ${
-                      currentView === 'week' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    }`}
-                  >
-                    Week
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('month')}
-                    className={`px-3 py-1 rounded text-sm transition-colors ${
-                      currentView === 'month' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    }`}
-                  >
-                    Month
-                  </button>
-                </div>
-                
-                <div className="flex space-x-1">
-                  <button
-                    onClick={currentView === 'week' ? goToPreviousWeek : goToPreviousMonth}
-                    className="p-1 text-gray-400 hover:text-white hover:bg-gray-800 rounded"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={currentView === 'week' ? goToNextWeek : goToNextMonth}
-                    className="p-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Calendar Display - IMPORTED FROM /calendar */}
-              {currentView === 'week' ? (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-2">
-                    {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-                      <div key={i} className="p-1">{day}</div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {getWeekDates().map((date, i) => (
-                      <div
-                        key={i}
-                        className={`p-2 text-center rounded cursor-pointer transition-colors ${
-                          isToday(new Date(currentDate.getFullYear(), currentDate.getMonth(), date))
-                            ? 'bg-purple-600 text-white'
-                            : 'hover:bg-gray-800'
-                        }`}
-                        onClick={() => setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), date))}
-                      >
-                        {date}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-2">
-                    {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-                      <div key={i} className="p-1">{day}</div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {getMonthDates().map((date, i) => (
-                      <div
-                        key={i}
-                        className={`p-2 text-center rounded cursor-pointer transition-colors text-sm ${
-                          isToday(date)
-                            ? 'bg-purple-600 text-white'
-                            : 'hover:bg-gray-800'
-                        }`}
-                        onClick={() => setSelectedDate(date)}
-                      >
-                        {date.getDate()}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Actions - IMPORTED FROM /calendar */}
-              <div className="mt-6 space-y-2">
-                <button 
-                  onClick={() => setShowCreateEvent(true)}
-                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Appointment
-                </button>
-                <button className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  View Full Calendar
-                </button>
-              </div>
-            </div>
+            <MiniCalendar
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              events={demoCalendarEvents}
+              onDateSelect={setSelectedDate}
+              onNewAppointment={() => setShowCreateEvent(true)}
+              compact={false}
+            />
           </div>
 
           {/* RIGHT PANEL - Patient Management */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 h-full">
+            <div className="bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
                 <User className="w-5 h-5 mr-2 text-purple-400" />
                 Patient Management
@@ -789,38 +757,15 @@ export default function TestAppointments() {
                 <div className="space-y-6">
                   {/* Patient Info Header */}
                   <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {currentPatient.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white">Consulting: {currentPatient.name}</div>
-                          <div className="text-sm text-gray-400">
-                            {format(new Date(), 'EEEE, MMMM d, yyyy', { locale: ro })}
-                          </div>
-                        </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                        {currentPatient.name.charAt(0)}
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={saveReportDraft}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
-                        >
-                          <Save className="w-4 h-4 mr-2" />
-                          Save Draft
-                        </button>
-                        <button
-                          onClick={submitReport}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center"
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Submit Report
-                        </button>
-                      </div>
+                      <div className="font-semibold text-white">Consulting: {currentPatient.name}</div>
                     </div>
                   </div>
 
-                  {/* Report Form */}
+                  {/* Report Form with Professional Validation */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left Column */}
                     <div className="space-y-4">
@@ -833,8 +778,22 @@ export default function TestAppointments() {
                           onChange={(e) => handleReportFormChange('symptoms', e.target.value)}
                           placeholder="Describe patient symptoms..."
                           rows={4}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                            formErrors.symptoms && formErrors.symptoms.length > 0
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-700 focus:ring-purple-500'
+                          }`}
                         />
+                        {formErrors.symptoms && formErrors.symptoms.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {formErrors.symptoms.map((error, index) => (
+                              <div key={index} className="text-red-400 text-sm flex items-center">
+                                <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
+                                {error}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -846,8 +805,22 @@ export default function TestAppointments() {
                           onChange={(e) => handleReportFormChange('diagnosis', e.target.value)}
                           placeholder="Enter diagnosis..."
                           rows={3}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                            formErrors.diagnosis && formErrors.diagnosis.length > 0
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-700 focus:ring-purple-500'
+                          }`}
                         />
+                        {formErrors.diagnosis && formErrors.diagnosis.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {formErrors.diagnosis.map((error, index) => (
+                              <div key={index} className="text-red-400 text-sm flex items-center">
+                                <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
+                                {error}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -862,8 +835,22 @@ export default function TestAppointments() {
                           onChange={(e) => handleReportFormChange('treatment', e.target.value)}
                           placeholder="Describe treatment plan..."
                           rows={3}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                            formErrors.treatment && formErrors.treatment.length > 0
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-700 focus:ring-purple-500'
+                          }`}
                         />
+                        {formErrors.treatment && formErrors.treatment.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {formErrors.treatment.map((error, index) => (
+                              <div key={index} className="text-red-400 text-sm flex items-center">
+                                <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
+                                {error}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -875,39 +862,81 @@ export default function TestAppointments() {
                           onChange={(e) => handleReportFormChange('additionalDetails', e.target.value)}
                           placeholder="Additional notes, recommendations, follow-up instructions..."
                           rows={4}
-                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                            formErrors.additionalDetails && formErrors.additionalDetails.length > 0
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-700 focus:ring-purple-500'
+                          }`}
                         />
+                        {formErrors.additionalDetails && formErrors.additionalDetails.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {formErrors.additionalDetails.map((error, index) => (
+                              <div key={index} className="text-red-400 text-sm flex items-center">
+                                <span className="w-1 h-1 bg-red-400 rounded-full mr-2"></span>
+                                {error}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Form Actions */}
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
-                    <button
-                      onClick={() => setReportForm({
-                        symptoms: '',
-                        diagnosis: '',
-                        treatment: '',
-                        additionalDetails: ''
-                      })}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                    >
-                      Clear Form
-                    </button>
-                    <button
-                      onClick={saveReportDraft}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Draft
-                    </button>
-                    <button
-                      onClick={submitReport}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center"
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      Submit Report
-                    </button>
+                  {/* Form Actions with Professional Validation */}
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                    {/* Form Status */}
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${isFormValid ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                        <span className={`text-sm ${isFormValid ? 'text-green-400' : 'text-red-400'}`}>
+                          {isFormValid ? 'Form is valid' : 'Form has errors'}
+                        </span>
+                      </div>
+                      {Object.keys(formErrors).length > 0 && (
+                        <span className="text-sm text-gray-400">
+                          {Object.values(formErrors).flat().length} validation error(s)
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => {
+                          setReportForm({
+                            symptoms: '',
+                            diagnosis: '',
+                            treatment: '',
+                            additionalDetails: ''
+                          })
+                          setFormErrors({})
+                          setIsFormValid(false)
+                        }}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      >
+                        Clear Form
+                      </button>
+                      <button
+                        onClick={saveReportDraft}
+                        disabled={isSubmitting}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSubmitting ? 'Saving...' : 'Save Draft'}
+                      </button>
+                      <button
+                        onClick={submitReport}
+                        disabled={!isFormValid || isSubmitting}
+                        className={`px-4 py-2 rounded-lg transition-colors flex items-center ${
+                          isFormValid && !isSubmitting
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        }`}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -921,126 +950,8 @@ export default function TestAppointments() {
           </div>
         </div>
       </div>
-
-      {/* Create Event Modal - IMPORTED FROM /calendar */}
-      {showCreateEvent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#100B1A] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 border border-[#7A48BF]/20">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-2xl font-bold text-white">Programare Nouă</h3>
-              <button
-                onClick={() => setShowCreateEvent(false)}
-                className="text-white/70 hover:text-white transition-colors p-2 -mr-2"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">Nume pacient</label>
-                <input
-                  type="text"
-                  value={newEventTitle}
-                  onChange={(e) => setNewEventTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                  placeholder="Ex: Ion Popescu"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">Data Programării</label>
-                <input
-                  type="date"
-                  value={newEventDate}
-                  onChange={(e) => setNewEventDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-            
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white text-sm font-medium mb-2">Ora Început</label>
-                  <select
-                    value={newEventStartTime}
-                    onChange={(e) => setNewEventStartTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                  >
-                    <option value="">Selectați ora</option>
-                    {Array.from({ length: 13 }, (_, i) => i + 8).map(hour => [
-                      <option key={`${hour}-00`} value={`${hour.toString().padStart(2, '0')}:00`}>
-                        {hour.toString().padStart(2, '0')}:00
-                      </option>,
-                      <option key={`${hour}-30`} value={`${hour.toString().padStart(2, '0')}:30`}>
-                        {hour.toString().padStart(2, '0')}:30
-                      </option>
-                    ]).flat()}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-white text-sm font-medium mb-2">Ora Sfârșit</label>
-                  <select
-                    value={newEventEndTime}
-                    onChange={(e) => setNewEventEndTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                  >
-                    <option value="">Selectați ora</option>
-                    {Array.from({ length: 13 }, (_, i) => i + 8).map(hour => [
-                      <option key={`${hour}-00`} value={`${hour.toString().padStart(2, '0')}:00`}>
-                        {hour.toString().padStart(2, '0')}:00
-                      </option>,
-                      <option key={`${hour}-30`} value={`${hour.toString().padStart(2, '0')}:30`}>
-                        {hour.toString().padStart(2, '0')}:30
-                      </option>
-                    ]).flat()}
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-white text-sm font-medium mb-2">Descriere</label>
-                <textarea
-                  value={newEventDescription}
-                  onChange={(e) => setNewEventDescription(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                  rows={3}
-                  placeholder="Introduceți descrierea programării"
-                />
-              </div>
-            </div>
-            
-            <div className="mt-6 flex justify-between items-center">
-              <button
-                onClick={() => setShowCreateEvent(false)}
-                className="px-4 py-2 text-white/70 hover:text-white transition-colors"
-              >
-                Anulează
-              </button>
-              <button 
-                onClick={createEvent}
-                className="px-4 py-2 bg-[#7A48BF] hover:bg-[#804AC8] text-white rounded-md transition-colors"
-              >
-                Creează Programarea
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
-// Helper function for calculating age
-function calculateAge(dateOfBirth: string): number {
-  const today = new Date()
-  const birthDate = new Date(dateOfBirth)
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-  
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-  
-  return age
-}
+export default TestAppointments
