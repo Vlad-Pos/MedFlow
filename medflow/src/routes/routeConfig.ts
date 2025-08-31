@@ -7,6 +7,8 @@ export const routeComponents = {
   SignIn: lazy(() => import('../pages/auth/SignIn')),
   SignUp: lazy(() => import('../pages/auth/SignUp')),
   ResetPassword: lazy(() => import('../pages/auth/ResetPassword')),
+  NewSignIn: lazy(() => import('../pages/auth/NewSignIn')),
+  NewSignUp: lazy(() => import('../pages/auth/NewSignUp')),
   Dashboard: lazy(() => import('../pages/Dashboard')),
   Appointments: lazy(() => import('../pages/Appointments')),
   TestAppointments: lazy(() => import('../pages/TestAppointments')),
@@ -92,6 +94,24 @@ export const routes: RouteConfig[] = [
   {
     path: '/reset',
     component: 'ResetPassword',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white'
+  },
+  
+  // New Authentication routes (with navbar, scroll background, page transitions)
+  {
+    path: '/new-signin',
+    component: 'NewSignIn',
+    background: 'scroll',
+    showNavbar: true,
+    showPageTransition: true,
+    containerClass: 'min-h-screen text-white'
+  },
+  {
+    path: '/new-signup',
+    component: 'NewSignUp',
     background: 'scroll',
     showNavbar: true,
     showPageTransition: true,

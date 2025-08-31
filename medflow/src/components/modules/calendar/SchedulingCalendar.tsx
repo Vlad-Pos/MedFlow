@@ -682,11 +682,36 @@ export function SchedulingCalendar() {
     }
   }
 
-  const deleteEvent = () => {
+  const deleteEvent = async () => {
     if (selectedEvent) {
-      setEvents(prevEvents => prevEvents.filter(event => event.id !== selectedEvent.id))
-      setSelectedEvent(null)
-      setIsEditingEvent(false)
+      try {
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          alert('Trebuie să fiți autentificat pentru a șterge o programare')
+          return
+        }
+
+        // Store reference to deleted event for potential rollback
+        const deletedEvent = selectedEvent
+
+        // Update local state immediately for responsive UI
+        setEvents(prevEvents => prevEvents.filter(event => event.id !== selectedEvent.id))
+        setSelectedEvent(null)
+        setIsEditingEvent(false)
+
+        // Delete from Firebase database
+        await deleteAppointment(selectedEvent.id.toString())
+
+        // Show success message
+        alert('Programarea a fost ștearsă cu succes!')
+      } catch (error) {
+        console.error('Error deleting appointment:', error)
+        alert('Eroare la ștergerea programării. Vă rugăm să încercați din nou.')
+        
+        // Revert local state on error
+        setEvents(prevEvents => [...prevEvents, selectedEvent])
+        setSelectedEvent(selectedEvent)
+      }
     }
   }
 
@@ -708,31 +733,74 @@ export function SchedulingCalendar() {
     }
   }
 
-  const saveEventChanges = () => {
+  const saveEventChanges = async () => {
     if (selectedEvent && editEventTitle && editEventStartTime && editEventEndTime) {
-      const updatedEvent: CalendarEvent = {
-        ...selectedEvent,
-        title: editEventTitle,
-        startTime: editEventStartTime,
-        endTime: editEventEndTime,
-        description: editEventDescription,
-        location: editEventLocation,
-        
-        // Enhanced patient information fields
-        patientCNP: editEventCNP || undefined,
-        patientEmail: editEventEmail || undefined,
-        patientPhone: editEventPhone || undefined,
-        patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
-      }
+      try {
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          alert('Trebuie să fiți autentificat pentru a edita o programare')
+          return
+        }
 
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.id === selectedEvent.id ? updatedEvent : event
+        const updatedEvent: CalendarEvent = {
+          ...selectedEvent,
+          title: editEventTitle,
+          startTime: editEventStartTime,
+          endTime: editEventEndTime,
+          description: editEventDescription,
+          location: editEventLocation,
+          
+          // Enhanced patient information fields
+          patientCNP: editEventCNP || undefined,
+          patientEmail: editEventEmail || undefined,
+          patientPhone: editEventPhone || undefined,
+          patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
+        }
+
+        // Update local state immediately for responsive UI
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.id === selectedEvent.id ? updatedEvent : event
+          )
         )
-      )
 
-      setSelectedEvent(updatedEvent)
-      setIsEditingEvent(false)
+        setSelectedEvent(updatedEvent)
+        setIsEditingEvent(false)
+
+        // Update Firebase database - only include fields with actual values
+        const updateData: any = {
+          patientName: editEventTitle,
+          symptoms: editEventDescription || `Programare pentru ${editEventTitle}`,
+          status: 'scheduled' as const,
+          dateTime: new Date(currentDateObj.setHours(
+            Number(editEventStartTime.split(':')[0]),
+            Number(editEventStartTime.split(':')[1])
+          )),
+        }
+
+        // Only add optional fields if they have values
+        if (editEventEmail) updateData.patientEmail = editEventEmail
+        if (editEventPhone) updateData.patientPhone = editEventPhone
+        if (editEventCNP) updateData.patientCNP = editEventCNP
+        if (editEventBirthDate) updateData.patientBirthDate = new Date(editEventBirthDate)
+        if (editEventDescription) updateData.notes = editEventDescription
+
+        await updateAppointment(selectedEvent.id.toString(), updateData)
+
+        // Show success message
+        alert('Programarea a fost actualizată cu succes!')
+      } catch (error) {
+        console.error('Error updating appointment:', error)
+        alert('Eroare la actualizarea programării. Vă rugăm să încercați din nou.')
+        
+        // Revert local state on error
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.id === selectedEvent.id ? selectedEvent : event
+          )
+        )
+        setSelectedEvent(selectedEvent)
+      }
     }
   }
 

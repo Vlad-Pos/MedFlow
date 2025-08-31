@@ -91,9 +91,9 @@ service cloud.firestore {
       return getUserId() == resourceUserId;
     }
     
-    // Check if appointment belongs to the doctor
-    function isAppointmentDoctor(appointmentData) {
-      return isAuthenticated() && appointmentData.doctorId == getUserId();
+    // Check if appointment belongs to the user
+    function isAppointmentOwner(appointmentData) {
+      return isAuthenticated() && appointmentData.userId == getUserId();
     }
     
     // Validate email format
@@ -189,44 +189,39 @@ service cloud.firestore {
     match /appointments/{appointmentId} {
       // Read access rules
       allow read: if isAuthenticated() && (
-        // Doctor can read their own appointments
-        isAppointmentDoctor(resource.data) ||
-        // Nurses can read appointments from their clinic (if clinic field matches)
-        (isNurse() && 'clinic' in resource.data && 'clinic' in get(/databases/$(database)/documents/users/$(getUserId())).data &&
-         resource.data.clinic == get(/databases/$(database)/documents/users/$(getUserId())).data.clinic)
+        // User can read their own appointments
+        isAppointmentOwner(resource.data) ||
+        // Admins can read all appointments
+        isAdmin()
       );
       
       // Create appointment rules
       allow create: if isAuthenticated() && 
-                       isMedicalStaff() &&
                        isValidAppointmentData(request.data) &&
-                       // Only doctors can create appointments for themselves
-                       (isDoctor() && request.data.doctorId == getUserId());
+                       // User can create appointments for themselves
+                       request.data.userId == getUserId();
       
       // Update appointment rules
       allow update: if isAuthenticated() && 
-                       isMedicalStaff() &&
-                       isAppointmentDoctor(resource.data) &&
+                       isAppointmentOwner(resource.data) &&
                        isValidAppointmentUpdate(resource.data, request.data);
       
-      // Delete appointment rules (only doctors can delete their appointments)
+      // Delete appointment rules (user can delete their own appointments)
       allow delete: if isAuthenticated() && 
-                       isDoctor() && 
-                       isAppointmentDoctor(resource.data);
+                       isAppointmentOwner(resource.data);
       
       // Validate appointment data
       function isValidAppointmentData(data) {
-        return data.keys().hasAll(['doctorId', 'patientName', 'dateTime', 'symptoms', 'status', 'createdAt']) &&
-               data.doctorId is string &&
+        return data.keys().hasAll(['userId', 'patientName', 'dateTime', 'symptoms', 'status', 'createdAt']) &&
+               data.userId is string &&
                data.patientName is string &&
                data.patientName.size() >= 2 &&
                data.patientName.size() <= 100 &&
                data.dateTime is timestamp &&
-               data.dateTime > request.time &&
                data.symptoms is string &&
-               data.symptoms.size() >= 10 &&
+               data.symptoms.size() >= 1 &&
                data.symptoms.size() <= 2000 &&
-               data.status in ['scheduled', 'completed', 'no_show'] &&
+               data.status in ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'] &&
                data.createdAt is timestamp &&
                isRecentTimestamp(data.createdAt);
       }
@@ -234,7 +229,7 @@ service cloud.firestore {
       // Validate appointment updates
       function isValidAppointmentUpdate(currentData, newData) {
         return // Core fields cannot be changed
-               newData.doctorId == currentData.doctorId &&
+               newData.userId == currentData.userId &&
                newData.createdAt == currentData.createdAt &&
                // Must include updatedAt
                newData.updatedAt is timestamp &&
@@ -242,9 +237,9 @@ service cloud.firestore {
                // Validate updated fields
                newData.patientName.size() >= 2 &&
                newData.patientName.size() <= 100 &&
-               newData.symptoms.size() >= 10 &&
+               newData.symptoms.size() >= 1 &&
                newData.symptoms.size() <= 2000 &&
-               newData.status in ['scheduled', 'completed', 'no_show'] &&
+               newData.status in ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'] &&
                // Notes validation if present
                (!('notes' in newData) || newData.notes.size() <= 1000);
       }
