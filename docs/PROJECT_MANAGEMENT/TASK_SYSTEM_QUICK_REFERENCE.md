@@ -27,25 +27,25 @@ This document provides a quick overview of how to use the task system for AI age
 
 ### **Task 1: Brand Consistency Audit**
 - **Purpose**: Brand compliance and visual integrity
-- **Source**: `TASKS/BRAND_CONSISTENCY_AUDIT.md`
+- **Source**: `BRAND_CONSISTENCY_AUDIT.md`
 - **Frequency**: Weekly rotation
 - **Priority**: HIGH - Critical for brand identity
 
 ### **Task 2: Performance Optimization Analysis**
 - **Purpose**: Performance standards and optimization
-- **Source**: `TASKS/PERFORMANCE_ANALYSIS.md`
+- **Source**: `PERFORMANCE_ANALYSIS.md`
 - **Frequency**: Monthly rotation
 - **Priority**: MEDIUM - When performance issues detected
 
 ### **Task 3: Accessibility Compliance Review**
 - **Purpose**: WCAG compliance and inclusive design
-- **Source**: `TASKS/ACCESSIBILITY_AUDIT.md`
+- **Source**: `ACCESSIBILITY_AUDIT.md`
 - **Frequency**: Quarterly rotation
 - **Priority**: MEDIUM - When accessibility issues reported
 
 ### **Task 4: Security & GDPR Audit**
 - **Purpose**: Security verification and compliance
-- **Source**: `TASKS/SECURITY_AUDIT.md`
+- **Source**: `SECURITY_AUDIT.md`
 - **Frequency**: Monthly rotation
 - **Priority**: HIGH - When security concerns identified
 
@@ -78,7 +78,7 @@ Week 5: Brand Consistency Audit (repeat)
 
 🎯 ASSIGNED TASK: [Task Name]
 📋 Task Details: [Brief description]
- Source File: TASKS/[TASK_FILE].md
+ Source File: [TASK_FILE].md
 📊 Expected Output: [Output requirements]
 
 🚀 Begin by reading MAIN_GUIDE.md, then execute the assigned task completely.
@@ -88,7 +88,7 @@ Week 5: Brand Consistency Audit (repeat)
 ```
 🎯 ASSIGNED TASK: Brand Consistency Audit
 📋 Task Details: Comprehensive brand compliance check of the entire codebase
- Source File: TASKS/BRAND_CONSISTENCY_AUDIT.md
+ Source File: BRAND_CONSISTENCY_AUDIT.md
 📊 Expected Output: Detailed analysis with violations, fixes, and brand health score
 ```
 
@@ -133,7 +133,7 @@ cat TASK_SELECTION.md
 ### **View Specific Task Details**
 ```bash
 # See detailed task instructions
-cat TASKS/[TASK_NAME].md
+cat [TASK_NAME].md
 ```
 
 ---
