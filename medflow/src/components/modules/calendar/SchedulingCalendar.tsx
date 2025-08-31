@@ -17,6 +17,7 @@ import {
   Clock,
   MapPin,
   Users,
+  User,
   Calendar as CalendarIcon,
   X
 } from 'lucide-react'
@@ -26,8 +27,16 @@ import { LoadingSpinner } from '../../ui/feedback/LoadingSpinner'
 import { AnimatedButton, IconButton } from '../../ui/buttons/AnimatedButton'
 import { ErrorBoundary } from '../../ui/feedback/ErrorBoundary'
 
+// Firebase and appointment utilities
+import { auth } from '../../../services/firebase'
+import { getAppointmentsForDateRange, createAppointment, updateAppointment, deleteAppointment } from '../../../utils/appointmentUtils'
+
+// Validation utilities
+import { validateCNP, extractBirthDateFromCNP } from '../../../utils/cnpValidation'
+import { COUNTRIES, DEFAULT_COUNTRY } from '../../../utils/phoneValidation'
+
 // Types for calendar events
-interface CalendarEvent {
+export interface CalendarEvent {
   id: number
   title: string
   startTime: string
@@ -38,6 +47,11 @@ interface CalendarEvent {
   location: string
   attendees: string[]
   organizer: string
+  // New patient information fields
+  patientCNP?: string
+  patientEmail?: string
+  patientPhone?: string
+  patientBirthDate?: Date
 }
 
 /**
@@ -149,7 +163,153 @@ export function SchedulingCalendar() {
     setCurrentDate(forceCapitalizeMonth(now))
     setCurrentMonth(formatDateWithCapitalization(now, 'MMMM yyyy'))
     setIsLoaded(true)
+    
+    // Fetch appointments from Firebase on initial load
+    fetchAppointmentsFromFirebase()
   }, [])
+
+  // Function to fetch appointments from Firebase and convert to calendar events
+  const fetchAppointmentsFromFirebase = useCallback(async () => {
+    if (!auth.currentUser?.uid) {
+      console.log('No authenticated user, using demo events')
+      // Fallback to demo events if no user is authenticated
+      setEvents([
+        {
+          id: 1,
+          title: "Consultație Popescu Maria",
+          startTime: "09:00",
+          endTime: "10:00",
+          color: getEventColor(1),
+          day: 1,
+          description: "Consultare cardiologie - control periodic",
+          location: "Cabinet 3",
+          attendees: ["Popescu Maria", "Dr. Ionescu"],
+          organizer: "Dr. Ionescu",
+        },
+        {
+          id: 2,
+          title: "Analize sânge - Dumitrescu Ion",
+          startTime: "12:00",
+          endTime: "13:00",
+          color: getEventColor(2),
+          day: 1,
+          description: "Recoltare sânge pentru analize complete",
+          location: "Laborator",
+          attendees: ["Dumitrescu Ion", "Asistenta Popa"],
+          organizer: "Asistenta Popa",
+        },
+        {
+          id: 3,
+          title: "Vaccinare copil - Stanescu Andrei",
+          startTime: "10:00",
+          endTime: "11:00",
+          color: getEventColor(3),
+          day: 3,
+          description: "Vaccinare rutină copil 2 ani",
+          location: "Cabinet pediatrie",
+          attendees: ["Stanescu Andrei", "Mama Stanescu"],
+          organizer: "Dr. Popescu",
+        },
+        {
+          id: 4,
+          title: "Control ginecologie - Vasilescu Elena",
+          startTime: "14:00",
+          endTime: "15:00",
+          color: getEventColor(4),
+          day: 2,
+          description: "Control periodic ginecologie",
+          location: "Cabinet 5",
+          attendees: ["Vasilescu Elena", "Dr. Dumitrescu"],
+          organizer: "Dr. Dumitrescu",
+        },
+        {
+          id: 5,
+          title: "Consultație psihiatrie - Marin Ion",
+          startTime: "13:00",
+          endTime: "14:30",
+          color: getEventColor(5),
+          day: 4,
+          description: "Sesiune psihoterapie",
+          location: "Cabinet psihiatrie",
+          attendees: ["Marin Ion", "Dr. Marin"],
+          organizer: "Dr. Marin",
+        },
+      ]);
+      return;
+    }
+
+    try {
+      // Calculate date range for current view using currentDateObj from state
+      let startDate: Date, endDate: Date
+      
+      switch (currentView) {
+        case 'day':
+          startDate = new Date(currentDateObj);
+          startDate.setHours(0, 0, 0, 0);
+          endDate = new Date(currentDateObj);
+          endDate.setHours(23, 59, 59, 999);
+          break;
+        case 'week':
+          startDate = startOfWeek(currentDateObj, { weekStartsOn: 1 });
+          endDate = endOfWeek(currentDateObj, { weekStartsOn: 1 });
+          endDate.setHours(23, 59, 59, 999);
+          break;
+        case 'month':
+          startDate = startOfMonth(currentDateObj);
+          endDate = endOfMonth(currentDateObj);
+          endDate.setHours(23, 59, 59, 999);
+          break;
+        default:
+          startDate = new Date(currentDateObj);
+          startDate.setHours(0, 0, 0, 0);
+          endDate = new Date(currentDateObj);
+          endDate.setHours(23, 59, 59, 999);
+      }
+
+      // Fetch appointments from Firebase
+      const appointments = await getAppointmentsForDateRange(startDate, endDate, auth.currentUser.uid)
+      
+      // Convert appointments to calendar events
+      const calendarEvents: CalendarEvent[] = appointments.map((appointment: any, index: number) => ({
+        id: index + 1, // Use index for demo purposes, in production use appointment.id
+        title: appointment.patientName,
+        startTime: appointment.dateTime.toTimeString().slice(0, 5), // Extract HH:MM
+        endTime: new Date(appointment.dateTime.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5), // Add 1 hour
+        color: getEventColor(index + 1),
+        day: appointment.dateTime.getDay() === 0 ? 7 : appointment.dateTime.getDay(), // Keep for backward compatibility
+        description: appointment.symptoms || `Programare pentru ${appointment.patientName}`,
+        location: "Cabinet principal",
+        attendees: [appointment.patientName],
+        organizer: "Medicul curant"
+      }))
+
+      setEvents(calendarEvents);
+    } catch (error) {
+      console.error('Error fetching appointments from Firebase:', error);
+      // Fallback to demo events on error
+      setEvents([
+        {
+          id: 1,
+          title: "Consultație Demo",
+          startTime: "09:00",
+          endTime: "10:00",
+          color: getEventColor(1),
+          day: 1,
+          description: "Programare demonstrativă",
+          location: "Cabinet demo",
+          attendees: ["Pacient Demo"],
+          organizer: "Dr. Demo",
+        }
+      ]);
+    }
+  }, [currentView, currentDateObj]);
+
+  // Refetch appointments when date or view changes
+  useEffect(() => {
+    if (isLoaded) {
+      fetchAppointmentsFromFirebase()
+    }
+  }, [currentDateObj, currentView, isLoaded, fetchAppointmentsFromFirebase])
 
   // Navigation functions for calendar controls
   const goToPreviousMonth = useCallback(() => {
@@ -235,12 +395,24 @@ export function SchedulingCalendar() {
   const [newEventEndTime, setNewEventEndTime] = useState('10:00')
   const [newEventDescription, setNewEventDescription] = useState('')
   
+  // New fields for patient information
+  const [newEventCNP, setNewEventCNP] = useState('')
+  const [newEventEmail, setNewEventEmail] = useState('')
+  const [newEventPhone, setNewEventPhone] = useState('')
+  const [newEventCountryCode, setNewEventCountryCode] = useState('RO')
+  
   // Form state for editing existing events
   const [editEventTitle, setEditEventTitle] = useState('')
   const [editEventStartTime, setEditEventStartTime] = useState('')
   const [editEventEndTime, setEditEventEndTime] = useState('')
   const [editEventDescription, setEditEventDescription] = useState('')
   const [editEventLocation, setEditEventLocation] = useState('')
+  
+  // Enhanced patient information fields for editing
+  const [editEventCNP, setEditEventCNP] = useState('')
+  const [editEventEmail, setEditEventEmail] = useState('')
+  const [editEventPhone, setEditEventPhone] = useState('')
+  const [editEventBirthDate, setEditEventBirthDate] = useState('')
 
   // Enhanced brand color system with smooth transitions
   const enhancedEventColors = [
@@ -416,40 +588,98 @@ export function SchedulingCalendar() {
     setNewEventStartTime('09:00')
     setNewEventEndTime('10:00')
     setNewEventDescription('')
+    // Reset new patient information fields
+    setNewEventCNP('')
+    setNewEventEmail('')
+    setNewEventPhone('')
+    setNewEventCountryCode('RO')
   }
 
-  const createEvent = () => {
+  const createEvent = async () => {
     if (!newEventTitle || !newEventDate || !newEventStartTime || !newEventEndTime) {
       return // Don't create event without required fields
     }
 
-    // Parse the selected date to get day of week
-    const selectedDate = new Date(newEventDate)
-    const dayOfWeek = selectedDate.getDay() // 0 = Sunday, 1 = Monday, etc.
-    const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek // Convert to 1-7 (Monday-Sunday)
-
-    const newEvent: CalendarEvent = {
-      id: Math.max(...events.map(e => e.id)) + 1, // Generate unique ID
-      title: newEventTitle,
-      startTime: newEventStartTime,
-      endTime: newEventEndTime,
-      color: getEventColor(Math.max(...events.map(e => e.id)) + 1), // Use enhanced color system
-      day: adjustedDay, // Use the selected date's day of week
-      description: newEventDescription || `Programare pentru ${newEventTitle}`,
-      location: "Cabinet principal",
-      attendees: [],
-      organizer: "Medicul curant",
+    // Check if user is authenticated
+    if (!auth.currentUser) {
+      alert('Trebuie să fiți autentificat pentru a crea o programare')
+      return
     }
 
-    setEvents(prevEvents => [...prevEvents, newEvent])
-    
-    // Close modal and reset form
-    setShowCreateEvent(false)
-    setNewEventTitle('')
-    setNewEventDate('')
-    setNewEventStartTime('09:00')
-    setNewEventEndTime('10:00')
-    setNewEventDescription('')
+    try {
+      // Parse the selected date and time
+      const selectedDate = new Date(newEventDate)
+      const [hours, minutes] = newEventStartTime.split(':').map(Number)
+      const appointmentDateTime = new Date(selectedDate)
+      appointmentDateTime.setHours(hours, minutes, 0, 0)
+
+      // Extract birth date from CNP if provided
+      const birthDate = newEventCNP ? extractBirthDateFromCNP(newEventCNP) : null
+
+      // Format phone number with country code if provided
+      const formattedPhone = newEventPhone ? `${newEventCountryCode}${newEventPhone}` : undefined
+
+             // Create appointment data for Firebase
+       const appointmentData = {
+         patientName: newEventTitle,
+         patientEmail: newEventEmail || undefined,
+         patientPhone: formattedPhone,
+         patientCNP: newEventCNP || undefined,
+         patientBirthDate: birthDate || undefined,
+         dateTime: appointmentDateTime,
+         symptoms: newEventDescription || `Programare pentru ${newEventTitle}`,
+         notes: newEventDescription || undefined,
+         status: 'scheduled' as const,
+         userId: auth.currentUser.uid,
+         createdBy: auth.currentUser.uid, // Add required createdBy field
+       }
+
+      // Create appointment in Firebase
+      const appointmentId = await createAppointment(appointmentData)
+
+      // Create local event for display
+      const dayOfWeek = selectedDate.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek // Convert to 1-7 (Monday-Sunday)
+
+      const newEvent: CalendarEvent = {
+        id: Math.max(...events.map(e => e.id)) + 1, // Generate unique ID for display
+        title: newEventTitle,
+        startTime: newEventStartTime,
+        endTime: newEventEndTime,
+        color: getEventColor(Math.max(...events.map(e => e.id)) + 1), // Use enhanced color system
+        day: adjustedDay, // Use the selected date's day of week
+        description: newEventDescription || `Programare pentru ${newEventTitle}`,
+        location: "Cabinet principal",
+        attendees: [],
+        organizer: "Medicul curant",
+        // New patient information fields
+        patientCNP: newEventCNP || undefined,
+        patientEmail: newEventEmail || undefined,
+        patientPhone: formattedPhone,
+        patientBirthDate: birthDate || undefined,
+      }
+
+      setEvents(prevEvents => [...prevEvents, newEvent])
+      
+      // Close modal and reset form
+      setShowCreateEvent(false)
+      setNewEventTitle('')
+      setNewEventDate('')
+      setNewEventStartTime('09:00')
+      setNewEventEndTime('10:00')
+      setNewEventDescription('')
+      // Reset new fields
+      setNewEventCNP('')
+      setNewEventEmail('')
+      setNewEventPhone('')
+      setNewEventCountryCode('RO')
+
+      // Show success message
+      alert('Programarea a fost creată cu succes!')
+    } catch (error) {
+      console.error('Error creating appointment:', error)
+      alert('Eroare la crearea programării. Vă rugăm să încercați din nou.')
+    }
   }
 
   const deleteEvent = () => {
@@ -467,6 +697,13 @@ export function SchedulingCalendar() {
       setEditEventEndTime(selectedEvent.endTime)
       setEditEventDescription(selectedEvent.description)
       setEditEventLocation(selectedEvent.location)
+      
+      // Enhanced patient information fields
+      setEditEventCNP(selectedEvent.patientCNP || '')
+      setEditEventEmail(selectedEvent.patientEmail || '')
+      setEditEventPhone(selectedEvent.patientPhone || '')
+      setEditEventBirthDate(selectedEvent.patientBirthDate ? selectedEvent.patientBirthDate.toISOString().split('T')[0] : '')
+      
       setIsEditingEvent(true)
     }
   }
@@ -480,6 +717,12 @@ export function SchedulingCalendar() {
         endTime: editEventEndTime,
         description: editEventDescription,
         location: editEventLocation,
+        
+        // Enhanced patient information fields
+        patientCNP: editEventCNP || undefined,
+        patientEmail: editEventEmail || undefined,
+        patientPhone: editEventPhone || undefined,
+        patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
       }
 
       setEvents(prevEvents => 
@@ -500,6 +743,12 @@ export function SchedulingCalendar() {
     setEditEventEndTime('')
     setEditEventDescription('')
     setEditEventLocation('')
+    
+    // Reset enhanced patient information fields
+    setEditEventCNP('')
+    setEditEventEmail('')
+    setEditEventPhone('')
+    setEditEventBirthDate('')
   }
 
   // Render functions for different calendar views
@@ -550,6 +799,30 @@ export function SchedulingCalendar() {
                     {event.attendees.length} participanți
                   </span>
                 </div>
+                
+                {/* Enhanced Patient Information Section */}
+                {(event.patientCNP || event.patientEmail || event.patientPhone || event.patientBirthDate) && (
+                  <div className="mt-3 pt-3 border-t border-white/20">
+                    <h4 className="text-xs font-medium text-white/70 mb-2 flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      Informații Pacient:
+                    </h4>
+                    <div className="space-y-1">
+                      {event.patientCNP && (
+                        <div className="text-xs text-white/60">CNP: {event.patientCNP}</div>
+                      )}
+                      {event.patientEmail && (
+                        <div className="text-xs text-white/60">Email: {event.patientEmail}</div>
+                      )}
+                      {event.patientPhone && (
+                        <div className="text-xs text-white/60">Telefon: {event.patientPhone}</div>
+                      )}
+                      {event.patientBirthDate && (
+                        <div className="text-xs text-white/60">Data nașterii: {event.patientBirthDate.toLocaleDateString('ro-RO')}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -1207,6 +1480,30 @@ export function SchedulingCalendar() {
                   <p>
                     <strong>Descriere:</strong> {selectedEvent.description}
                   </p>
+                  
+                  {/* Enhanced Patient Information Section */}
+                  {(selectedEvent.patientCNP || selectedEvent.patientEmail || selectedEvent.patientPhone || selectedEvent.patientBirthDate) && (
+                    <div className="pt-3 border-t border-white/20">
+                      <h4 className="text-sm font-medium text-white/80 mb-2 flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        Informații Pacient:
+                      </h4>
+                      <div className="space-y-1 text-sm">
+                        {selectedEvent.patientCNP && (
+                          <div className="text-white/70"><strong>CNP:</strong> {selectedEvent.patientCNP}</div>
+                        )}
+                        {selectedEvent.patientEmail && (
+                          <div className="text-white/70"><strong>Email:</strong> {selectedEvent.patientEmail}</div>
+                        )}
+                        {selectedEvent.patientPhone && (
+                          <div className="text-white/70"><strong>Telefon:</strong> {selectedEvent.patientPhone}</div>
+                        )}
+                        {selectedEvent.patientBirthDate && (
+                          <div className="text-white/70"><strong>Data nașterii:</strong> {selectedEvent.patientBirthDate.toLocaleDateString('ro-RO')}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 // Edit Mode
@@ -1279,6 +1576,53 @@ export function SchedulingCalendar() {
                       rows={3}
                       placeholder="Introduceți descrierea programării"
                     />
+                  </div>
+                  
+                  {/* Enhanced Patient Information Fields */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">CNP Pacient</label>
+                      <input
+                        type="text"
+                        value={editEventCNP || ''}
+                        onChange={(e) => setEditEventCNP(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="1234567890123"
+                        maxLength={13}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Email Pacient</label>
+                      <input
+                        type="email"
+                        value={editEventEmail || ''}
+                        onChange={(e) => setEditEventEmail(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="exemplu@email.com"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Telefon Pacient</label>
+                      <input
+                        type="tel"
+                        value={editEventPhone || ''}
+                        onChange={(e) => setEditEventPhone(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        placeholder="7XX XXX XXX"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Data Nașterii</label>
+                      <input
+                        type="date"
+                        value={editEventBirthDate || ''}
+                        onChange={(e) => setEditEventBirthDate(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1369,8 +1713,8 @@ export function SchedulingCalendar() {
 
         {/* Create Event Modal */}
         {showCreateEvent && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[#100B1A] p-6 rounded-lg shadow-xl max-w-md w-full mx-4 border border-[#7A48BF]/20">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style={{ paddingTop: '80px' }}>
+            <div className="bg-[#100B1A] p-4 sm:p-6 rounded-lg shadow-xl w-full mx-4 border border-[#7A48BF]/20 overflow-hidden" style={{ maxWidth: 'min(90vw, 600px)', maxHeight: 'calc(100vh - 120px)' }}>
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-2xl font-bold text-white">Programare Nouă</h3>
                 <motion.button
@@ -1391,10 +1735,12 @@ export function SchedulingCalendar() {
                 </motion.button>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                {/* Row 1: Nume pacient */}
                 <div>
-                  <label className="block text-white text-sm font-medium mb-2">Nume pacient</label>
+                  <label htmlFor="patient-name-input" className="block text-white text-sm font-medium mb-2">Nume pacient</label>
                   <input
+                    id="patient-name-input"
                     type="text"
                     value={newEventTitle}
                     onChange={(e) => setNewEventTitle(e.target.value)}
@@ -1403,9 +1749,25 @@ export function SchedulingCalendar() {
                   />
                 </div>
                 
+                {/* Row 2: CNP pacient */}
                 <div>
-                  <label className="block text-white text-sm font-medium mb-2">Data Programării</label>
+                  <label htmlFor="cnp-input" className="block text-white text-sm font-medium mb-2">CNP pacient</label>
                   <input
+                    id="cnp-input"
+                    type="text"
+                    value={newEventCNP}
+                    onChange={(e) => setNewEventCNP(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                    placeholder="1234567890123"
+                    maxLength={13}
+                  />
+                </div>
+                
+                {/* Row 3: Data Programării */}
+                <div>
+                  <label htmlFor="appointment-date-input" className="block text-white text-sm font-medium mb-2">Data Programării</label>
+                  <input
+                    id="appointment-date-input"
                     type="date"
                     value={newEventDate}
                     onChange={(e) => setNewEventDate(e.target.value)}
@@ -1414,10 +1776,12 @@ export function SchedulingCalendar() {
                   />
                 </div>
               
+                {/* Row 4: Ora Început and Durată (side by side) */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white text-sm font-medium mb-2">Ora Început</label>
+                    <label htmlFor="start-time-input" className="block text-white text-sm font-medium mb-2">Ora Început</label>
                     <select
+                      id="start-time-input"
                       value={newEventStartTime}
                       onChange={(e) => setNewEventStartTime(e.target.value)}
                       className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
@@ -1434,8 +1798,9 @@ export function SchedulingCalendar() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-white text-sm font-medium mb-2">Durată</label>
+                    <label htmlFor="duration-input" className="block text-white text-sm font-medium mb-2">Durată</label>
                     <select
+                      id="duration-input"
                       value={newEventEndTime}
                       onChange={(e) => setNewEventEndTime(e.target.value)}
                       className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
@@ -1451,13 +1816,54 @@ export function SchedulingCalendar() {
                   </div>
                 </div>
                 
+                {/* Row 5: Email and Phone (side by side) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="email-input" className="block text-white text-sm font-medium mb-2">Email pacient (pentru notificări)</label>
+                    <input
+                      id="email-input"
+                      type="email"
+                      value={newEventEmail}
+                      onChange={(e) => setNewEventEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                      placeholder="exemplu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone-input" className="block text-white text-sm font-medium mb-2">Telefon pacient (pentru SMS)</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={newEventCountryCode}
+                        onChange={(e) => setNewEventCountryCode(e.target.value)}
+                        className="px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                      >
+                        {COUNTRIES.map(country => (
+                          <option key={country.code} value={country.code}>
+                            {country.flag} {country.dialCode}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        id="phone-input"
+                        type="tel"
+                        value={newEventPhone}
+                        onChange={(e) => setNewEventPhone(e.target.value)}
+                        className="flex-1 px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                        placeholder="7XX XXX XXX"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Row 6: Descriere (shorter height) */}
                 <div>
-                  <label className="block text-white text-sm font-medium mb-2">Descriere</label>
+                  <label htmlFor="description-input" className="block text-white text-sm font-medium mb-2">Descriere</label>
                   <textarea
+                    id="description-input"
                     value={newEventDescription}
                     onChange={(e) => setNewEventDescription(e.target.value)}
                     className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                    rows={3}
+                    rows={2}
                     placeholder="Introduceți descrierea programării"
                   />
                 </div>

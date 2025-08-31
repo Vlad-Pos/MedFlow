@@ -11,7 +11,7 @@
  * - MedFlow/FEATURES_DOCUMENTATION.md (feature implementation)
  */
 
-import React, { Suspense, useState } from 'react'
+import React, { Suspense } from 'react'
 import { SchedulingCalendar } from '../components/modules/calendar'
 import { LoadingSpinner } from '../components/ui/feedback/LoadingSpinner'
 import { ErrorBoundary } from '../components/ui/feedback/ErrorBoundary'
@@ -20,27 +20,23 @@ import { ErrorBoundary } from '../components/ui/feedback/ErrorBoundary'
  * Calendar Page Component
  * 
  * This page provides access to the enhanced scheduling calendar system
- * while maintaining complete separation from existing calendar functionality.
+ * with full-screen immersive experience matching the working test calendar.
  */
 export default function CalendarPage() {
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Calendar
-          </h1>
-          <p className="text-[#CCCCCC] text-lg">
-            Manage your schedule with our enhanced calendar system
-          </p>
-        </div>
-        
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner size="lg" text="Loading calendar..." />}>
+    <div 
+      className="fixed inset-0 w-screen h-screen m-0 p-0 overflow-hidden"
+      style={{
+        top: '83px' // Adjusted navbar height: py-4 (32px) + logo h-11 (44px) + 7px buffer = 83px
+      }}
+    >
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingSpinner size="lg" text="Loading calendar..." />}>
+          <div className="w-full h-full">
             <SchedulingCalendar />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
+          </div>
+        </Suspense>
+      </ErrorBoundary>
     </div>
   )
 }
