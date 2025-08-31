@@ -15,7 +15,7 @@ import { FormAI } from '../base/FormAI'
 import { AppointmentFormData } from '../../../utils/appointmentValidation'
 
 export interface AIState {
-  analysis: ReturnType<typeof FormAI.analyzeSymptoms> | null
+  analysis: Awaited<ReturnType<typeof FormAI.analyzeSymptoms>> | null
   suggestions: Record<keyof AppointmentFormData, string[]>
   isAnalyzing: boolean
   showSuggestions: boolean
@@ -92,8 +92,8 @@ export function useFormAI(
     updateAIState({ isAnalyzing: true })
 
     // Simulate AI analysis delay
-    setTimeout(() => {
-      const analysis = FormAI.analyzeSymptoms(symptoms)
+    setTimeout(async () => {
+      const analysis = await FormAI.analyzeSymptoms(symptoms)
       updateAIState({
         analysis,
         isAnalyzing: false,
@@ -157,8 +157,9 @@ export function useFormAI(
   // Auto-analyze symptoms when they change
   useEffect(() => {
     if (autoAnalyze && isAIAvailable && formData.symptoms) {
-      const timeoutId = setTimeout(() => {
-        analyzeSymptoms(formData.symptoms)
+      const timeoutId = setTimeout(async () => {
+        const analysis = await analyzeSymptoms(formData.symptoms)
+        // Handle the analysis result if needed
       }, suggestionDelay)
 
       return () => clearTimeout(timeoutId)
@@ -210,18 +211,23 @@ export function useFormAIWithCustom(
   const baseHook = useFormAI(formData, options)
 
   // Override analyzeSymptoms with custom analyzer
-  const analyzeSymptomsWithCustom = useCallback((symptoms: string) => {
+  const analyzeSymptomsWithCustom = useCallback(async (symptoms: string) => {
     if (customAnalyzer) {
       baseHook.updateAIState({ isAnalyzing: true })
 
-      setTimeout(() => {
-        const analysis = customAnalyzer(symptoms)
+      try {
+        const analysis = await customAnalyzer(symptoms)
         baseHook.updateAIState({
           analysis,
           isAnalyzing: false,
           lastAnalysisTime: Date.now()
         })
-      }, 300)
+      } catch (error) {
+        baseHook.updateAIState({
+          analysis: null,
+          isAnalyzing: false
+        })
+      }
     } else {
       baseHook.analyzeSymptoms(symptoms)
     }

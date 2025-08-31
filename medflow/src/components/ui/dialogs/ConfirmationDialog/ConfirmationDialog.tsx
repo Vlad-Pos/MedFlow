@@ -261,7 +261,7 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
 }
 
 // Specialized confirmation dialogs for common medical actions
-interface DeleteAppointmentDialogProps {
+export interface DeleteAppointmentDialogProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
@@ -304,7 +304,7 @@ export const DeleteAppointmentDialog: React.FC<DeleteAppointmentDialogProps> = (
   )
 }
 
-interface CompleteAppointmentDialogProps {
+export interface CompleteAppointmentDialogProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
@@ -344,7 +344,7 @@ export const CompleteAppointmentDialog: React.FC<CompleteAppointmentDialogProps>
   )
 }
 
-interface CustomConfirmationDialogProps extends Omit<ConfirmationDialogProps, 'type' | 'icon'> {
+export interface CustomConfirmationDialogProps extends Omit<ConfirmationDialogProps, 'type' | 'icon'> {
   customIcon?: React.ReactNode
   customType?: ConfirmationDialogProps['type']
 }

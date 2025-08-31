@@ -5,27 +5,45 @@
 
 // Demo mode detection
 export const isDemoMode = (): boolean => {
+  console.log('🔍 Debug: Checking demo mode...')
+  
   // Check for demo mode in localStorage
   if (typeof window !== 'undefined') {
     const demoMode = localStorage.getItem('medflow-demo-mode')
+    console.log('🔍 Debug: localStorage demo mode:', demoMode)
     if (demoMode === 'true') {
+      console.log('🔍 Debug: Demo mode enabled via localStorage')
       return true
     }
   }
   
   // Check for demo mode in environment variables
-  if (import.meta.env.VITE_DEMO_MODE === 'true') {
+  // VITE_DEMO_MODE can be 'true', 'false', or undefined
+  const envDemoMode = import.meta.env.VITE_DEMO_MODE
+  console.log('🔍 Debug: VITE_DEMO_MODE:', envDemoMode, 'Type:', typeof envDemoMode)
+  
+  if (envDemoMode === 'true') {
+    console.log('🔍 Debug: Demo mode enabled via environment variable')
     return true
+  }
+  if (envDemoMode === 'false') {
+    console.log('🔍 Debug: Demo mode disabled via environment variable')
+    return false
   }
   
   // Check for demo mode in URL parameters
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('demo') === 'true') {
+    const urlDemo = urlParams.get('demo')
+    console.log('🔍 Debug: URL demo parameter:', urlDemo)
+    if (urlDemo === 'true') {
+      console.log('🔍 Debug: Demo mode enabled via URL parameter')
       return true
     }
   }
   
+  // Default to false if not explicitly set
+  console.log('🔍 Debug: Demo mode defaulting to false')
   return false
 }
 
@@ -281,7 +299,7 @@ export interface DemoAppointment {
   symptoms: string
   notes: string
   status: 'scheduled' | 'completed' | 'no_show'
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   createdAt: Date
   updatedAt: Date
 }
@@ -295,12 +313,12 @@ export interface DemoUser {
 }
 
 // Demo data functions
-export async function getDemoAppointments(doctorId?: string): Promise<DemoAppointment[]> {
+export async function getDemoAppointments(userId?: string): Promise<DemoAppointment[]> {
   const demoManager = new DemoDataManager()
   const appointments = Array.from(demoManager['appointments'].values())
   
-  if (doctorId) {
-    return appointments.filter(appointment => appointment.doctorId === doctorId)
+  if (userId) {
+    return appointments.filter(appointment => appointment.userId === userId)
   }
   
   return appointments
@@ -343,7 +361,7 @@ export async function deleteDemoAppointment(id: string): Promise<void> {
 // Demo subscription functions for real-time updates
 export function subscribeToDemoAppointments(
   callback: (appointments: any[]) => void,
-  doctorId?: string
+  userId?: string
 ): () => void {
   // Simulate real-time updates by calling callback immediately
   // and setting up a periodic refresh

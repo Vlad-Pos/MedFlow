@@ -32,11 +32,15 @@ import { useFeatureAnalytics } from '../hooks/useFeatureAnalytics'
 interface Appointment {
   id: string
   patientName: string
+  patientEmail?: string
+  patientPhone?: string
+  patientCNP?: string // Romanian CNP (Cod Numeric Personal)
+  patientBirthDate?: Date // Extracted birth date from CNP
   dateTime: Date
   symptoms: string
   notes?: string
   status: 'scheduled' | 'completed' | 'no_show'
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
 }
 
 export default function Dashboard() {
@@ -110,8 +114,8 @@ export default function Dashboard() {
     try {
       const q = query(
         collection(db, 'appointments'),
-        where('doctorId', '==', user.uid),
-        orderBy('dateTime', 'desc')
+        where('userId', '==', user.uid),
+        orderBy('dateTime', 'asc')  // Use ASC order to match our existing index
       )
       
       const unsub = onSnapshot(
@@ -125,7 +129,7 @@ export default function Dashboard() {
                 symptoms: string
                 notes?: string
                 status: 'scheduled' | 'completed' | 'no_show'
-                doctorId: string
+                userId: string
               }
               return {
                 id: d.id,
@@ -134,12 +138,16 @@ export default function Dashboard() {
                 symptoms: data.symptoms,
                 notes: data.notes,
                 status: data.status,
-                doctorId: data.doctorId,
+                userId: data.userId,
               }
             })
             setFallbackActive(false)
             setIndexLink(null)
-            setAppointments(rows)
+            // Sort in descending order (newest first) to maintain the same behavior
+            const sortedRows = [...rows].sort((a, b) => 
+              new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+            )
+            setAppointments(sortedRows)
             setLoading(false)
             setError(null)
             

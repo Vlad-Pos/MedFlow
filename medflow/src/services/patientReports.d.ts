@@ -23,7 +23,7 @@ export declare function validateReportData(data: Partial<ReportFormData>): Repor
 /**
  * Creates a new patient report (draft state)
  */
-export declare function createReport(appointmentId: string, doctorId: string, doctorName: string, patientId: string, patientName: string, formData: ReportFormData, templateId?: string): Promise<string>;
+export declare function createReport(appointmentId: string, userId: string, doctorName: string, patientId: string, patientName: string, formData: ReportFormData, templateId?: string): Promise<string>;
 /**
  * Updates an existing report
  */
@@ -43,7 +43,7 @@ export declare function getReportsByAppointment(appointmentId: string): Promise<
 /**
  * Gets reports for a specific doctor with filtering and pagination
  */
-export declare function getReportsByDoctor(doctorId: string, filters?: ReportFilters, limitCount?: number, lastDoc?: QueryDocumentSnapshot<DocumentData>): Promise<{
+export declare function getReportsByDoctor(userId: string, filters?: ReportFilters, limitCount?: number, lastDoc?: QueryDocumentSnapshot<DocumentData>): Promise<{
     reports: ReportSummary[];
     hasMore: boolean;
     lastDoc?: QueryDocumentSnapshot<DocumentData>;
@@ -51,7 +51,7 @@ export declare function getReportsByDoctor(doctorId: string, filters?: ReportFil
 /**
  * Subscribes to real-time updates for reports
  */
-export declare function subscribeToReports(doctorId: string, callback: (reports: PatientReport[]) => void, filters?: ReportFilters): () => void;
+export declare function subscribeToReports(userId: string, callback: (reports: PatientReport[]) => void, filters?: ReportFilters): () => void;
 /**
  * Deletes a report (only for drafts, archived reports cannot be deleted)
  */
@@ -59,8 +59,8 @@ export declare function deleteReport(reportId: string, userId: string, userRole?
 /**
  * Gets available report templates for a doctor
  */
-export declare function getReportTemplates(doctorId: string): Promise<ReportTemplate[]>;
+export declare function getReportTemplates(userId: string): Promise<ReportTemplate[]>;
 /**
  * Gets report statistics for a doctor
  */
-export declare function getReportStatistics(doctorId: string): Promise<ReportStatistics>;
+export declare function getReportStatistics(userId: string): Promise<ReportStatistics>;

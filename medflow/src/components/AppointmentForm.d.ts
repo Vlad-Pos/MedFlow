@@ -17,7 +17,7 @@ import { Timestamp } from 'firebase/firestore';
 export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show';
 export interface Appointment {
     id?: string;
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     patientName: string;
     dateTime: Date;
     symptoms: string;

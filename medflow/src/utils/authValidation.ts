@@ -308,25 +308,6 @@ export function validateDisplayName(name: string): AuthValidationResult {
 }
 
 /**
- * Validates user role selection
- */
-export function validateRole(role: string): AuthValidationResult {
-  const errors: string[] = []
-  const validRoles = ['doctor', 'nurse']
-  
-  if (!role) {
-    errors.push(AUTH_ERRORS.ROLE_REQUIRED)
-  } else if (!validRoles.includes(role)) {
-    errors.push(AUTH_ERRORS.ROLE_INVALID)
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  }
-}
-
-/**
  * Comprehensive validation for sign-up form
  */
 export function validateSignUpForm(data: {
@@ -334,7 +315,6 @@ export function validateSignUpForm(data: {
   email: string
   password: string
   confirmPassword: string
-  role: string
 }): AuthValidationResult {
   const allErrors: string[] = []
   const allWarnings: string[] = []
@@ -343,13 +323,11 @@ export function validateSignUpForm(data: {
   const nameValidation = validateDisplayName(data.displayName)
   const emailValidation = validateEmail(data.email)
   const passwordValidation = validatePassword(data.password, data.confirmPassword)
-  const roleValidation = validateRole(data.role)
   
   // Collect all errors and warnings
   allErrors.push(...nameValidation.errors)
   allErrors.push(...emailValidation.errors)
   allErrors.push(...passwordValidation.errors)
-  allErrors.push(...roleValidation.errors)
   
   if (nameValidation.warnings) allWarnings.push(...nameValidation.warnings)
   if (emailValidation.warnings) allWarnings.push(...emailValidation.warnings)

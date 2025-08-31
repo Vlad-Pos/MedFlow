@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Appointments collection - DIAGNOSTIC RULES
+    match /appointments/{appointmentId} {
+      // Create: Diagnostic rule to see exact values
+      allow create: if isAuthenticated() && 
+                      // Log what we're receiving
+                      request.data.userId != null &&
+                      request.data.createdBy != null &&
+                      // Check if they're strings
+                      request.data.userId is string &&
+                      request.data.createdBy is string &&
+                      // Check their lengths
+                      request.data.userId.size() > 0 &&
+                      request.data.createdBy.size() > 0 &&
+                      // Check if they match each other
+                      request.data.userId == request.data.createdBy &&
+                      // Check if they match current user (this will fail and show us why)
+                      request.data.userId == getUserId();
+      
+      // Read: Users can read their own appointments
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == getUserId();
+      
+      // Update: Users can update their own appointments
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+      
+      // Delete: Users can delete their own appointments
+      allow delete: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && userId == getUserId();
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -22,9 +22,13 @@ interface MonthlyStats {
 interface Appointment {
   id: string
   patientName: string
+  patientEmail?: string
+  patientPhone?: string
+  patientCNP?: string // Romanian CNP (Cod Numeric Personal)
+  patientBirthDate?: Date | string // Extracted birth date from CNP
   status: 'scheduled' | 'completed' | 'no_show'
   dateTime: Date | string
-  doctorId?: string
+  userId?: string // User ID for the new ADMIN/USER role system
 }
 
 export default function Analytics() {
@@ -85,8 +89,8 @@ export default function Analytics() {
     // Real data from Firestore
     const q = query(
       collection(db, 'appointments'),
-      where('doctorId', '==', user.uid),
-      orderBy('dateTime', 'desc'),
+      where('userId', '==', user.uid),
+      orderBy('dateTime', 'asc'),  // Use ASC order to match our existing index
       limit(100)
     )
 
@@ -131,7 +135,11 @@ export default function Analytics() {
       })).slice(0, 6) // Last 6 months
       
       setMonthlyStats(monthlyStats)
-      setAppointments(rows) // Set appointments for the recent appointments section
+      // Sort in descending order (newest first) to maintain the same behavior
+      const sortedRows = [...rows].sort((a, b) => 
+        new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+      )
+      setAppointments(sortedRows) // Set appointments for the recent appointments section
       setLoading(false)
     })
     
@@ -204,7 +212,7 @@ export default function Analytics() {
                 <div>
                   <div className="font-medium text-[var(--medflow-text-primary)]">{appointment.patientName}</div>
                   <div className="text-sm text-[var(--medflow-text-tertiary)]">
-                    {formatDate(appointment.dateTime)}
+                    {formatDate(safeConvertToDate(appointment.dateTime))}
                   </div>
                 </div>
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${

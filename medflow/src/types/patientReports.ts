@@ -189,7 +189,7 @@ export interface PatientReport {
   appointmentId: string // Link to appointment
   patientId: string // Patient identifier (email or unique ID)
   patientName: string // Patient full name
-  doctorId: string // Doctor who created the report
+  userId: string // User ID for the new ADMIN/USER role system
   doctorName: string // Doctor full name
   
   // ===== STATUS & WORKFLOW =====

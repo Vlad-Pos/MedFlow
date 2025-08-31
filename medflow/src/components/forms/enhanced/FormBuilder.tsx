@@ -348,8 +348,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     disabled={field.disabled || readOnly}
                     required={field.required}
                     placeholder={field.placeholder}
-                    type={field.type}
-                    options={field.options}
+                    type={field.type === 'select' || field.type === 'textarea' ? undefined : field.type}
+                    {...(field.type === 'select' && field.options ? { options: field.options } : {})}
+                    {...(field.type === 'textarea' ? { rows: 3 } : {})}
                     aiSuggestions={aiSuggestions[field.name] || field.aiSuggestions}
                     showAISuggestions={enableAI && !!field.aiSuggestions}
                   />

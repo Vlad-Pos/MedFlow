@@ -45,6 +45,7 @@ export interface AppointmentFormErrors {
   general?: string
   patientEmail?: string
   patientPhone?: string
+  status?: string
 }
 
 /**

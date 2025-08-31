@@ -21,7 +21,7 @@ interface Appointment {
     symptoms: string;
     notes?: string;
     status: 'scheduled' | 'completed' | 'no_show';
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
 }
 interface ModernCalendarProps {
     onAppointmentClick?: (appointment: Appointment) => void;

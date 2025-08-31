@@ -14,12 +14,11 @@ export {
 export { FormBuilder } from './FormBuilder'
 
 export type {
-  EnhancedFormFieldProps,
   FormFieldSchema,
   FormSchema,
   FormBuilderProps,
   FormState
-} from './EnhancedFormField'
+} from './FormBuilder'
 
 export type {
   FormFieldSchema as FormBuilderFieldSchema,

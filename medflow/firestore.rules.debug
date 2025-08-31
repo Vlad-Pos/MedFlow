@@ -1,0 +1,58 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Debug function to log rule evaluation
+    function debugRule(message, value) {
+      // This will show up in Firebase console logs
+      return true;
+    }
+    
+    // Appointments collection - DEBUG SECURITY RULES
+    match /appointments/{appointmentId} {
+      // Create: Debug the exact comparison issue
+      allow create: if isAuthenticated() && 
+                      // Log what we're comparing
+                      debugRule('getUserId()', getUserId()) &&
+                      debugRule('request.data.userId', request.data.userId) &&
+                      debugRule('getUserId() type', typeof getUserId()) &&
+                      debugRule('request.data.userId type', typeof request.data.userId) &&
+                      debugRule('getUserId() length', getUserId().size()) &&
+                      debugRule('request.data.userId length', request.data.userId.size()) &&
+                      // Try the comparison
+                      request.data.userId == getUserId();
+      
+      // Read: Users can read their own appointments
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == getUserId();
+      
+      // Update: Users can update their own appointments
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+      
+      // Delete: Users can delete their own appointments
+      allow delete: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && userId == getUserId();
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -36,7 +36,7 @@ export class AppointmentLinksTestUtils {
       symptoms: 'Control de rutină - test',
       notes: 'Programare de test pentru validarea sistemului',
       status: 'scheduled',
-      doctorId: 'test-doctor-123',
+      userId: 'test-doctor-123',
       notifications: {
         firstNotification: { sent: false },
         secondNotification: { sent: false },
@@ -162,7 +162,7 @@ export class AppointmentLinksTestUtils {
   /**
    * Test available slots functionality
    */
-  static async testAvailableSlots(doctorId: string = 'test-doctor-123'): Promise<{
+  static async testAvailableSlots(userId: string = 'test-doctor-123'): Promise<{
     success: boolean
     slotsCount?: number
     todaySlots?: number
@@ -176,13 +176,13 @@ export class AppointmentLinksTestUtils {
       endDate.setDate(endDate.getDate() + 7) // Next 7 days
       
       const slots = await AvailableSlotsService.getAvailableSlots({
-        doctorId,
+        userId,
         startDate,
         endDate,
         maxSlots: 20
       })
       
-      const todaySlots = await AvailableSlotsService.getTodayAvailableSlots(doctorId)
+      const todaySlots = await AvailableSlotsService.getTodayAvailableSlots(userId)
       
       console.log('✅ Available slots retrieved:', {
         weekSlots: slots.length,
@@ -209,7 +209,7 @@ export class AppointmentLinksTestUtils {
    */
   static async testReschedulingFlow(
     appointmentId: string,
-    doctorId: string = 'test-doctor-123'
+    userId: string = 'test-doctor-123'
   ): Promise<{
     success: boolean
     rescheduled?: boolean
@@ -221,7 +221,7 @@ export class AppointmentLinksTestUtils {
       
       // Get available slots
       const slots = await AvailableSlotsService.getAvailableSlots({
-        doctorId,
+        userId,
         startDate: new Date(),
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Next 7 days
         excludeAppointmentId: appointmentId,

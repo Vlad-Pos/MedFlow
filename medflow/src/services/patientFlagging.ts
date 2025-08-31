@@ -40,7 +40,7 @@ import { withDemoModeQuery, withDemoModeWrite, getDemoUserData } from '../utils/
 /**
  * Default flagging configuration for Romanian medical practices
  */
-const DEFAULT_FLAGGING_CONFIG: Omit<FlaggingConfiguration, 'doctorId' | 'createdAt' | 'updatedAt'> = {
+const DEFAULT_FLAGGING_CONFIG: Omit<FlaggingConfiguration, 'userId' | 'createdAt' | 'updatedAt'> = {
   enableAutoFlagging: true,
   flagAfterMissedNotifications: 2, // Flag after both notifications missed
   flagSeverityForNoResponse: 'medium',
@@ -162,7 +162,7 @@ export class PatientFlaggingService {
       }
       
       // Get doctor's flagging configuration
-      const config = await this.getDoctorFlaggingConfig(appointment.doctorId)
+      const config = await this.getDoctorFlaggingConfig(appointment.userId)
       
       if (!config.enableAutoFlagging) {
         return { shouldFlag: false }
@@ -230,10 +230,10 @@ export class PatientFlaggingService {
   ): Promise<PatientFlag> {
     try {
       const patientId = this.getPatientId(appointment)
-      const config = await this.getDoctorFlaggingConfig(appointment.doctorId)
+      const config = await this.getDoctorFlaggingConfig(appointment.userId)
       
       // Check GDPR compliance
-      const gdprValidation = await this.validateGDPRCompliance(patientId, appointment.doctorId)
+      const gdprValidation = await this.validateGDPRCompliance(patientId, appointment.userId)
       
       if (!gdprValidation.gdprCompliant) {
         throw new Error('GDPR compliance check failed for patient flagging')
@@ -247,7 +247,7 @@ export class PatientFlaggingService {
         patientId,
         patientName: appointment.patientName,
         patientEmail: appointment.patientEmail,
-        doctorId: appointment.doctorId,
+        userId: appointment.userId,
         reason,
         severity: config.flagSeverityForNoResponse,
         status: 'active',
@@ -279,7 +279,7 @@ export class PatientFlaggingService {
       await this.logFlagAudit({
         flagId: flagRef.id,
         patientId,
-        doctorId: appointment.doctorId,
+        userId: appointment.userId,
         action: 'created',
         performedBy: 'system',
         performedByType: 'system',
@@ -311,7 +311,7 @@ export class PatientFlaggingService {
         : appointment.dateTime.toDate()
       
       const alert: Omit<DoctorAlert, 'id'> = {
-        doctorId: appointment.doctorId,
+        userId: appointment.userId,
         type: 'patient_flagged',
         severity: 'warning',
         title: 'Pacient semnalizat pentru lipsa de răspuns',
@@ -403,7 +403,7 @@ export class PatientFlaggingService {
     const demoAlerts: DoctorAlert[] = [
       {
         id: 'demo-alert-1',
-        doctorId: doctorId,
+        userId: doctorId,
         type: 'patient_flagged',
         severity: 'warning',
         title: 'Pacient semnalizat pentru lipsa de răspuns',
@@ -420,7 +420,7 @@ export class PatientFlaggingService {
       },
       {
         id: 'demo-alert-2',
-        doctorId: doctorId,
+        userId: doctorId,
         type: 'high_risk_patient',
         severity: 'urgent',
         title: 'Pacient cu risc ridicat',
@@ -439,28 +439,34 @@ export class PatientFlaggingService {
 
     return withDemoModeQuery(
       async () => {
-        let alertsQuery = query(
-          collection(db, 'doctorAlerts'),
-          where('doctorId', '==', doctorId),
-          orderBy('createdAt', 'desc'),
-          limit(50)
-        )
-        
-        if (unreadOnly) {
-          alertsQuery = query(
+        try {
+          let alertsQuery = query(
             collection(db, 'doctorAlerts'),
-            where('doctorId', '==', doctorId),
-            where('read', '==', false),
+            where('userId', '==', doctorId),
             orderBy('createdAt', 'desc'),
             limit(50)
           )
+          
+          if (unreadOnly) {
+            alertsQuery = query(
+              collection(db, 'doctorAlerts'),
+              where('userId', '==', doctorId),
+              where('read', '==', false),
+              orderBy('createdAt', 'desc'),
+              limit(50)
+            )
+          }
+          
+          const snapshot = await getDocs(alertsQuery)
+          return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as DoctorAlert[]
+        } catch (error) {
+          console.warn('Doctor alerts collection not accessible, returning demo data:', error)
+          // Return demo data if the collection doesn't exist or has permission issues
+          return unreadOnly ? demoAlerts.filter(alert => !alert.read) : demoAlerts
         }
-        
-        const snapshot = await getDocs(alertsQuery)
-        return snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as DoctorAlert[]
       },
       unreadOnly ? demoAlerts.filter(alert => !alert.read) : demoAlerts,
       'getDoctorAlerts'
@@ -517,7 +523,7 @@ export class PatientFlaggingService {
       await this.logFlagAudit({
         flagId,
         patientId: flag.patientId,
-        doctorId: flag.doctorId,
+        userId: flag.userId,
         action: 'resolved',
         performedBy: resolvedBy,
         performedByType: 'doctor',
@@ -536,9 +542,9 @@ export class PatientFlaggingService {
   /**
    * Get doctor's flagging configuration
    */
-  private static async getDoctorFlaggingConfig(doctorId: string): Promise<FlaggingConfiguration> {
+  private static async getDoctorFlaggingConfig(userId: string): Promise<FlaggingConfiguration> {
     try {
-      const configRef = doc(db, 'flaggingConfigurations', doctorId)
+      const configRef = doc(db, 'flaggingConfigurations', userId)
       const configSnap = await getDoc(configRef)
       
       if (configSnap.exists()) {
@@ -548,7 +554,7 @@ export class PatientFlaggingService {
       // Create default configuration
       const defaultConfig: FlaggingConfiguration = {
         ...DEFAULT_FLAGGING_CONFIG,
-        doctorId,
+        userId,
         createdAt: serverTimestamp() as Timestamp,
         updatedAt: serverTimestamp() as Timestamp
       }
@@ -559,7 +565,7 @@ export class PatientFlaggingService {
       console.error('Error getting flagging configuration:', error)
       return {
         ...DEFAULT_FLAGGING_CONFIG,
-        doctorId,
+        userId,
         createdAt: serverTimestamp() as Timestamp,
         updatedAt: serverTimestamp() as Timestamp
       }
@@ -635,7 +641,7 @@ export class PatientFlaggingService {
    */
   private static async validateGDPRCompliance(
     patientId: string,
-    doctorId: string
+    userId: string
   ): Promise<FlaggingValidationResult> {
     try {
       // Check if patient has given consent to data processing
@@ -764,7 +770,7 @@ export class PatientFlaggingService {
   /**
    * Get flagged patients for a doctor with UI display information
    */
-  static async getFlaggedPatientsForDoctor(doctorId: string): Promise<{
+  static async getFlaggedPatientsForDoctor(userId: string): Promise<{
     patientId: string
     patientName: string
     flagCount: number

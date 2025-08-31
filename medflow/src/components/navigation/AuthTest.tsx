@@ -10,7 +10,7 @@ import { isDemoMode } from '../../utils/demo'
  */
 export function AuthTest() {
   const { user, initializing } = useAuth()
-  const { role, isAdmin, isSuperAdmin } = useRole()
+  const { role, isAdmin } = useRole()
   const demoMode = isDemoMode()
 
   return (
@@ -25,7 +25,7 @@ export function AuthTest() {
           <div>Display Name: {user.displayName}</div>
           <div>Role: {role || 'None'}</div>
           <div>Is Admin: {isAdmin ? '✅ Yes' : '❌ No'}</div>
-          <div>Is Super Admin: {isSuperAdmin ? '✅ Yes' : '❌ No'}</div>
+  
         </>
       )}
     </div>

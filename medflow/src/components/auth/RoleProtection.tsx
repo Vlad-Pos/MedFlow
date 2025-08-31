@@ -1,190 +1,130 @@
-import React from 'react'
-import { useRole } from '../../hooks/useRole'
-import { usePermissions } from '../../hooks/usePermissions'
-import type { Permission } from '../../types/auth'
+import React from 'react';
+import { useAuth } from '../../providers/AuthProvider';
+import { UserRole } from '../../types/auth';
 
 interface RoleProtectionProps {
-  children: React.ReactNode
-  requiredRole?: 'SUPER_ADMIN' | 'ADMIN' | 'USER'
-  requiredPermission?: {
-    resource: Permission['resource']
-    action: Permission['action']
-    scope?: Permission['scope']
-  }
-  fallback?: React.ReactNode
-  showAccessDenied?: boolean
+  children: React.ReactNode;
+  requiredRole?: 'ADMIN' | 'USER';
+  fallback?: React.ReactNode;
+  showAccessDenied?: boolean;
 }
 
 /**
- * Role Protection Component
- * Provides role-based and permission-based access control for components
+ * RoleProtection Component
+ * 
+ * Protects content based on user role requirements.
+ * Only renders children if user has the required role.
+ * 
+ * @param children - Content to render if user has required role
+ * @param requiredRole - Minimum role required to access content
+ * @param fallback - Content to render if user doesn't have required role
+ * @param showAccessDenied - Whether to show access denied message
  */
-export function RoleProtection({
+export const RoleProtection: React.FC<RoleProtectionProps> = ({
   children,
   requiredRole,
-  requiredPermission,
   fallback,
-  showAccessDenied = true
-}: RoleProtectionProps) {
-  const { role, isAuthenticated, isSuperAdmin, isAdmin, isUser } = useRole()
-  const { hasPermission } = usePermissions()
+  showAccessDenied = false
+}) => {
+  const { user, initializing } = useAuth();
 
-  // Check if user is authenticated
-  if (!isAuthenticated) {
-    return fallback || (
-      <div className="p-6 text-center">
-        <h2 className="text-2xl font-bold text-[var(--medflow-text-secondary)] mb-4">Authentication Required</h2>
-        <p className="text-[var(--medflow-text-muted)]">Please sign in to access this content.</p>
+  // Show loading state while auth is initializing
+  if (initializing) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--medflow-brand-1)]"></div>
       </div>
-    )
+    );
   }
 
-  // Check role-based access
-  if (requiredRole) {
-    let hasRoleAccess = false
+  // If no user is authenticated, show fallback or access denied
+  if (!user) {
+    if (showAccessDenied) {
+      return (
+        <div className="text-center p-6">
+          <div className="text-red-600 text-lg font-semibold mb-2">
+            Access Denied
+          </div>
+          <p className="text-gray-600">
+            You must be signed in to access this content.
+          </p>
+        </div>
+      );
+    }
+    return fallback || null;
+  }
 
+  // If no specific role is required, show children
+  if (!requiredRole) {
+    return <>{children}</>;
+  }
+
+  // Check if user has the required role
+  const hasRequiredRole = (() => {
     switch (requiredRole) {
-      case 'SUPER_ADMIN':
-        hasRoleAccess = isSuperAdmin
-        break
       case 'ADMIN':
-        hasRoleAccess = isAdmin || isSuperAdmin
-        break
+        return user.role === 'ADMIN';
       case 'USER':
-        hasRoleAccess = isUser || isAdmin || isSuperAdmin
-        break
+        return user.role === 'USER' || user.role === 'ADMIN';
+      default:
+        return false;
     }
+  })();
 
-    if (!hasRoleAccess) {
-      return fallback || (
-        showAccessDenied ? (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-            <p className="text-[var(--medflow-text-secondary)]">
-              This content requires {requiredRole} role access.
-              Your current role: {role || 'USER'}
-            </p>
-          </div>
-        ) : null
-      )
-    }
+  // If user has required role, show children
+  if (hasRequiredRole) {
+    return <>{children}</>;
   }
 
-  // Check permission-based access
-  if (requiredPermission) {
-    const hasAccess = hasPermission(
-      requiredPermission.resource,
-      requiredPermission.action,
-      requiredPermission.scope
-    )
-
-    if (!hasAccess) {
-      return fallback || (
-        showAccessDenied ? (
-          <div className="p-6 text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-            <p className="text-[var(--medflow-text-secondary)]">
-              You don't have permission to {requiredPermission.action} {requiredPermission.resource}.
-            </p>
-          </div>
-        ) : null
-      )
-    }
+  // If user doesn't have required role, show fallback or access denied
+  if (showAccessDenied) {
+    return (
+      <div className="text-center p-6">
+        <div className="text-red-600 text-lg font-semibold mb-2">
+          Access Denied
+        </div>
+        <p className="text-gray-600">
+          You need {requiredRole} role to access this content.
+          <br />
+          Current role: {user.role}
+        </p>
+      </div>
+    );
   }
 
-  // Access granted
-  return <>{children}</>
-}
+  return fallback || null;
+};
 
-// Convenience components for common role checks
-export function SuperAdminOnly({ children, fallback, showAccessDenied }: Omit<RoleProtectionProps, 'requiredRole' | 'requiredPermission'>) {
-  return (
-    <RoleProtection requiredRole="SUPER_ADMIN" fallback={fallback} showAccessDenied={showAccessDenied}>
-      {children}
-    </RoleProtection>
-  )
-}
+// Convenience components for common role requirements
+export const AdminOnly: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({ 
+  children, 
+  fallback 
+}) => (
+  <RoleProtection requiredRole="ADMIN" fallback={fallback} showAccessDenied={true}>
+    {children}
+  </RoleProtection>
+);
 
-export function AdminOnly({ children, fallback, showAccessDenied }: Omit<RoleProtectionProps, 'requiredRole' | 'requiredPermission'>) {
-  return (
-    <RoleProtection requiredRole="ADMIN" fallback={fallback} showAccessDenied={showAccessDenied}>
-      {children}
-    </RoleProtection>
-  )
-}
+export const UserOnly: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({ 
+  children, 
+  fallback 
+}) => (
+  <RoleProtection requiredRole="USER" fallback={fallback} showAccessDenied={true}>
+    {children}
+  </RoleProtection>
+);
 
-export function AuthenticatedOnly({ children, fallback, showAccessDenied }: Omit<RoleProtectionProps, 'requiredRole' | 'requiredPermission'>) {
-  return (
-    <RoleProtection requiredRole="USER" fallback={fallback} showAccessDenied={showAccessDenied}>
-      {children}
-    </RoleProtection>
-  )
-}
-
-// Permission-based components
-export function WithPermission({
-  children,
-  resource,
-  action,
-  scope = 'own',
-  fallback,
-  showAccessDenied
-}: {
-  children: React.ReactNode
-  resource: Permission['resource']
-  action: Permission['action']
-  scope?: Permission['scope']
+// Higher-order component for role protection
+export function withRoleProtection<P extends object>(
+  Component: React.ComponentType<P>,
+  requiredRole: UserRole,
   fallback?: React.ReactNode
-  showAccessDenied?: boolean
-}) {
-  return (
-    <RoleProtection
-      requiredPermission={{ resource, action, scope }}
-      fallback={fallback}
-      showAccessDenied={showAccessDenied}
-    >
-      {children}
-    </RoleProtection>
-  )
-}
-
-// Conditional rendering components
-export function RenderIfRole({
-  children,
-  requiredRole,
-  fallback
-}: {
-  children: React.ReactNode
-  requiredRole: 'SUPER_ADMIN' | 'ADMIN' | 'USER'
-  fallback?: React.ReactNode
-}) {
-  return (
-    <RoleProtection requiredRole={requiredRole} fallback={fallback} showAccessDenied={false}>
-      {children}
-    </RoleProtection>
-  )
-}
-
-export function RenderIfPermission({
-  children,
-  resource,
-  action,
-  scope = 'own',
-  fallback
-}: {
-  children: React.ReactNode
-  resource: Permission['resource']
-  action: Permission['action']
-  scope?: Permission['scope']
-  fallback?: React.ReactNode
-}) {
-  return (
-    <RoleProtection
-      requiredPermission={{ resource, action, scope }}
-      fallback={fallback}
-      showAccessDenied={false}
-    >
-      {children}
-    </RoleProtection>
-  )
+) {
+  return function RoleProtectedComponent(props: P) {
+    return (
+      <RoleProtection requiredRole={requiredRole} fallback={fallback}>
+        <Component {...props} />
+      </RoleProtection>
+    );
+  };
 }

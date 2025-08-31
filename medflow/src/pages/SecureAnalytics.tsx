@@ -6,7 +6,7 @@ import { RoleProtection } from '../components/auth/RoleProtection'
  * Secure Analytics Page
  * 
  * This page provides access to the analytics dashboard with strict role-based access control.
- * Only ADMIN and SUPER_ADMIN users can access this page.
+ * Only ADMIN users can access this page.
  * 
  * Features:
  * - Role-based access control

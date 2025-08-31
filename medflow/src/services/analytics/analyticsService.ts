@@ -74,8 +74,8 @@ export class DataAnalyticsService {
    */
   trackPerformance(operation: string, metrics: DataPerformanceMetrics): void {
     const performanceEntry = {
-      operation,
       ...metrics,
+      operation,
       timestamp: Date.now()
     }
 

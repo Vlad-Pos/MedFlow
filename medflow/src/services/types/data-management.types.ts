@@ -1,4 +1,5 @@
 import { DocumentData, Query } from 'firebase/firestore'
+import { DataManager } from '../core/dataManager'
 
 /**
  * Enhanced Data Management Types for Advanced Module Architecture
@@ -122,6 +123,7 @@ export interface DataPerformanceMetrics {
   startTime: number
   endTime: number
   duration: number
+  operation: string
   cacheHit: boolean
   networkLatency?: number
   retryCount: number

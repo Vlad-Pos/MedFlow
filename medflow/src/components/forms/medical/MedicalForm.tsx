@@ -49,7 +49,7 @@ export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
 export interface Appointment {
   id?: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   patientName: string
   dateTime: Date
   symptoms: string
@@ -95,7 +95,7 @@ export default memo(function MedicalForm({
   const [submitSuccess, setSubmitSuccess] = useState(false)
   
   // AI features state (for future implementation)
-  const [aiAnalysis, setAiAnalysis] = useState<ReturnType<typeof FormAI.analyzeSymptoms> | null>(null)
+  const [aiAnalysis, setAiAnalysis] = useState<Awaited<ReturnType<typeof FormAI.analyzeSymptoms>> | null>(null)
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [optimalTimes, setOptimalTimes] = useState<string[]>([])
   
@@ -107,7 +107,7 @@ export default memo(function MedicalForm({
     async function loadAppointment() {
       if (!appointmentId) {
         // Initialize with optimal time suggestions for new appointments
-        const suggestions = FormAI.suggestOptimalAppointmentTimes()
+        const suggestions = await FormAI.suggestOptimalAppointmentTimes()
         setOptimalTimes(suggestions)
         return
       }
@@ -178,12 +178,16 @@ export default memo(function MedicalForm({
   
   // AI symptom analysis (placeholder for future AI integration)
   useEffect(() => {
-    if (formData.symptoms.length > 20) {
-      const analysis = FormAI.analyzeSymptoms(formData.symptoms)
-      setAiAnalysis(analysis)
-    } else {
-      setAiAnalysis(null)
+    const analyzeSymptoms = async () => {
+      if (formData.symptoms.length > 20) {
+        const analysis = await FormAI.analyzeSymptoms(formData.symptoms)
+        setAiAnalysis(analysis)
+      } else {
+        setAiAnalysis(null)
+      }
     }
+    
+    analyzeSymptoms()
   }, [formData.symptoms])
 
   // Enhanced form handlers with better UX
@@ -266,12 +270,12 @@ export default memo(function MedicalForm({
         if (!appointmentId) {
           // Create new appointment data
           const appointmentData: Omit<DemoAppointment, 'id'> = {
-            doctorId: user.uid,
+            userId: user.uid,
             patientName: formData.patientName,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status as 'scheduled' | 'completed' | 'no_show',
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus,
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -283,8 +287,8 @@ export default memo(function MedicalForm({
             patientName: formData.patientName,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status as 'scheduled' | 'completed' | 'no_show'
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus
           }
           updateDemoAppointment(appointmentId, updateData)
         }
@@ -293,14 +297,14 @@ export default memo(function MedicalForm({
         if (!appointmentId) {
           // Create appointment data for Firestore
           const appointmentData = {
-            doctorId: user.uid,
+            userId: user.uid,
             patientName: formData.patientName,
             patientEmail: formData.patientEmail,
             patientPhone: formData.patientPhone,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
+            notes: formData.notes || '',
+            status: formData.status || 'scheduled',
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -321,8 +325,8 @@ export default memo(function MedicalForm({
             patientPhone: formData.patientPhone,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
+            notes: formData.notes || '',
+            status: formData.status || 'scheduled',
             updatedAt: new Date()
           }
           await updateDoc(ref, updateData)
@@ -338,9 +342,9 @@ export default memo(function MedicalForm({
             patientEmail: formData.patientEmail || '', // Add patient email field if available
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
-            doctorId: user.uid,
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus,
+            userId: user.uid,
             notifications: { // Assuming notifications are part of the Appointment interface
               firstNotification: { sent: false },
               secondNotification: { sent: false },
@@ -619,7 +623,7 @@ export default memo(function MedicalForm({
         {/* Notes */}
         <FormInput
           label="Note suplimentare (opțional)"
-          value={formData.notes}
+          value={formData.notes || ''}
           onChange={handleNotesChange}
           onBlur={handleNotesBlur}
           error={touched.notes ? errors.notes : undefined}
@@ -633,7 +637,7 @@ export default memo(function MedicalForm({
         {/* Status Selection */}
         <FormInput
           label="Status programare"
-          value={formData.status}
+          value={formData.status || 'scheduled'}
           onChange={(value) => handleFieldChange('status', value as AppointmentStatus)}
           options={statusOptions}
           icon={<Shield className="w-4 h-4" />}

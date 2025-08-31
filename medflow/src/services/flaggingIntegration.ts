@@ -239,14 +239,14 @@ export class FlaggingIntegrationService {
   /**
    * Get flagged patients summary for dashboard widget
    */
-  static async getFlaggedPatientsSummary(doctorId: string): Promise<{
+  static async getFlaggedPatientsSummary(userId: string): Promise<{
     totalFlagged: number
     highRisk: number
     needsAttention: number
     recentFlags: Array<{ patientName: string; flagDate: Date; reason: string }>
   }> {
     try {
-      const flaggedPatients = await PatientFlaggingService.getFlaggedPatientsForDoctor(doctorId)
+      const flaggedPatients = await PatientFlaggingService.getFlaggedPatientsForDoctor(userId)
       
       const totalFlagged = flaggedPatients.length
       const highRisk = flaggedPatients.filter(p => p.riskLevel === 'high').length

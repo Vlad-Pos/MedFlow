@@ -65,7 +65,7 @@ export declare class FlaggingIntegrationService {
     /**
      * Get flagged patients summary for dashboard widget
      */
-    static getFlaggedPatientsSummary(doctorId: string): Promise<{
+    static getFlaggedPatientsSummary(userId: string): Promise<{
         totalFlagged: number;
         highRisk: number;
         needsAttention: number;

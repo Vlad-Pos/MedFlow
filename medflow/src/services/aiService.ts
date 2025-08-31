@@ -198,7 +198,7 @@ export class AIService {
   /**
    * Generate smart appointment slot suggestions
    * 
-   * @param doctorId - Doctor's unique identifier
+   * @param userId - User's unique identifier for the new ADMIN/USER role system
    * @param patientPreferences - Patient scheduling preferences
    * @param urgencyLevel - Medical urgency level
    * 
@@ -206,7 +206,7 @@ export class AIService {
    * @integration-point Claude for reasoning about optimal timing
    */
   async suggestAppointmentSlots(
-    doctorId: string,
+    userId: string,
     patientPreferences: Record<string, unknown> = {},
     urgencyLevel: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
   ): Promise<AppointmentSuggestion[]> {
@@ -217,16 +217,16 @@ export class AIService {
     // TODO: Replace with actual AI integration
     /*
     const prompt = `
-    Optimizează programarea pentru un doctor cu ID ${doctorId}:
+    Optimizează programarea pentru un utilizator cu ID ${userId}:
     
     Preferințe pacient: ${JSON.stringify(patientPreferences)}
     Nivel urgență: ${urgencyLevel}
     
-    Analizează programul curent al doctorului și sugerează cele mai bune 3-5 slot-uri
+    Analizează programul curent al utilizatorului și sugerează cele mai bune 3-5 slot-uri
     disponibile, ținând cont de:
     - Urgența cazului medical
     - Preferințele de oră ale pacientului
-    - Eficiența programului doctorului
+    - Eficiența programului utilizatorului
     - Timpul necesar pentru tipul de consultație
     
     Răspunde în format JSON cu explicații în română.

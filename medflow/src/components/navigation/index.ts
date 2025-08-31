@@ -31,7 +31,6 @@ export {
   createNavigationGuardsManager
 } from './guards/navigationGuards'
 export type {
-  NavigationGuard,
   NavigationGuardResult,
   NavigationGuardEvaluation
 } from './guards/navigationGuards'
@@ -40,14 +39,6 @@ export type {
 export {
   NavigationStateManager,
   createNavigationStateManager
-} from './state/navigationState'
-export type {
-  NavigationHistoryItem,
-  NavigationCacheEntry,
-  NavigationAnalyticsState,
-  NavigationMetrics,
-  NavigationUserBehavior,
-  NavigationPerformanceMetrics
 } from './state/navigationState'
 
 // Navigation Analytics
@@ -84,4 +75,3 @@ export { default as MinimalNavigationTest } from './MinimalNavigationTest'
 export { default as NavigationDebug } from './NavigationDebug'
 export { default as AuthTest } from './AuthTest'
 export { default as EnvironmentTest } from './EnvironmentTest'
-export { default as NavigationTest } from './NavigationTest'

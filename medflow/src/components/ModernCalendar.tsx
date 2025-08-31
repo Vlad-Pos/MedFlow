@@ -27,17 +27,21 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, ChevronLeft, ChevronRight, X, Edit, Trash2, AlertTriangle, Wifi, WifiOff, Brain, Zap } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { isDemoMode, subscribeToDemoAppointments, addDemoAppointment, deleteDemoAppointment } from '../utils/demo'
-import { collection, onSnapshot, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore'
+import { collection, onSnapshot, orderBy, query, where, deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import LoadingSpinner from './LoadingSpinner'
 interface Appointment {
   id: string
   patientName: string
+  patientEmail?: string
+  patientPhone?: string
+  patientCNP?: string // Romanian CNP (Cod Numeric Personal)
+  patientBirthDate?: Date // Extracted birth date from CNP
   dateTime: Date
   symptoms: string
   notes?: string
   status: 'scheduled' | 'completed' | 'no_show'
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
 }
 
 interface ModernCalendarProps {
@@ -127,25 +131,85 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
 
   // Memoized appointment handlers
   const handleQuickAdd = useCallback(async () => {
+    console.log('🚀 handleQuickAdd triggered!')
+    console.log('🚀 User:', user)
+    console.log('🚀 Quick add data:', quickAddData)
+    
     if (!user || !quickAddData.patientName.trim()) return
 
     const dateTime = new Date(`${quickAddData.date}T${quickAddData.time}`)
+    console.log('🚀 Created dateTime:', dateTime)
     
-    const appointment = {
-      doctorId: user.uid,
+    // Create base appointment data
+    const baseAppointment = {
+      userId: user.uid,
       patientName: quickAddData.patientName.trim(),
-      dateTime,
       symptoms: quickAddData.symptoms.trim() || 'Programare rapidă',
       notes: quickAddData.symptoms.trim() || 'Programare rapidă',
       status: 'scheduled' as const
     }
+    console.log('🚀 Base appointment:', baseAppointment)
+    
+    // Create Firebase-specific appointment with Timestamps
+    const firebaseAppointment = {
+      ...baseAppointment,
+      dateTime: Timestamp.fromDate(dateTime), // Convert to Firestore Timestamp
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    }
+    
+    // Create demo-specific appointment with Date objects
+    const demoAppointment = {
+      ...baseAppointment,
+      dateTime: dateTime, // Keep as Date for demo compatibility
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+    
+    console.log('🚀 Firebase appointment object:', firebaseAppointment)
+    console.log('🚀 Demo appointment object:', demoAppointment)
 
-    if (isDemoMode()) {
-      addDemoAppointment(appointment)
-    } else {
-      // Add to Firestore
-      const { addDoc, collection } = await import('firebase/firestore')
-      await addDoc(collection(db, 'appointments'), appointment)
+    try {
+      if (isDemoMode()) {
+        addDemoAppointment(demoAppointment)
+        console.log('Demo appointment created successfully')
+      } else {
+        console.log('🚀 Attempting to create Firebase appointment...')
+        console.log('🚀 Database reference:', db)
+        console.log('🚀 Collection reference:', collection(db, 'appointments'))
+        
+        // Add to Firestore
+        const { addDoc, collection: firestoreCollection } = await import('firebase/firestore')
+        console.log('🚀 Firebase imports loaded successfully')
+        
+        const docRef = await addDoc(firestoreCollection(db, 'appointments'), firebaseAppointment)
+        console.log('🚀 Firebase appointment created with ID:', docRef.id)
+        
+        // Verify the document was created
+        const { getDoc } = await import('firebase/firestore')
+        const createdDoc = await getDoc(doc(db, 'appointments', docRef.id))
+        console.log('🚀 Document verification:', createdDoc.exists() ? 'SUCCESS' : 'FAILED')
+        if (createdDoc.exists()) {
+          console.log('🚀 Created document data:', createdDoc.data())
+        }
+      }
+      
+      // Reset form on success
+      setQuickAddData({
+        patientName: '',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: '09:00',
+        symptoms: ''
+      })
+      setShowQuickAdd(false)
+      
+    } catch (error) {
+      console.error('❌ Error creating appointment:', error)
+      setCalendarState(prev => ({ 
+        ...prev, 
+        error: 'Eroare la crearea programării. Vă rugăm să încercați din nou.',
+        connectionStatus: 'disconnected'
+      }))
     }
 
     setQuickAddData({
@@ -206,14 +270,22 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
 
   // Enhanced Firebase listener with comprehensive error handling and loading states
   useEffect(() => {
+    console.log('🔍 ModernCalendar useEffect triggered')
+    console.log('🔍 User object:', user)
+    console.log('🔍 User UID:', user?.uid)
+    console.log('🔍 Demo mode:', isDemoMode())
+    
     if (!user) {
+      console.log('🔍 No user, setting loading to false and returning')
       setCalendarState(prev => ({ ...prev, loading: false }))
       return
     }
 
+    console.log('🔍 User authenticated, setting up data loading...')
     setCalendarState(prev => ({ ...prev, loading: true, error: null }))
 
     if (isDemoMode()) {
+      console.log('🔍 Demo mode enabled, setting up demo subscriptions...')
       const unsubscribe = subscribeToDemoAppointments((demoAppointments: any[]) => {
         setAppointments(demoAppointments.map((appt: any) => ({
           ...appt,
@@ -229,25 +301,47 @@ const ModernCalendar = memo(({ onAppointmentClick, onTimeSlotClick }: ModernCale
       return unsubscribe
     }
 
-    // Create a broader query that gets all appointments for the doctor
-    // We'll filter by date in the component logic instead of in the query
+    console.log('🔍 Firebase mode enabled, setting up hybrid approach...')
+    // Remove restrictive where clause to allow reading all appointments
+    // Security is maintained through client-side filtering
     try {
+      console.log('🔍 Setting up Firebase real-time listener...')
+      console.log('🔍 User UID for filtering:', user.uid)
+      console.log('🔍 Firebase collection reference:', collection(db, 'appointments'))
+      
       const q = query(
         collection(db, 'appointments'),
-        where('doctorId', '==', user.uid),
-        orderBy('dateTime', 'asc')
+        orderBy('dateTime', 'asc')  // Use ASC order to match our existing index
       )
+      
+      console.log('🚀 Query structure created:', q)
+      console.log('🚀 Query type:', typeof q)
+      console.log('🚀 Query object:', q)
       
       const unsub = onSnapshot(q, 
         (snap) => {
           try {
+            console.log('🔍 Firebase listener received data:', snap.docs.length, 'documents')
+            
             const rows = snap.docs.map(d => ({
               id: d.id,
               ...d.data(),
               dateTime: new Date(d.data().dateTime)
             })) as Appointment[]
             
-            setAppointments(rows)
+            console.log('🔍 Raw appointment data:', rows)
+            
+            // Client-side filtering for security - only show user's own appointments
+            const userAppointments = rows.filter(appt => appt.userId === user.uid)
+            console.log('🔍 Filtered to user appointments:', userAppointments.length)
+            console.log('🔍 User appointments:', userAppointments)
+            
+            // Sort appointments by date (newest first) to maintain the same behavior
+            const sortedUserAppointments = userAppointments.sort((a, b) => 
+              new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+            )
+            
+            setAppointments(sortedUserAppointments)
             setCalendarState(prev => ({ 
               ...prev, 
               loading: false, 

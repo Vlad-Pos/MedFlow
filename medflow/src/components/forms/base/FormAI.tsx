@@ -28,19 +28,19 @@ export class FormAI {
   /**
    * Analyzes symptoms using AI (placeholder for future implementation)
    */
-  static analyzeSymptoms(symptoms: string): AIAnalysis | null {
+  static async analyzeSymptoms(symptoms: string): Promise<AIAnalysis | null> {
     if (symptoms.length < 20) {
       return null
     }
     
-    return analyzeSymptoms(symptoms)
+    return await analyzeSymptoms(symptoms)
   }
 
   /**
    * Suggests optimal appointment times
    */
-  static suggestOptimalAppointmentTimes(): string[] {
-    return suggestOptimalAppointmentTimes()
+  static async suggestOptimalAppointmentTimes(): Promise<string[]> {
+    return await suggestOptimalAppointmentTimes()
   }
 
   /**
@@ -106,7 +106,8 @@ export class FormAI {
         ]
         
       case 'dateTime':
-        return this.suggestOptimalAppointmentTimes()
+        // This will be handled asynchronously in the calling code
+        return []
         
       default:
         return []
@@ -138,8 +139,8 @@ export class FormAI {
   /**
    * Gets AI analysis display data for symptoms
    */
-  static getSymptomsAnalysis(symptoms: string): AIAnalysis | null {
-    return this.analyzeSymptoms(symptoms)
+  static async getSymptomsAnalysis(symptoms: string): Promise<AIAnalysis | null> {
+    return await this.analyzeSymptoms(symptoms)
   }
 
   /**
@@ -153,16 +154,16 @@ export class FormAI {
   } {
     const severity = analysis.severity || 'low'
     
-    const severityClass = {
+    const severityClass: Record<string, string> = {
       low: 'bg-medflow-primary/5 border-medflow-primary/20 text-medflow-primary',
       medium: 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300',
       high: 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
       urgent: 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-    }[severity]
+    }
     
     return {
       severity: severity,
-      severityClass,
+      severityClass: severityClass[severity] || severityClass.low,
       suggestions: analysis.suggestions || [],
       redFlags: analysis.redFlags || []
     }

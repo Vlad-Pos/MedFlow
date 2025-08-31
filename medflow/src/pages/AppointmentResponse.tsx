@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 import { fadeInVariants, cardVariants } from '../utils/animations'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { RescheduleCalendar } from '../components/reschedule'
+// import { RescheduleCalendar } from '../components/reschedule'
 import { submitRescheduleRequest } from '../services/appointmentService'
 
 interface AppointmentInfo {
@@ -591,8 +591,8 @@ export default function AppointmentResponse() {
                 />
               </div>
               
-              {/* v0 Reschedule Calendar */}
-              <div className="mb-6">
+              {/* v0 Reschedule Calendar - Temporarily disabled */}
+              {/* <div className="mb-6">
                 <RescheduleCalendar 
                   experience={{
                     title: "Reprogramare programare medicală",
@@ -620,7 +620,7 @@ export default function AppointmentResponse() {
                     location: appointment.location
                   }}
                 />
-              </div>
+              </div> */}
               
               {/* Reschedule Actions */}
               <div className="flex space-x-3">

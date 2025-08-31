@@ -479,7 +479,12 @@ export class NavigationStateManager {
  */
 export function createNavigationStateManager(
   context: NavigationContext,
-  options?: Parameters<typeof NavigationStateManager>[1]
+  options?: {
+    cacheTTL?: number
+    enablePersistence?: boolean
+    persistenceKey?: string
+    maxHistoryItems?: number
+  }
 ): NavigationStateManager {
   return new NavigationStateManager(context, options)
 }

@@ -28,7 +28,7 @@ export interface PatientFlag {
     patientId: string;
     patientName: string;
     patientEmail?: string;
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     reason: FlagReason;
     severity: FlagSeverity;
     status: FlagStatus;
@@ -76,7 +76,7 @@ export interface PatientFlagSummary {
  */
 export interface DoctorAlert {
     id: string;
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     type: 'patient_flagged' | 'high_risk_patient' | 'repeated_offender';
     severity: 'info' | 'warning' | 'urgent';
     title: string;
@@ -99,7 +99,7 @@ export interface DoctorAlert {
  * Flagging configuration for doctors/clinics
  */
 export interface FlaggingConfiguration {
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     enableAutoFlagging: boolean;
     flagAfterMissedNotifications: number;
     flagSeverityForNoResponse: FlagSeverity;

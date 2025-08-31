@@ -100,7 +100,7 @@ export interface AccessibilitySettings {
 export interface Appointment {
   id: string
   patientId: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   startTime: Date
   endTime: Date
   status: AppointmentStatus
@@ -222,7 +222,7 @@ export interface TimeSlot {
 
 export interface Schedule {
   id: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   date: Date
   timeSlots: TimeSlot[]
   workingHours: WorkingHours

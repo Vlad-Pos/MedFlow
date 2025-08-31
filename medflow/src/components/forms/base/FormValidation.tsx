@@ -293,8 +293,8 @@ export class FormValidation {
   /**
    * Suggests optimal appointment times
    */
-  static suggestOptimalAppointmentTimes(): string[] {
-    return suggestOptimalAppointmentTimes()
+  static async suggestOptimalAppointmentTimes(): Promise<string[]> {
+    return await suggestOptimalAppointmentTimes()
   }
 
   /**

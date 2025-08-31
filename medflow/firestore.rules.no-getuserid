@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Appointments collection - NO getUserId() RULES
+    match /appointments/{appointmentId} {
+      // Create: Allow creation for authenticated users (this works)
+      allow create: if isAuthenticated();
+      
+      // Read: Allow reading for authenticated users (temporary - will fix isolation later)
+      allow read: if isAuthenticated();
+      
+      // Update: Allow updating for authenticated users (temporary - will fix isolation later)
+      allow update: if isAuthenticated();
+      
+      // Delete: Allow deletion for authenticated users (temporary - will fix isolation later)
+      allow delete: if isAuthenticated();
+    }
+    
+    // Users collection - NO getUserId() RULES
+    match /users/{userId} {
+      // Allow users to access their own data by matching the document ID
+      allow read, write: if isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

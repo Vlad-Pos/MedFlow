@@ -42,11 +42,13 @@ interface Appointment {
   patientName: string
   patientEmail?: string
   patientPhone?: string
+  patientCNP?: string // Romanian CNP (Cod Numeric Personal)
+  patientBirthDate?: Date // Extracted birth date from CNP
   dateTime: Date
   symptoms: string
   notes?: string
   status: 'scheduled' | 'completed' | 'no_show' | 'confirmed' | 'declined'
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
 }
 
 interface DeleteDialogState {
@@ -158,8 +160,8 @@ export default function Appointments() {
     try {
       const q = query(
         collection(db, 'appointments'),
-        where('doctorId', '==', user.uid),
-        orderBy('dateTime', 'desc')
+        where('userId', '==', user.uid),
+        orderBy('dateTime', 'asc')  // Use ASC order to match our existing index
       )
       
       const unsub = onSnapshot(q, 
@@ -170,7 +172,11 @@ export default function Appointments() {
               ...d.data(),
               dateTime: safeConvertToDate(d.data().dateTime)
             })) as Appointment[]
-            setAppointments(rows)
+            // Sort in descending order (newest first) to maintain the same behavior
+            const sortedRows = [...rows].sort((a, b) => 
+              new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+            )
+            setAppointments(sortedRows)
             setLoading(false)
             setError(null)
           } catch (processingError) {

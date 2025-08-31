@@ -37,6 +37,10 @@ export const validationRules = {
   noSpecialChars: (value: string): boolean => {
     const specialCharsRegex = /[<>\"'&]/
     return !specialCharsRegex.test(value)
+  },
+  cnp: (value: string): boolean => {
+    const cnpRegex = /^[1-9]\d{12}$/
+    return cnpRegex.test(value)
   }
 }
 
@@ -95,6 +99,22 @@ export function validateDateTime(dateTime: string): ValidationResult {
     { test: validationRules.required, message: 'Data și ora sunt obligatorii' },
     { test: validationRules.date, message: 'Data și ora nu sunt valide' },
     { test: validationRules.futureDate, message: 'Data și ora trebuie să fie în viitor' }
+  ])
+}
+
+export function validateCNP(cnp: string): ValidationResult {
+  return validateField(cnp, [
+    { test: validationRules.required, message: 'CNP-ul este obligatoriu' },
+    { test: validationRules.cnp, message: 'CNP-ul trebuie să aibă exact 13 cifre' },
+    { test: validationRules.maxLength(20), message: 'CNP-ul este prea lung' }
+  ])
+}
+
+export function validatePhoneNumber(phoneNumber: string): ValidationResult {
+  return validateField(phoneNumber, [
+    { test: validationRules.required, message: 'Numărul de telefon este obligatoriu' },
+    { test: validationRules.phone, message: 'Numărul de telefon nu este valid' },
+    { test: validationRules.maxLength(20), message: 'Numărul de telefon este prea lung' }
   ])
 }
 

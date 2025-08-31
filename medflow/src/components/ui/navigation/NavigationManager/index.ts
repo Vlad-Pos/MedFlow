@@ -5,7 +5,6 @@
 
 export {
   NavigationManager,
-  NavigationItem,
   SidebarNavigation,
   CollapsedNavigation,
   MobileNavigation,
@@ -13,7 +12,6 @@ export {
 } from './NavigationManager'
 
 export type {
-  NavigationItem,
   NavigationManagerProps,
   NavigationItemProps,
   NavigationGroup

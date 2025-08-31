@@ -29,11 +29,11 @@ export declare function isMonthOverdue(month: string): boolean;
 /**
  * Gets monthly report summary for a specific month
  */
-export declare function getMonthlyReportSummary(doctorId: string, month: string): Promise<MonthlyReportSummary>;
+export declare function getMonthlyReportSummary(userId: string, month: string): Promise<MonthlyReportSummary>;
 /**
  * Gets reports for a specific month with filtering
  */
-export declare function getMonthlyReports(doctorId: string, filters: MonthlyReportFilters, limitCount?: number, lastDoc?: QueryDocumentSnapshot<DocumentData>): Promise<{
+export declare function getMonthlyReports(userId: string, filters: MonthlyReportFilters, limitCount?: number, lastDoc?: QueryDocumentSnapshot<DocumentData>): Promise<{
     reports: PatientReport[];
     hasMore: boolean;
     lastDoc?: QueryDocumentSnapshot<DocumentData>;
@@ -41,7 +41,7 @@ export declare function getMonthlyReports(doctorId: string, filters: MonthlyRepo
 /**
  * Subscribes to real-time monthly report updates
  */
-export declare function subscribeToMonthlyReports(doctorId: string, month: string, callback: (reports: PatientReport[]) => void): () => void;
+export declare function subscribeToMonthlyReports(userId: string, month: string, callback: (reports: PatientReport[]) => void): () => void;
 /**
  * Creates an amendment request for a finalized report
  */
@@ -73,4 +73,4 @@ export declare function bulkApproveReports(reportIds: string[], reviewedBy: stri
 /**
  * Gets available months for reporting
  */
-export declare function getAvailableMonths(doctorId: string): Promise<string[]>;
+export declare function getAvailableMonths(userId: string): Promise<string[]>;

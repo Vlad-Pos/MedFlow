@@ -13,8 +13,8 @@ import {
   DataRetryConfig
 } from '../types/data-management.types'
 import { CacheService } from '../cache/cacheService'
-import { StateService } from '../state/stateService'
-import { AnalyticsService } from '../analytics/analyticsService'
+import { DataStateService } from '../state/stateService'
+import { DataAnalyticsService } from '../analytics/analyticsService'
 
 /**
  * Core Data Manager
@@ -26,15 +26,15 @@ import { AnalyticsService } from '../analytics/analyticsService'
 export class DataManager implements DataService {
   private config: DataManagerConfig
   private cacheService: CacheService
-  private stateService: StateService
-  private analyticsService: AnalyticsService
+  private stateService: DataStateService
+  private analyticsService: DataAnalyticsService
   private retryConfig: DataRetryConfig
 
   constructor(
     config: DataManagerConfig,
     cacheService: CacheService,
-    stateService: StateService,
-    analyticsService: AnalyticsService
+    stateService: DataStateService,
+    analyticsService: DataAnalyticsService
   ) {
     this.config = config
     this.cacheService = cacheService
@@ -97,6 +97,7 @@ export class DataManager implements DataService {
             startTime,
             endTime: performance.now(),
             duration: performance.now() - startTime,
+            operation: 'cache_hit',
             cacheHit: true,
             retryCount: 0
           })
@@ -133,6 +134,7 @@ export class DataManager implements DataService {
         startTime,
         endTime,
         duration: endTime - startTime,
+        operation: 'network_fetch',
         cacheHit: false,
         retryCount: 0
       })
@@ -154,7 +156,7 @@ export class DataManager implements DataService {
         metadata: {
           timestamp: Date.now(),
           cacheHit: false,
-          source: 'error',
+          source: 'network',
           performance: this.calculatePerformanceMetrics(startTime)
         }
       }
@@ -221,6 +223,7 @@ export class DataManager implements DataService {
         startTime,
         endTime: performance.now(),
         duration: performance.now() - startTime,
+        operation: 'create_operation',
         cacheHit: false,
         retryCount: 0
       })
@@ -299,6 +302,7 @@ export class DataManager implements DataService {
         startTime,
         endTime: performance.now(),
         duration: performance.now() - startTime,
+        operation: 'update_operation',
         cacheHit: false,
         retryCount: 0
       })
@@ -368,6 +372,7 @@ export class DataManager implements DataService {
         startTime,
         endTime: performance.now(),
         duration: performance.now() - startTime,
+        operation: 'delete_operation',
         cacheHit: false,
         retryCount: 0
       })
@@ -590,8 +595,8 @@ export const DEFAULT_DATA_MANAGER_CONFIG: DataManagerConfig = {
 export function createDataManager(
   config: DataManagerConfig,
   cacheService: CacheService,
-  stateService: StateService,
-  analyticsService: AnalyticsService
+  stateService: DataStateService,
+  analyticsService: DataAnalyticsService
 ): DataManager {
   return new DataManager(config, cacheService, stateService, analyticsService)
 }

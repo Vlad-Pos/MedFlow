@@ -128,7 +128,7 @@ export declare class AppointmentLinksService {
     /**
      * Get link statistics for monitoring
      */
-    static getLinkStatistics(doctorId: string, startDate: Date, endDate: Date): Promise<{
+    static getLinkStatistics(userId: string, startDate: Date, endDate: Date): Promise<{
         totalLinks: number;
         confirmations: number;
         declines: number;

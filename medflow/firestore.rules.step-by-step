@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Appointments collection - STEP-BY-STEP DIAGNOSTIC RULES
+    match /appointments/{appointmentId} {
+      // Create: Step-by-step testing to isolate the failure point
+      allow create: if isAuthenticated() && 
+                      // Step 1: Check if userId exists
+                      request.data.userId != null &&
+                      // Step 2: Check if createdBy exists
+                      request.data.createdBy != null &&
+                      // Step 3: Check if userId is string
+                      request.data.userId is string &&
+                      // Step 4: Check if createdBy is string
+                      request.data.createdBy is string &&
+                      // Step 5: Check if userId has content
+                      request.data.userId.size() > 0 &&
+                      // Step 6: Check if createdBy has content
+                      request.data.createdBy.size() > 0 &&
+                      // Step 7: Check if they match each other
+                      request.data.userId == request.data.createdBy &&
+                      // Step 8: Check if userId matches current user (this is where it fails)
+                      request.data.userId == getUserId();
+      
+      // Read: Users can read their own appointments
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == getUserId();
+      
+      // Update: Users can update their own appointments
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+      
+      // Delete: Users can delete their own appointments
+      allow delete: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && userId == getUserId();
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

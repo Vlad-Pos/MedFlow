@@ -129,7 +129,6 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       disabled={disabled || loading}
       className={baseClasses}
       {...animations}
-      {...props}
     >
       {loading ? (
         <motion.div
@@ -220,7 +219,15 @@ export const IconButton: React.FC<IconButtonProps> = ({
         ${props.className || ''}
       `}
       aria-label={ariaLabel}
-      {...props}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      type={props.type}
+      id={props.id}
+      name={props.name}
+      value={props.value}
+      form={props.form}
+      autoFocus={props.autoFocus}
+      tabIndex={props.tabIndex}
     >
       <motion.div
         className={iconSizeClass}

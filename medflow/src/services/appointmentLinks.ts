@@ -531,7 +531,7 @@ export class AppointmentLinksService {
   /**
    * Get link statistics for monitoring
    */
-  static async getLinkStatistics(doctorId: string, startDate: Date, endDate: Date): Promise<{
+  static async getLinkStatistics(userId: string, startDate: Date, endDate: Date): Promise<{
     totalLinks: number
     confirmations: number
     declines: number

@@ -92,14 +92,14 @@ export declare class AIService {
     /**
      * Generate smart appointment slot suggestions
      *
-     * @param doctorId - Doctor's unique identifier
+     * @param userId - User's unique identifier for the new ADMIN/USER role system
      * @param patientPreferences - Patient scheduling preferences
      * @param urgencyLevel - Medical urgency level
      *
      * @integration-point OpenAI for schedule optimization
      * @integration-point Claude for reasoning about optimal timing
      */
-    suggestAppointmentSlots(doctorId: string, patientPreferences?: Record<string, unknown>, urgencyLevel?: 'low' | 'medium' | 'high' | 'urgent'): Promise<AppointmentSuggestion[]>;
+    suggestAppointmentSlots(userId: string, patientPreferences?: Record<string, unknown>, urgencyLevel?: 'low' | 'medium' | 'high' | 'urgent'): Promise<AppointmentSuggestion[]>;
     /**
      * Process chatbot conversation for patient intake
      *

@@ -11,7 +11,7 @@ import type { CreateInvitationRequest } from '../../types/invitations'
  * Provides comprehensive admin functionality for user and invitation management
  */
 export function AdminDashboard() {
-  const { isAdmin, isSuperAdmin } = useRole()
+  const { isAdmin } = useRole()
   const { permissions } = usePermissions()
   const { 
     invitations, 
@@ -36,18 +36,17 @@ export function AdminDashboard() {
   // Debug logging for role access
   console.log('AdminDashboard Debug:', {
     isAdmin,
-    isSuperAdmin,
     permissions,
     userRole: permissions
   })
 
   // Load users on component mount
   useEffect(() => {
-    // SUPER_ADMIN can always access, or if we have user read permissions
-    if (isSuperAdmin || permissions.users?.canRead) {
+    // ADMIN can always access, or if we have user read permissions
+    if (isAdmin || permissions.users?.canRead) {
       loadUsers()
     }
-  }, [isSuperAdmin, permissions.users?.canRead])
+  }, [isAdmin, permissions.users?.canRead])
 
   const loadUsers = async () => {
     try {
@@ -84,13 +83,13 @@ export function AdminDashboard() {
     }
   }
 
-  // Access control - SUPER_ADMIN bypasses all restrictions
-  if (!isSuperAdmin && !isAdmin) {
+  // Access control - ADMIN bypasses all restrictions
+  if (!isAdmin) {
     return (
       <div className="p-6 text-center">
         <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to access the admin dashboard.</p>
-        <p className="text-sm text-gray-500 mt-2">Required: ADMIN or SUPER_ADMIN role</p>
+        <p className="text-sm text-gray-500 mt-2">Required: ADMIN role</p>
       </div>
     )
   }
@@ -142,20 +141,20 @@ export function AdminDashboard() {
           <OverviewTab 
             stats={stats}
             permissions={permissions}
-            isSuperAdmin={isSuperAdmin}
+            isAdmin={isAdmin}
           />
         )}
 
-        {selectedTab === 'users' && (isSuperAdmin || permissions.users?.canRead) && (
+        {selectedTab === 'users' && (isAdmin || permissions.users?.canRead) && (
           <UsersTab 
             users={users}
             onRoleUpdate={handleRoleUpdate}
-            canManageUsers={isSuperAdmin || permissions.users?.canManage}
-            canUpdateRoles={isSuperAdmin || permissions.users?.canWrite}
+            canManageUsers={isAdmin || permissions.users?.canManage}
+            canUpdateRoles={isAdmin || permissions.users?.canWrite}
           />
         )}
 
-        {selectedTab === 'invitations' && (isSuperAdmin || permissions.users?.canWrite) && (
+        {selectedTab === 'invitations' && (isAdmin || permissions.users?.canWrite) && (
           <InvitationsTab 
             invitations={invitations}
             stats={stats}
@@ -177,11 +176,11 @@ export function AdminDashboard() {
 function OverviewTab({ 
   stats, 
   permissions, 
-  isSuperAdmin 
+  isAdmin 
 }: { 
   stats: any
   permissions: any
-  isSuperAdmin: boolean
+  isAdmin: boolean
 }) {
   return (
     <div className="space-y-6">
@@ -228,10 +227,10 @@ function OverviewTab({
         </div>
       </div>
 
-      {/* Super Admin Features */}
-      {isSuperAdmin && (
+      {/* Admin Features */}
+      {isAdmin && (
         <div className="bg-gradient-to-r from-[var(--medflow-brand-5)]/20 to-[var(--medflow-brand-4)]/20 p-6 rounded-lg border border-[var(--medflow-brand-1)]/30">
-          <h3 className="text-lg font-medium text-[var(--medflow-brand-1)] mb-2">Super Admin Features</h3>
+          <h3 className="text-lg font-medium text-[var(--medflow-brand-1)] mb-2">Admin Features</h3>
           <p className="text-[var(--medflow-text-secondary)]">
             You have full system access including user role management, system settings, and complete administrative control.
           </p>
@@ -298,8 +297,8 @@ function UsersTab({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'SUPER_ADMIN' ? 'bg-[var(--medflow-brand-1)]/20 text-[var(--medflow-brand-1)]' :
-                      user.role === 'ADMIN' ? 'bg-[var(--medflow-brand-2)]/20 text-[var(--medflow-brand-2)]' :
+                      user.role === 'ADMIN' ? 'bg-[var(--medflow-brand-1)]/20 text-[var(--medflow-brand-1)]' :
+                      user.role === 'USER' ? 'bg-[var(--medflow-brand-2)]/20 text-[var(--medflow-brand-2)]' :
                       'bg-[var(--medflow-surface-dark)] text-[var(--medflow-text-tertiary)]'
                     }`}>
                       {user.role}
@@ -321,8 +320,8 @@ function UsersTab({
                       >
                         <option value="USER">USER</option>
                         <option value="ADMIN">ADMIN</option>
-                        {user.role === 'SUPER_ADMIN' && (
-                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                        {user.role === 'ADMIN' && (
+                          <option value="ADMIN">ADMIN</option>
                         )}
                       </select>
                     )}

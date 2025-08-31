@@ -10,7 +10,7 @@ import { useRole } from '../../hooks/useRole'
  */
 export function NavigationDebug() {
   const { user } = useAuth()
-  const { role, isAdmin, isSuperAdmin, isUser } = useRole()
+  const { role, isAdmin, isUser } = useRole()
 
   if (process.env.NODE_ENV !== 'development') {
     return null
@@ -22,7 +22,7 @@ export function NavigationDebug() {
       <div>User: {user ? 'Authenticated' : 'Not authenticated'}</div>
       <div>Role: {role || 'None'}</div>
       <div>Is Admin: {isAdmin ? 'Yes' : 'No'}</div>
-      <div>Is Super Admin: {isSuperAdmin ? 'Yes' : 'No'}</div>
+      
       <div>Is User: {isUser ? 'Yes' : 'No'}</div>
     </div>
   )

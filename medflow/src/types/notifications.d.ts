@@ -70,7 +70,7 @@ export interface AppointmentWithNotifications {
     symptoms: string;
     notes?: string;
     status: 'scheduled' | 'completed' | 'no_show' | 'cancelled' | 'confirmed' | 'declined';
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     notifications: {
         patientPreferencesId?: string;
         firstNotification: {

@@ -15,7 +15,7 @@
  */
 import { AppointmentSuggestion } from '../services/aiService';
 interface SmartAppointmentSuggestionsProps {
-    doctorId?: string;
+    userId?: string; // User ID for the new ADMIN/USER role system
     patientPreferences?: {
         preferredHours?: number[];
         preferredDays?: string[];
@@ -26,5 +26,5 @@ interface SmartAppointmentSuggestionsProps {
     onScheduleAppointment?: (suggestion: AppointmentSuggestion) => void;
     className?: string;
 }
-export default function SmartAppointmentSuggestions({ doctorId, patientPreferences, onSelectSlot, onScheduleAppointment, className }: SmartAppointmentSuggestionsProps): import("react/jsx-runtime").JSX.Element;
+export default function SmartAppointmentSuggestions({ userId, patientPreferences, onSelectSlot, onScheduleAppointment, className }: SmartAppointmentSuggestionsProps): import("react/jsx-runtime").JSX.Element;
 export {};

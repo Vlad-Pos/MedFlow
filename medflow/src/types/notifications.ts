@@ -104,11 +104,13 @@ export interface AppointmentWithNotifications {
   patientName: string
   patientEmail?: string
   patientPhone?: string
+  patientCNP?: string // Romanian CNP (Cod Numeric Personal)
+  patientBirthDate?: Date | Timestamp // Extracted birth date from CNP
   dateTime: Date | Timestamp
   symptoms: string
   notes?: string
   status: 'scheduled' | 'completed' | 'no_show' | 'cancelled' | 'confirmed' | 'declined'
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   
   // Notification tracking
   notifications: {

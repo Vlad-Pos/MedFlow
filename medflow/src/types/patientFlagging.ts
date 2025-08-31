@@ -38,7 +38,7 @@ export interface PatientFlag {
   patientId: string
   patientName: string
   patientEmail?: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   
   // Flag details
   reason: FlagReason
@@ -112,7 +112,7 @@ export interface PatientFlagSummary {
  */
 export interface DoctorAlert {
   id: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   
   // Alert details
   type: 'patient_flagged' | 'high_risk_patient' | 'repeated_offender'
@@ -146,7 +146,7 @@ export interface DoctorAlert {
  * Flagging configuration for doctors/clinics
  */
 export interface FlaggingConfiguration {
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   
   // Automatic flagging rules
   enableAutoFlagging: boolean
@@ -180,7 +180,7 @@ export interface FlaggingConfiguration {
  * Patient flagging analytics
  */
 export interface FlaggingAnalytics {
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   period: {
     startDate: Timestamp
     endDate: Timestamp
@@ -222,7 +222,7 @@ export interface FlagAuditLog {
   id: string
   flagId: string
   patientId: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   
   // Action details
   action: 'created' | 'updated' | 'resolved' | 'dismissed' | 'data_access' | 'data_deleted'
@@ -316,7 +316,7 @@ export interface FlagEvent {
   flagId?: string
   alertId?: string
   patientId: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   data: Record<string, unknown>
   timestamp: Timestamp
 }

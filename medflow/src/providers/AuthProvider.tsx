@@ -20,8 +20,8 @@ import type { User, AuthError } from 'firebase/auth'
 import { auth, db } from '../services/firebase'
 import { isDemoMode } from '../utils/demo'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
-import type { AppUser, UserRole, LegacyUserRole } from '../types/auth'
-import { ROLE_PERMISSIONS, convertLegacyRole, isLegacyRole } from '../types/auth'
+import type { AppUser, UserRole } from '../types/auth'
+import { ROLE_PERMISSIONS } from '../types/auth'
 
 interface AuthContextValue {
   user: AppUser | null
@@ -34,6 +34,7 @@ interface AuthContextValue {
   // Enhanced security methods
   refreshUserData: () => Promise<void>
   updateUserPreferences: (preferences: Record<string, unknown>) => Promise<void>
+  forceUserDocumentCreation: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initializing, setInitializing] = useState(true)
 
   /**
-   * Enhanced user data loading with comprehensive metadata and legacy role support
+   * Simplified user data loading with new role system
    */
   const loadUserData = useCallback(async (firebaseUser: User): Promise<AppUser> => {
     try {
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (snap.exists()) {
         const userData = snap.data()
-        const userRole = userData.role as UserRole | LegacyUserRole | undefined
+        const userRole = userData.role as UserRole | undefined
         
         // Debug logging for role loading
         console.log('AuthProvider Debug - Raw User Data:', {
@@ -60,33 +61,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: firebaseUser.email,
           rawRole: userData.role,
           userRole: userRole,
-          isLegacy: userRole && isLegacyRole(userRole),
           fullUserData: userData
         })
         
-        // Handle legacy roles with backward compatibility
-        let finalRole: UserRole
-        let legacyRole: LegacyUserRole | undefined
-        
-        if (userRole && isLegacyRole(userRole)) {
-          // Convert legacy role to new role system
-          finalRole = convertLegacyRole(userRole)
-          legacyRole = userRole
-        } else {
-          // Use existing new role system
-          finalRole = (userRole as UserRole) || 'USER'
-        }
+        // Use existing role or default to USER
+        const finalRole: UserRole = userRole || 'USER'
         
         console.log('AuthProvider Debug - Processed Role:', {
           finalRole,
-          legacyRole,
           permissions: ROLE_PERMISSIONS[finalRole],
           permissionsLength: ROLE_PERMISSIONS[finalRole]?.length
         })
         
         const finalUser = Object.assign(firebaseUser, {
           role: finalRole,
-          legacyRole, // Store legacy role for backward compatibility
           permissions: userData.permissions || ROLE_PERMISSIONS[finalRole] || [],
           invitedBy: userData.invitedBy,
           invitedAt: userData.invitedAt?.toDate(),
@@ -112,8 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
-          role: 'USER' as UserRole,
-          permissions: ROLE_PERMISSIONS['USER'],
+          role: 'USER' as UserRole, // Default to USER role for new registrations
+          permissions: ROLE_PERMISSIONS['USER'] || [],
           verified: false,
           lastActivity: serverTimestamp(),
           aiPreferences: {
@@ -125,15 +113,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         
         return Object.assign(firebaseUser, {
-          role: 'USER' as UserRole,
-          permissions: ROLE_PERMISSIONS['USER'],
+          role: 'USER' as UserRole, // Default to USER role
+          permissions: ROLE_PERMISSIONS['USER'] || [],
         })
       }
     } catch (error) {
       console.error('AuthProvider: Error loading user data:', error)
       return Object.assign(firebaseUser, {
-        role: 'USER' as UserRole,
-        permissions: ROLE_PERMISSIONS['USER'],
+        role: 'USER' as UserRole, // Default to USER role on error
+        permissions: ROLE_PERMISSIONS['USER'] || [],
       })
     }
   }, [])
@@ -150,8 +138,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string, displayName: string) => {
     try {
+      // Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName })
+      
+      // ✅ NEW: Create Firestore user document
+      const userRef = doc(db, 'users', userCredential.user.uid)
+      await setDoc(userRef, {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        displayName: userCredential.user.displayName,
+        role: 'USER' as UserRole,
+        permissions: ROLE_PERMISSIONS['USER'] || [],
+        verified: false,
+        lastActivity: serverTimestamp(),
+        aiPreferences: {
+          smartSuggestions: true,
+          autoComplete: true,
+          medicalAssistance: true
+        },
+        createdAt: serverTimestamp(),
+      })
+      
+      console.log('✅ User document created successfully in Firestore')
     } catch (error) {
       const authError = error as AuthError
       throw new Error(`Înregistrare eșuată: ${authError.message}`)
@@ -190,6 +199,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
+  // ✅ NEW: User creation verification function
+  const verifyUserCreation = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const userRef = doc(db, 'users', userId)
+      const snap = await getDoc(userRef)
+      
+      if (snap.exists()) {
+        const userData = snap.data()
+        console.log('✅ User document verified:', {
+          uid: userData.uid,
+          role: userData.role,
+          permissions: userData.permissions?.length || 0
+        })
+        return true
+      } else {
+        console.warn('⚠️ User document not found after creation, attempting to create...')
+        
+        // Retry creation
+        await setDoc(userRef, {
+          uid: userId,
+          email: auth.currentUser?.email,
+          displayName: auth.currentUser?.displayName,
+          role: 'USER' as UserRole,
+          permissions: ROLE_PERMISSIONS['USER'] || [],
+          verified: false,
+          lastActivity: serverTimestamp(),
+          aiPreferences: {
+            smartSuggestions: true,
+            autoComplete: true,
+            medicalAssistance: true
+          },
+          createdAt: serverTimestamp(),
+        })
+        
+        console.log('✅ User document created on retry')
+        return true
+      }
+    } catch (error) {
+      console.error('❌ Error verifying user creation:', error)
+      return false
+    }
+  }, [])
+
+  // ✅ NEW: Force user document creation for existing users
+  const forceUserDocumentCreation = useCallback(async (): Promise<boolean> => {
+    try {
+      if (!auth.currentUser) {
+        console.warn('⚠️ No authenticated user to create document for')
+        return false
+      }
+
+      const userId = auth.currentUser.uid
+      const userRef = doc(db, 'users', userId)
+      
+      // Check if document already exists
+      const snap = await getDoc(userRef)
+      if (snap.exists()) {
+        console.log('✅ User document already exists')
+        return true
+      }
+
+      // Create user document for existing user
+      console.log('🔧 Creating user document for existing user:', userId)
+      
+      await setDoc(userRef, {
+        uid: userId,
+        email: auth.currentUser.email,
+        displayName: auth.currentUser.displayName,
+        role: 'USER' as UserRole,
+        permissions: ROLE_PERMISSIONS['USER'] || [],
+        verified: false,
+        lastActivity: serverTimestamp(),
+        aiPreferences: {
+          smartSuggestions: true,
+          autoComplete: true,
+          medicalAssistance: true
+        },
+        createdAt: serverTimestamp(),
+      })
+      
+      console.log('✅ User document created successfully for existing user')
+      
+      // Refresh user data to include new role and permissions
+      if (user) {
+        const refreshedUser = await loadUserData(user)
+        setUser(refreshedUser)
+        console.log('✅ User data refreshed with new role and permissions')
+      }
+      
+      return true
+    } catch (error) {
+      console.error('❌ Error forcing user document creation:', error)
+      return false
+    }
+  }, [user, loadUserData])
+
   // Memoized context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     user,
@@ -200,7 +305,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     refreshUserData,
     updateUserPreferences,
-  }), [user, initializing, signIn, signUp, resetPassword, logout, refreshUserData, updateUserPreferences])
+    forceUserDocumentCreation,
+  }), [user, initializing, signIn, signUp, resetPassword, logout, refreshUserData, updateUserPreferences, forceUserDocumentCreation])
 
   // Global debugging function for role checking (accessible from browser console)
   useEffect(() => {
@@ -210,8 +316,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Current User:', user)
         console.log('User Role:', user?.role)
         console.log('User Permissions:', user?.permissions)
-        console.log('Is Admin:', user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN')
-        console.log('Is Super Admin:', user?.role === 'SUPER_ADMIN')
+        console.log('Is Admin:', user?.role === 'ADMIN')
+        console.log('Is User:', user?.role === 'USER')
         console.log('=======================')
         return user
       }
@@ -235,8 +341,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const userData = snap.data()
             console.log('Database User Data:', userData)
             console.log('Role from Database:', userData.role)
-            console.log('Expected Role:', 'SUPER_ADMIN')
-            console.log('Role Match:', userData.role === 'SUPER_ADMIN')
+            console.log('Expected Role:', 'ADMIN')
+            console.log('Role Match:', userData.role === 'ADMIN')
             return userData
           } else {
             console.log('No user document found in database')
@@ -245,6 +351,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error('Error checking role:', error)
           return null
+        }
+      }
+
+      // ✅ NEW: Force user document creation function (accessible from browser console)
+      (window as any).fixMedFlowUser = async () => {
+        console.log('=== MedFlow User Document Fix ===')
+        try {
+          const result = await forceUserDocumentCreation()
+          if (result) {
+            console.log('✅ User document created/fixed successfully')
+            console.log('💡 Try creating an appointment now - it should work!')
+          } else {
+            console.log('❌ Failed to fix user document')
+          }
+          return result
+        } catch (error) {
+          console.error('❌ Error fixing user document:', error)
+          return false
         }
       }
     }

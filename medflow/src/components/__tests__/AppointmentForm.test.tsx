@@ -6,6 +6,7 @@ import { addDoc, updateDoc, getDoc } from 'firebase/firestore'
 import { useAuth } from '../../providers/AuthProvider'
 import * as appointmentValidation from '../../utils/appointmentValidation'
 import { isDemoMode, addDemoAppointment } from '../../utils/demo'
+import type { UserRole, Permission } from '../../types/auth'
 
 // Mock Firebase modules
 vi.mock('firebase/firestore')
@@ -73,8 +74,34 @@ const mockUser = {
   uid: 'test-doctor-id',
   email: 'doctor@example.com',
   displayName: 'Dr. Test',
-  role: 'DOCTOR',
-  permissions: ['read:appointments', 'write:appointments']
+  role: 'USER' as UserRole,
+  permissions: [
+    { resource: 'appointments', action: 'read', scope: 'own' },
+    { resource: 'appointments', action: 'write', scope: 'own' }
+  ] as Permission[],
+  // Firebase User properties
+  emailVerified: false,
+  isAnonymous: false,
+  metadata: {},
+  providerData: [],
+  refreshToken: '',
+  tenantId: null,
+  delete: vi.fn(),
+  getIdToken: vi.fn(),
+  getIdTokenResult: vi.fn(),
+  reload: vi.fn(),
+  toJSON: vi.fn(),
+  phoneNumber: null,
+  photoURL: null,
+  providerId: 'password',
+  // AppUser extended properties
+  verified: true,
+  lastActivity: new Date(),
+  aiPreferences: {
+    smartSuggestions: true,
+    autoComplete: true,
+    medicalAssistance: true
+  }
 }
 
 const renderWithRouter = (component: React.ReactElement) => {

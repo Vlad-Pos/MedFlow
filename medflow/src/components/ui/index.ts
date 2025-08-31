@@ -93,7 +93,6 @@ export {
 
 export {
   NavigationManager,
-  NavigationItem,
   SidebarNavigation,
   CollapsedNavigation,
   MobileNavigation,

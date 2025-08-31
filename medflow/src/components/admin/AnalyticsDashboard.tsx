@@ -133,7 +133,7 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
           
           <div className="mt-4 text-sm text-[var(--medflow-text-tertiary)]">
-            Last updated: {formatTime(analyticsData.timestamp)}
+            Last updated: {formatTime(new Date(analyticsData.timestamp))}
           </div>
         </div>
 

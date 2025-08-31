@@ -56,7 +56,7 @@ export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
 export interface Appointment {
   id?: string
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   patientName: string
   dateTime: Date
   symptoms: string
@@ -284,12 +284,12 @@ export default function AppointmentForm({
         if (!appointmentId) {
           // Create new appointment data
           const appointmentData: Omit<DemoAppointment, 'id'> = {
-            doctorId: user.uid,
+            userId: user.uid,
             patientName: formData.patientName,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status as 'scheduled' | 'completed' | 'no_show',
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus,
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -301,8 +301,8 @@ export default function AppointmentForm({
             patientName: formData.patientName,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status as 'scheduled' | 'completed' | 'no_show'
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus
           }
           updateDemoAppointment(appointmentId, updateData)
         }
@@ -311,14 +311,14 @@ export default function AppointmentForm({
         if (!appointmentId) {
           // Create appointment data for Firestore
           const appointmentData = {
-            doctorId: user.uid,
+            userId: user.uid,
             patientName: formData.patientName,
             patientEmail: formData.patientEmail,
             patientPhone: formData.patientPhone,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
+            notes: formData.notes || '',
+            status: formData.status || 'scheduled',
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -343,8 +343,8 @@ export default function AppointmentForm({
             patientPhone: formData.patientPhone,
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
+            notes: formData.notes || '',
+            status: formData.status || 'scheduled',
             updatedAt: new Date()
           }
           await updateDoc(ref, updateData)
@@ -360,9 +360,9 @@ export default function AppointmentForm({
             patientEmail: formData.patientEmail || '', // Add patient email field if available
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
-            notes: formData.notes,
-            status: formData.status,
-            doctorId: user.uid,
+            notes: formData.notes || '',
+            status: (formData.status || 'scheduled') as AppointmentStatus,
+            userId: user.uid,
             notifications: { // Assuming notifications are part of the Appointment interface
               firstNotification: { sent: false },
               secondNotification: { sent: false },
@@ -641,7 +641,7 @@ export default function AppointmentForm({
         {/* Notes */}
         <FormInput
           label="Note suplimentare (opțional)"
-          value={formData.notes}
+          value={formData.notes || ''}
           onChange={handleNotesChange}
           onBlur={handleNotesBlur}
           error={touched.notes ? errors.notes : undefined}
@@ -655,7 +655,7 @@ export default function AppointmentForm({
         {/* Status Selection */}
         <FormInput
           label="Status programare"
-          value={formData.status}
+          value={formData.status || 'scheduled'}
           onChange={(value) => handleFieldChange('status', value as AppointmentStatus)}
           options={statusOptions}
           icon={<Shield className="w-4 h-4" />}

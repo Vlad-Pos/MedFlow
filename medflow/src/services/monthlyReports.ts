@@ -145,7 +145,7 @@ export async function getMonthlyReportSummary(
   try {
     if (isDemoMode()) {
       const monthReports = demoMonthlyReports.filter(r => 
-        r.doctorId === doctorId && r.reportMonth === month
+        r.userId === doctorId && r.reportMonth === month
       )
 
       const totalReports = monthReports.length
@@ -185,7 +185,7 @@ export async function getMonthlyReportSummary(
     // Calculate fresh summary
     const reportsQuery = query(
       collection(db, COLLECTIONS.PATIENT_REPORTS),
-      where('doctorId', '==', doctorId),
+      where('userId', '==', doctorId),
       where('reportMonth', '==', month)
     )
 
@@ -237,7 +237,7 @@ export async function getMonthlyReports(
   try {
     if (isDemoMode()) {
       let filteredReports = demoMonthlyReports.filter(r => 
-        r.doctorId === doctorId && r.reportMonth === filters.month
+        r.userId === doctorId && r.reportMonth === filters.month
       )
 
       // Apply additional filters
@@ -273,7 +273,7 @@ export async function getMonthlyReports(
 
     let q = query(
       collection(db, COLLECTIONS.PATIENT_REPORTS),
-      where('doctorId', '==', doctorId),
+      where('userId', '==', doctorId),
       where('reportMonth', '==', filters.month),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
@@ -348,7 +348,7 @@ export function subscribeToMonthlyReports(
 
   const q = query(
     collection(db, COLLECTIONS.PATIENT_REPORTS),
-    where('doctorId', '==', doctorId),
+    where('userId', '==', doctorId),
     where('reportMonth', '==', month),
     orderBy('updatedAt', 'desc')
   )
@@ -874,7 +874,7 @@ export async function getAvailableMonths(doctorId: string): Promise<string[]> {
     if (isDemoMode()) {
       const months = Array.from(new Set(
         demoMonthlyReports
-          .filter(r => r.doctorId === doctorId)
+          .filter(r => r.userId === doctorId)
           .map(r => r.reportMonth)
       )).sort().reverse()
       
@@ -883,7 +883,7 @@ export async function getAvailableMonths(doctorId: string): Promise<string[]> {
 
     const q = query(
       collection(db, COLLECTIONS.PATIENT_REPORTS),
-      where('doctorId', '==', doctorId),
+      where('userId', '==', doctorId),
       orderBy('reportMonth', 'desc')
     )
 

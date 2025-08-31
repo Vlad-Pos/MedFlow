@@ -10,7 +10,7 @@ import { useRole } from '../../hooks/useRole'
  */
 export function NavigationTest() {
   const { user } = useAuth()
-  const { role, isAdmin, isSuperAdmin } = useRole()
+  const { role, isAdmin } = useRole()
   const navItems = useNavigationItemsV2()
 
   if (process.env.NODE_ENV !== 'development') {
@@ -23,7 +23,7 @@ export function NavigationTest() {
       <div>User: {user ? '✅ Authenticated' : '❌ Not authenticated'}</div>
       <div>Role: {role || 'None'}</div>
       <div>Is Admin: {isAdmin ? '✅ Yes' : '❌ No'}</div>
-      <div>Is Super Admin: {isSuperAdmin ? '✅ Yes' : '❌ No'}</div>
+      
       <div>Nav Items: {navItems.length}</div>
       <div className="mt-2">
         {navItems.map((item, index) => (

@@ -61,7 +61,7 @@ export const useNavigationItems = (): {
   hasPermission: (item: NavigationItem) => boolean
 } => {
   const { user } = useAuth()
-  const { isAdmin, hasPermission } = useRole()
+  const { isAdmin, checkPermission } = useRole()
 
   // Base navigation items (always visible for authenticated users)
   const baseNavItems: NavigationItem[] = [
@@ -158,24 +158,23 @@ export const useNavigationItems = (): {
       ),
       description: 'View your integrated Framer websites',
       priority: 6,
-      category: 'external',
-      isExternal: true,
-      isNew: true
+      category: 'integrations',
+      badge: 'New'
     }
   ]
 
   // Combine all navigation items
-  const allItems = [
-    ...adminNavItems,
+  const allItems = useMemo(() => [
     ...baseNavItems,
+    ...adminNavItems,
     ...additionalNavItems
-  ]
+  ], [adminNavItems])
 
-  // Filter items based on permissions and roles
+  // Filter items based on user permissions and role
   const visibleItems = useMemo(() => {
-    return allItems.filter((item) => {
+    return allItems.filter(item => {
       // Check role requirements
-      if (item.requiredRole && !item.requiredRole.includes('user')) {
+      if (item.requiredRole) {
         if (item.requiredRole.includes('admin') && !isAdmin) {
           return false
         }
@@ -183,12 +182,16 @@ export const useNavigationItems = (): {
 
       // Check permission requirements
       if (item.requiredPermission) {
-        return item.requiredPermission.every(permission => hasPermission(permission))
+        return item.requiredPermission.every(permission => {
+          // Parse permission string (e.g., "users:read:all" -> resource: "users", action: "read", scope: "all")
+          const [resource, action, scope = 'own'] = permission.split(':')
+          return checkPermission(resource as any, action as any, scope as any)
+        })
       }
 
       return true
     })
-  }, [allItems, isAdmin, hasPermission])
+  }, [allItems, isAdmin, checkPermission])
 
   // Group items by category
   const groupedItems = useMemo(() => {
@@ -217,7 +220,11 @@ export const useNavigationItems = (): {
     }
 
     if (item.requiredPermission) {
-      return item.requiredPermission.every(permission => hasPermission(permission))
+      return item.requiredPermission.every(permission => {
+        // Parse permission string (e.g., "users:read:all" -> resource: "users", action: "read", scope: "all")
+        const [resource, action, scope = 'own'] = permission.split(':')
+        return checkPermission(resource as any, action as any, scope as any)
+      })
     }
 
     return true

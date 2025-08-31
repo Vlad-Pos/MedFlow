@@ -73,7 +73,7 @@ export function useNavigationItemsV3(): NavigationItems {
     ]
 
     // Add role-specific navigation items
-    if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') {
+    if (user?.role === 'ADMIN') {
       // Analytics for admin users - high priority
       coreNavItems.unshift({
         to: '/analytics', 

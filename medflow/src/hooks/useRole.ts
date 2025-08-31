@@ -23,7 +23,6 @@ export function useRole() {
         role: undefined,
         permissions: [],
         isAuthenticated: false,
-        isSuperAdmin: false,
         isAdmin: false,
         isUser: false,
       }
@@ -45,9 +44,8 @@ export function useRole() {
       role,
       permissions,
       isAuthenticated: true,
-      isSuperAdmin: role === 'SUPER_ADMIN',
-      isAdmin: role === 'ADMIN' || role === 'SUPER_ADMIN',
-      isUser: role === 'USER' || role === 'ADMIN' || role === 'SUPER_ADMIN',
+      isAdmin: role === 'ADMIN',
+      isUser: role === 'USER' || role === 'ADMIN',
     }
   }, [user])
 

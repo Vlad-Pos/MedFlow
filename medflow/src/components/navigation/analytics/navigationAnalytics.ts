@@ -148,9 +148,9 @@ export class NavigationAnalyticsManager {
   private sendToExternalAnalytics(event: NavigationEvent): void {
     try {
       // Google Analytics 4
-      if (window.gtag && event.item?.analytics) {
+      if ((window as any).gtag && event.item?.analytics) {
         const analytics = event.item.analytics
-        window.gtag('event', analytics.action, {
+        ;(window as any).gtag('event', analytics.action, {
           event_category: analytics.category,
           event_label: analytics.label,
           value: analytics.value,

@@ -22,7 +22,7 @@ export interface AvailableSlot {
  * Doctor's working schedule
  */
 export interface DoctorSchedule {
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     workingDays: number[];
     workingHours: {
         start: string;
@@ -48,7 +48,7 @@ export interface DoctorSchedule {
  * Slot availability options
  */
 export interface SlotAvailabilityOptions {
-    doctorId: string;
+    userId: string; // User ID for the new ADMIN/USER role system
     startDate: Date;
     endDate: Date;
     excludeAppointmentId?: string;
@@ -70,15 +70,15 @@ export declare class AvailableSlotsService {
     /**
      * Get next available slot for urgent bookings
      */
-    static getNextAvailableSlot(doctorId: string, preferredDate?: Date): Promise<AvailableSlot | null>;
+    static getNextAvailableSlot(userId: string, preferredDate?: Date): Promise<AvailableSlot | null>;
     /**
      * Check if specific datetime is available
      */
-    static isSlotAvailable(doctorId: string, datetime: Date, excludeAppointmentId?: string): Promise<boolean>;
+    static isSlotAvailable(userId: string, datetime: Date, excludeAppointmentId?: string): Promise<boolean>;
     /**
      * Get available slots for today only
      */
-    static getTodayAvailableSlots(doctorId: string): Promise<AvailableSlot[]>;
+    static getTodayAvailableSlots(userId: string): Promise<AvailableSlot[]>;
     /**
      * Get doctor's working schedule (with defaults for Romanian medical practice)
      */
@@ -110,6 +110,6 @@ export declare class AvailableSlotsService {
     /**
      * Get slot recommendations based on patient history and preferences
      */
-    static getRecommendedSlots(doctorId: string, patientEmail?: string, maxRecommendations?: number): Promise<AvailableSlot[]>;
+    static getRecommendedSlots(userId: string, patientEmail?: string, maxRecommendations?: number): Promise<AvailableSlot[]>;
 }
 export default AvailableSlotsService;

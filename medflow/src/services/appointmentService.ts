@@ -19,7 +19,7 @@ export interface AppointmentConstraints {
   workStartHour: number // 8 = 08:00
   workEndHour: number // 18 = 18:00
   slotDuration: number // 45 minutes
-  doctorId?: string
+  userId?: string // User ID for the new ADMIN/USER role system
 }
 
 export interface RescheduleRequest {

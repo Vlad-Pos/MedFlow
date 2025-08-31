@@ -34,7 +34,7 @@ import { getAIService, AppointmentSuggestion } from '../services/aiService'
 import { formatDateTime } from '../utils/dateUtils'
 import LoadingSpinner from './LoadingSpinner'
 interface SmartAppointmentSuggestionsProps {
-  doctorId?: string
+  userId?: string // User ID for the new ADMIN/USER role system
   patientPreferences?: {
     preferredHours?: number[]
     preferredDays?: string[]
@@ -56,7 +56,7 @@ interface ScheduleAnalytics {
 }
 
 export default function SmartAppointmentSuggestions({
-  doctorId,
+  userId,
   patientPreferences = {},
   onSelectSlot,
   onScheduleAppointment,
@@ -74,25 +74,25 @@ export default function SmartAppointmentSuggestions({
 
   // Generate smart suggestions
   const generateSuggestions = useCallback(async () => {
-    if (!doctorId && !user?.uid) return
+    if (!userId && !user?.uid) return
 
     setLoading(true)
     try {
       // TODO: Replace with actual AI integration
       /*
       const aiSuggestions = await aiService.suggestAppointmentSlots(
-        doctorId || user!.uid,
+        userId || user!.uid,
         patientPreferences,
         patientPreferences.urgencyLevel || 'medium'
       )
       */
 
       // Placeholder implementation with realistic scheduling logic
-      const currentDoctorId = doctorId || user!.uid
+      const currentUserId = userId || user!.uid
       const urgencyLevel = patientPreferences.urgencyLevel || 'medium'
       
       const mockSuggestions = await aiService.suggestAppointmentSlots(
-        currentDoctorId,
+        currentUserId,
         patientPreferences,
         urgencyLevel
       )
@@ -115,7 +115,7 @@ export default function SmartAppointmentSuggestions({
     } finally {
       setLoading(false)
     }
-  }, [doctorId, user, patientPreferences, aiService])
+  }, [userId, user, patientPreferences, aiService])
 
   // Load suggestions on mount
   useEffect(() => {

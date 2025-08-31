@@ -36,7 +36,7 @@ export interface AvailableSlot {
  * Doctor's working schedule
  */
 export interface DoctorSchedule {
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   workingDays: number[] // 1-7, Monday to Sunday
   workingHours: {
     start: string // "08:00"
@@ -63,7 +63,7 @@ export interface DoctorSchedule {
  * Slot availability options
  */
 export interface SlotAvailabilityOptions {
-  doctorId: string
+  userId: string // User ID for the new ADMIN/USER role system
   startDate: Date
   endDate: Date
   excludeAppointmentId?: string // for rescheduling
@@ -86,7 +86,7 @@ export class AvailableSlotsService {
   static async getAvailableSlots(options: SlotAvailabilityOptions): Promise<AvailableSlot[]> {
     try {
       const {
-        doctorId,
+        userId,
         startDate,
         endDate,
         excludeAppointmentId,
@@ -96,11 +96,11 @@ export class AvailableSlotsService {
       } = options
       
       // Get doctor's schedule
-      const doctorSchedule = await this.getDoctorSchedule(doctorId)
+      const doctorSchedule = await this.getDoctorSchedule(userId)
       
       // Get existing appointments
       const existingAppointments = await this.getExistingAppointments(
-        doctorId, 
+        userId, 
         startDate, 
         endDate, 
         excludeAppointmentId
@@ -125,7 +125,7 @@ export class AvailableSlotsService {
         .filter(slot => slot.available)
         .slice(0, maxSlots)
       
-      console.log(`Found ${validSlots.length} available slots for doctor ${doctorId}`)
+      console.log(`Found ${validSlots.length} available slots for user ${userId}`)
       
       return validSlots
     } catch (error) {
@@ -138,7 +138,7 @@ export class AvailableSlotsService {
    * Get next available slot for urgent bookings
    */
   static async getNextAvailableSlot(
-    doctorId: string,
+    userId: string,
     preferredDate?: Date
   ): Promise<AvailableSlot | null> {
     try {
@@ -146,7 +146,7 @@ export class AvailableSlotsService {
       const endDate = addDays(startDate, 7) // Look ahead 1 week
       
       const availableSlots = await this.getAvailableSlots({
-        doctorId,
+        userId,
         startDate,
         endDate,
         maxSlots: 1,
@@ -164,7 +164,7 @@ export class AvailableSlotsService {
    * Check if specific datetime is available
    */
   static async isSlotAvailable(
-    doctorId: string,
+    userId: string,
     datetime: Date,
     excludeAppointmentId?: string
   ): Promise<boolean> {
@@ -173,7 +173,7 @@ export class AvailableSlotsService {
       const endDate = endOfDay(datetime)
       
       const availableSlots = await this.getAvailableSlots({
-        doctorId,
+        userId,
         startDate,
         endDate,
         excludeAppointmentId,
@@ -192,13 +192,13 @@ export class AvailableSlotsService {
   /**
    * Get available slots for today only
    */
-  static async getTodayAvailableSlots(doctorId: string): Promise<AvailableSlot[]> {
+  static async getTodayAvailableSlots(userId: string): Promise<AvailableSlot[]> {
     const today = new Date()
     const startOfToday = startOfDay(today)
     const endOfToday = endOfDay(today)
     
     return this.getAvailableSlots({
-      doctorId,
+      userId,
       startDate: startOfToday,
       endDate: endOfToday,
       includeSameDay: true,
@@ -210,13 +210,13 @@ export class AvailableSlotsService {
   /**
    * Get doctor's working schedule (with defaults for Romanian medical practice)
    */
-  private static async getDoctorSchedule(doctorId: string): Promise<DoctorSchedule> {
+  private static async getDoctorSchedule(userId: string): Promise<DoctorSchedule> {
     try {
       // Try to get custom schedule from Firestore
       // For now, return default Romanian medical practice schedule
       
       return {
-        doctorId,
+        userId,
         workingDays: [1, 2, 3, 4, 5], // Monday to Friday
         workingHours: {
           start: "08:00",
@@ -235,7 +235,7 @@ export class AvailableSlotsService {
       console.error('Error getting doctor schedule:', error)
       // Return default schedule as fallback
       return {
-        doctorId,
+        userId,
         workingDays: [1, 2, 3, 4, 5],
         workingHours: {
           start: "08:00",
@@ -253,7 +253,7 @@ export class AvailableSlotsService {
    * Get existing appointments for date range
    */
   private static async getExistingAppointments(
-    doctorId: string,
+    userId: string,
     startDate: Date,
     endDate: Date,
     excludeAppointmentId?: string
@@ -261,7 +261,7 @@ export class AvailableSlotsService {
     try {
       const appointmentsQuery = query(
         collection(db, 'appointments'),
-        where('doctorId', '==', doctorId),
+        where('userId', '==', userId),
         where('dateTime', '>=', Timestamp.fromDate(startDate)),
         where('dateTime', '<=', Timestamp.fromDate(endDate)),
         where('status', 'in', ['scheduled', 'confirmed']), // Only count active appointments
@@ -475,7 +475,7 @@ export class AvailableSlotsService {
    * Get slot recommendations based on patient history and preferences
    */
   static async getRecommendedSlots(
-    doctorId: string,
+    userId: string,
     patientEmail?: string,
     maxRecommendations: number = 3
   ): Promise<AvailableSlot[]> {
@@ -484,7 +484,7 @@ export class AvailableSlotsService {
       const endDate = addDays(startDate, 14) // Look ahead 2 weeks
       
       const availableSlots = await this.getAvailableSlots({
-        doctorId,
+        userId,
         startDate,
         endDate,
         maxSlots: 50

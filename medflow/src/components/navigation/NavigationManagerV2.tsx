@@ -22,7 +22,7 @@ import type { NavigationItem, NavigationItems } from './types'
  */
 export function useNavigationItemsV2(): NavigationItems {
   const { user } = useAuth()
-  const { isAdmin, isSuperAdmin } = useRole()
+  const { isAdmin } = useRole()
 
   return useMemo((): NavigationItems => {
     try {
@@ -66,7 +66,7 @@ export function useNavigationItemsV2(): NavigationItems {
       ]
 
       // Admin-only navigation items
-      const adminNavItems = (isAdmin || isSuperAdmin) ? [
+      const adminNavItems = isAdmin ? [
         { 
           to: '/analytics', 
           label: 'Analytics', 
@@ -101,8 +101,7 @@ export function useNavigationItemsV2(): NavigationItems {
       if (process.env.NODE_ENV === 'development') {
         console.log('🔍 Navigation V2 Debug:', {
           user: !!user,
-          isAdmin,
-          isSuperAdmin,
+                  isAdmin,
           adminNavItems: adminNavItems.length,
           baseNavItems: baseNavItems.length,
           totalItems: sortedNavItems.length,
@@ -125,7 +124,7 @@ export function useNavigationItemsV2(): NavigationItems {
         }
       ]
     }
-  }, [user, isAdmin, isSuperAdmin])
+  }, [user, isAdmin])
 }
 
 export default useNavigationItemsV2

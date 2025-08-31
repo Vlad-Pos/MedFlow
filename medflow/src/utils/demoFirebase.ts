@@ -22,7 +22,7 @@ export function getDemoUserData() {
     uid: 'demo-uid-123',
     email: 'demo@medflow.local',
     displayName: 'Dr. Demo Medic',
-    role: 'SUPER_ADMIN',
+    role: 'ADMIN',
     permissions: ['users', 'analytics', 'settings', 'reports', 'appointments', 'patients']
   }
 }

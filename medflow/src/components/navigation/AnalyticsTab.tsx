@@ -6,7 +6,7 @@ import { useRole } from '../../hooks/useRole'
  * Analytics Tab Component
  * 
  * This component renders the analytics navigation tab only for users with
- * ADMIN or SUPER_ADMIN roles. It's designed to be modular and reusable.
+ * ADMIN role. It's designed to be modular and reusable.
  * 
  * Features:
  * - Role-based visibility

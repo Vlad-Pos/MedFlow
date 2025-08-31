@@ -218,7 +218,7 @@ function notifyDemoSubscribers() {
  */
 export async function createReport(
   appointmentId: string,
-  doctorId: string,
+  userId: string, // User ID for the new ADMIN/USER role system
   doctorName: string,
   patientId: string,
   patientName: string,
@@ -228,7 +228,7 @@ export async function createReport(
   try {
     const validation = validateReportData(formData)
     
-    const auditEntry = createAuditEntry('created', doctorId, 'doctor', undefined, {
+    const auditEntry = createAuditEntry('created', userId, 'doctor', undefined, {
       appointmentId,
       templateId,
       validationStatus: validation.status
@@ -241,7 +241,7 @@ export async function createReport(
         appointmentId,
         patientId,
         patientName,
-        doctorId,
+        userId,
         doctorName,
         status: 'draft',
         priority: formData.priority,
@@ -524,14 +524,14 @@ export async function getReportsByAppointment(appointmentId: string): Promise<Pa
  * Gets reports for a specific doctor with filtering and pagination
  */
 export async function getReportsByDoctor(
-  doctorId: string,
+  userId: string, // User ID for the new ADMIN/USER role system
   filters?: ReportFilters,
   limitCount: number = 50,
   lastDoc?: QueryDocumentSnapshot<DocumentData>
 ): Promise<{ reports: ReportSummary[]; hasMore: boolean; lastDoc?: QueryDocumentSnapshot<DocumentData> }> {
   try {
     if (isDemoMode()) {
-      let filteredReports = demoReports.filter(r => r.doctorId === doctorId)
+      let filteredReports = demoReports.filter(r => r.userId === userId)
       
       // Apply filters
       if (filters) {
@@ -576,7 +576,7 @@ export async function getReportsByDoctor(
 
     let q = query(
       collection(db, COLLECTIONS.REPORTS),
-      where('doctorId', '==', doctorId),
+      where('userId', '==', userId),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     )
@@ -622,13 +622,13 @@ export async function getReportsByDoctor(
  * Subscribes to real-time updates for reports
  */
 export function subscribeToReports(
-  doctorId: string,
+  userId: string, // User ID for the new ADMIN/USER role system
   callback: (reports: PatientReport[]) => void,
   filters?: ReportFilters
 ): () => void {
   if (isDemoMode()) {
     demoReportSubscribers.push(callback)
-    callback(demoReports.filter(r => r.doctorId === doctorId))
+    callback(demoReports.filter(r => r.userId === userId))
     
     return () => {
       const index = demoReportSubscribers.indexOf(callback)
@@ -640,7 +640,7 @@ export function subscribeToReports(
 
   const q = query(
     collection(db, COLLECTIONS.REPORTS),
-    where('doctorId', '==', doctorId),
+    where('userId', '==', userId),
     orderBy('updatedAt', 'desc')
   )
 
@@ -709,7 +709,7 @@ export async function deleteReport(
 /**
  * Gets available report templates for a doctor
  */
-export async function getReportTemplates(doctorId: string): Promise<ReportTemplate[]> {
+export async function getReportTemplates(userId: string): Promise<ReportTemplate[]> {
   try {
     if (isDemoMode()) {
       // Return demo templates
@@ -757,10 +757,10 @@ export async function getReportTemplates(doctorId: string): Promise<ReportTempla
 /**
  * Gets report statistics for a doctor
  */
-export async function getReportStatistics(doctorId: string): Promise<ReportStatistics> {
+export async function getReportStatistics(userId: string): Promise<ReportStatistics> {
   try {
     if (isDemoMode()) {
-      const doctorReports = demoReports.filter(r => r.doctorId === doctorId)
+      const doctorReports = demoReports.filter(r => r.userId === userId)
       
       const byStatus = doctorReports.reduce((acc, report) => {
         acc[report.status] = (acc[report.status] || 0) + 1

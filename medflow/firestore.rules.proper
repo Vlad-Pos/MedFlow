@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Appointments collection - PROPER SECURITY RULES
+    match /appointments/{appointmentId} {
+      // Read: Users can read their own appointments
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == getUserId();
+      
+      // Create: Users can create appointments for themselves
+      allow create: if isAuthenticated() && 
+                      // User must be creating for themselves
+                      request.data.userId == getUserId() &&
+                      // Required fields must exist
+                      request.data.keys().hasAll(['patientName', 'dateTime', 'symptoms', 'status', 'userId', 'createdBy']) &&
+                      // Field type validation
+                      request.data.patientName is string &&
+                      request.data.dateTime is timestamp &&
+                      request.data.symptoms is string &&
+                      request.data.status is string &&
+                      request.data.userId is string &&
+                      request.data.createdBy is string &&
+                      // Status must be valid
+                      request.data.status in ['scheduled', 'completed', 'no_show', 'confirmed', 'declined'] &&
+                      // Optional fields validation (if present)
+                      (request.data.patientEmail == null || request.data.patientEmail is string) &&
+                      (request.data.patientPhone == null || request.data.patientPhone is string) &&
+                      (request.data.patientCNP == null || request.data.patientCNP is string) &&
+                      (request.data.patientBirthDate == null || request.data.patientBirthDate is timestamp) &&
+                      (request.data.notes == null || request.data.notes is string);
+      
+      // Update: Users can update their own appointments
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == getUserId() &&
+                      // Ensure userId cannot be changed
+                      request.data.userId == resource.data.userId;
+      
+      // Delete: Users can delete their own appointments
+      allow delete: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && userId == getUserId();
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

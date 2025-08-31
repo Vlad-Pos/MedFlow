@@ -284,7 +284,6 @@ export class RoleService {
       const users = await this.getAllUsers()
       
       const stats: Record<UserRole, number> = {
-        SUPER_ADMIN: 0,
         ADMIN: 0,
         USER: 0,
       }

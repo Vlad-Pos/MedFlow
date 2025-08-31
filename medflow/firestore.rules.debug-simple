@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Appointments collection - SIMPLE DEBUG RULES
+    match /appointments/{appointmentId} {
+      // Create: Test with minimal validation to isolate the issue
+      allow create: if isAuthenticated() && 
+                      // Test 1: Just check if userId exists
+                      request.data.userId != null &&
+                      // Test 2: Check if it's a string
+                      request.data.userId is string &&
+                      // Test 3: Check if it matches current user (this is where it fails)
+                      request.data.userId == getUserId();
+      
+      // Read: Users can read their own appointments
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == getUserId();
+      
+      // Update: Users can update their own appointments
+      allow update: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+      
+      // Delete: Users can delete their own appointments
+      allow delete: if isAuthenticated() && 
+                      resource.data.userId == getUserId();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && userId == getUserId();
+    }
+    
+    // All other collections - deny by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

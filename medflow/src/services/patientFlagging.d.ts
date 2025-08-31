@@ -47,7 +47,7 @@ export declare class PatientFlaggingService {
     /**
      * Get doctor alerts
      */
-    static getDoctorAlerts(doctorId: string, unreadOnly?: boolean): Promise<DoctorAlert[]>;
+    static getDoctorAlerts(userId: string, unreadOnly?: boolean): Promise<DoctorAlert[]>;
     /**
      * Mark doctor alert as read
      */
@@ -83,7 +83,7 @@ export declare class PatientFlaggingService {
     /**
      * Get flagged patients for a doctor with UI display information
      */
-    static getFlaggedPatientsForDoctor(doctorId: string): Promise<{
+    static getFlaggedPatientsForDoctor(userId: string): Promise<{
         patientId: string;
         patientName: string;
         flagCount: number;

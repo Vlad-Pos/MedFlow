@@ -75,7 +75,7 @@ const DEFAULT_GOVERNMENT_CONFIG: GovernmentSubmissionConfig = {
     endDay: 10    // 10th of month
   },
   requiredFields: [
-    'patientId', 'doctorId', 'diagnosis', 'treatmentDate', 
+    'patientId', 'userId', 'diagnosis', 'treatmentDate', 
     'prescribedMedications', 'gdprConsent'
   ],
   dataFormat: 'json',
@@ -219,7 +219,7 @@ function anonymizePatientData(reports: PatientReport[]): Record<string, unknown>
     consultationType: report.priority,
     
     // Doctor information
-    doctorId: report.doctorId,
+    userId: report.userId,
     doctorName: report.doctorName,
     
     // Compliance

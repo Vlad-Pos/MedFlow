@@ -16,226 +16,137 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // ==========================================
-    // HELPER FUNCTIONS
-    // ==========================================
-    
-    // Check if user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
+    // Helper functions
+    function isDemoMode() {
+      return request.auth.token.demo_mode == true;
     }
     
-    // Get authenticated user ID
     function getUserId() {
       return request.auth.uid;
     }
     
-    // Check if user has medical staff role
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function hasRole(role) {
+      return firestore.get(/databases/(default)/documents/users/$(getUserId())).data.role == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('ADMIN');
+    }
+    
+    function isUser() {
+      return hasRole('USER');
+    }
+    
     function isMedicalStaff() {
-      return isAuthenticated() && 
-             request.auth.token.role in ['doctor', 'nurse'];
+      return isDemoMode() || isAdmin();
     }
     
-    // Check if user is doctor
     function isDoctor() {
-      return isAuthenticated() && 
-             request.auth.token.role == 'doctor';
+      return hasRole('USER') || isAdmin();
     }
     
-    // Validate file type for medical documents
-    function isValidMedicalFileType() {
-      return resource.contentType in [
-        'application/pdf',
-        'image/jpeg', 
-        'image/jpg',
-        'image/png'
-      ];
+    function isNurse() {
+      return hasRole('USER') || isAdmin();
     }
     
-    // Validate file size (10MB limit for medical documents)
-    function isValidFileSize() {
-      return resource.size <= 10 * 1024 * 1024; // 10MB
+    function isValidMedicalUpload(contentType, size) {
+      return contentType.matches('image/.*') && 
+             size < 10 * 1024 * 1024; // 10MB limit
     }
     
-    // Check if filename is valid (no malicious characters)
-    function isValidFileName() {
-      return resource.name.matches('[a-zA-Z0-9._-]+\\.(pdf|jpg|jpeg|png)$');
+    function isValidDocumentUpload(contentType, size) {
+      return contentType.matches('application/pdf') && 
+             size < 25 * 1024 * 1024; // 25MB limit
     }
     
-    // Extract user ID from file path
-    function extractUserIdFromPath(path) {
-      return path.split('/')[1]; // assuming path format: appointments/{userId}/...
+    // User profile avatars
+    match /profiles/{userId}/avatar.jpg {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
     
-    // Extract appointment ID from file path
-    function extractAppointmentIdFromPath(path) {
-      return path.split('/')[1]; // assuming path format: appointments/{appointmentId}/...
+    match /profiles/{userId}/avatar.png {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
     
-    // ==========================================
-    // APPOINTMENT DOCUMENTS
-    // ==========================================
-    
-    // Medical documents uploaded for appointments
-    match /appointments/{appointmentId}/{fileName} {
-      
-      // Read access rules
-      allow read: if isAuthenticated() && 
-                     isMedicalStaff() && (
-        // Document uploader can read
-        extractUserIdFromPath(resource.name) == getUserId() ||
-        // Doctor who owns the appointment can read (verify via Firestore)
-        isDoctor()
-        // Note: In production, add Firestore lookup to verify appointment ownership
-      );
-      
-      // Write (upload) access rules
-      allow write: if isAuthenticated() && 
-                      isMedicalStaff() &&
-                      isValidMedicalUpload() &&
-                      appointmentId.matches('[a-zA-Z0-9]+'); // Valid appointment ID format
-      
-      // Delete access rules
-      allow delete: if isAuthenticated() && 
-                       isMedicalStaff() &&
-                       extractUserIdFromPath(resource.name) == getUserId();
-      
-      // Validate medical document upload
-      function isValidMedicalUpload() {
-        return isValidMedicalFileType() &&
-               isValidFileSize() &&
-               isValidFileName() &&
-               // Ensure filename includes timestamp and user ID for security
-               resource.name.matches('.*[0-9]{13}_.*'); // Timestamp prefix
-      }
+    // Medical documents
+    match /medical_documents/{documentId} {
+      allow read: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isOwner(resource.metadata.patientId) || 
+        isAdmin();
+      allow create: if 
+        isDemoMode() || 
+        (isMedicalStaff() && 
+         isValidDocumentUpload(request.resource.contentType, request.resource.size));
+      allow update: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isAdmin();
+      allow delete: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isAdmin();
     }
     
-    // ==========================================
-    // USER PROFILE IMAGES
-    // ==========================================
-    
-    // User profile pictures
-    match /profiles/{userId}/avatar.{extension} {
-      
-      // Read access (own profile only)
-      allow read: if isAuthenticated() && 
-                     userId == getUserId();
-      
-      // Write access (own profile only)
-      allow write: if isAuthenticated() && 
-                      userId == getUserId() &&
-                      isValidProfileImage();
-      
-      // Delete access (own profile only)
-      allow delete: if isAuthenticated() && 
-                       userId == getUserId();
-      
-      // Validate profile image
-      function isValidProfileImage() {
-        return resource.contentType.matches('image/.*') &&
-               resource.size <= 2 * 1024 * 1024 && // 2MB limit
-               extension in ['jpg', 'jpeg', 'png', 'webp'];
-      }
+    // Appointment attachments
+    match /appointments/{appointmentId}/attachments/{attachmentId} {
+      allow read: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isOwner(resource.metadata.patientId) || 
+        isAdmin();
+      allow create: if 
+        isDemoMode() || 
+        (isMedicalStaff() && 
+         isValidDocumentUpload(request.resource.contentType, request.resource.size));
+      allow update: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isAdmin();
+      allow delete: if 
+        isDemoMode() || 
+        isOwner(resource.metadata.doctorId) || 
+        isAdmin();
     }
     
-    // ==========================================
-    // MEDICAL REPORTS (Future expansion)
-    // ==========================================
-    
-    // Medical reports and lab results (placeholder)
-    match /medical_reports/{reportId}/{fileName} {
-      // Strict access control for medical reports
-      allow read, write, delete: if false; // Disabled until proper implementation
-      
-      // TODO: Implement when medical reports feature is added
-      // - GDPR compliance verification
-      // - Patient consent checks
-      // - Medical professional licensing verification
-      // - Comprehensive audit logging
-      // - Encryption at rest verification
+    // User uploads
+    match /users/{userId}/uploads/{uploadId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if 
+        isOwner(userId) && 
+        (isValidMedicalUpload(request.resource.contentType, request.resource.size) ||
+         isValidDocumentUpload(request.resource.contentType, request.resource.size));
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
     }
     
-    // ==========================================
-    // SYSTEM FILES
-    // ==========================================
-    
-    // System assets and configurations
-    match /system/{allPaths=**} {
-      // Read-only access for authenticated medical staff
-      allow read: if isAuthenticated() && isMedicalStaff();
-      
-      // No write access via client
-      allow write, delete: if false;
+    // System files (admin only)
+    match /system/{filePath=**} {
+      allow read: if isDemoMode() || isAdmin();
+      allow write: if isDemoMode() || isAdmin();
     }
     
-    // ==========================================
-    // TEMPORARY UPLOADS
-    // ==========================================
-    
-    // Temporary upload area for processing
-    match /temp/{userId}/{fileName} {
-      
-      // Only own temporary files
-      allow read, write: if isAuthenticated() && 
-                            userId == getUserId() &&
-                            isMedicalStaff();
-      
-      // Auto-cleanup after 1 hour (handled by Cloud Functions)
-      allow delete: if isAuthenticated() && 
-                       userId == getUserId();
+    // Analytics exports (admin only)
+    match /analytics/{exportId} {
+      allow read: if isDemoMode() || isAdmin();
+      allow create: if isDemoMode() || isAdmin();
+      allow update: if isDemoMode() || isAdmin();
+      allow delete: if isDemoMode() || isAdmin();
     }
     
-    // ==========================================
-    // BACKUP AND ARCHIVE
-    // ==========================================
-    
-    // Backup storage (system only)
-    match /backups/{allPaths=**} {
-      allow read, write, delete: if false; // System only
-    }
-    
-    // Archive storage (long-term retention)
-    match /archive/{allPaths=**} {
-      // Read-only for medical staff (for historical data)
-      allow read: if isAuthenticated() && 
-                     isMedicalStaff();
-      
-      // No client write access
-      allow write, delete: if false;
-    }
-    
-    // ==========================================
-    // AI PROCESSING
-    // ==========================================
-    
-    // Files for AI processing
-    match /ai_processing/{processingId}/{fileName} {
-      // Read access for document owner after processing
-      allow read: if isAuthenticated() && 
-                     isMedicalStaff();
-      
-      // No direct client write access (AI service only)
-      allow write, delete: if false;
-    }
-    
-    // ==========================================
-    // SECURITY LOGS
-    // ==========================================
-    
-    // Security and audit logs
-    match /logs/{allPaths=**} {
-      // No client access to logs
-      allow read, write, delete: if false;
-    }
-    
-    // ==========================================
-    // DENY ALL OTHER ACCESS
-    // ==========================================
-    
-    // Explicitly deny access to any other paths
-    match /{allPaths=**} {
-      allow read, write, delete: if false;
+    // Backup files (admin only)
+    match /backups/{backupId} {
+      allow read: if isDemoMode() || isAdmin();
+      allow create: if isDemoMode() || isAdmin();
+      allow update: if isDemoMode() || isAdmin();
+      allow delete: if isDemoMode() || isAdmin();
     }
   }
 }

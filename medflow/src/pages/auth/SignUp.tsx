@@ -4,7 +4,6 @@
  * Features:
  * - Comprehensive form validation with Romanian error messages
  * - Real-time password strength indicator
- * - Professional role selection for medical practitioners
  * - Enhanced security with input sanitization
  * - Smooth animations and loading states
  * - Full accessibility support
@@ -29,25 +28,22 @@ import {
   validateDisplayName,
   validateEmail,
   validatePassword,
-  validateRole,
   checkAuthRateLimit,
   clearAuthRateLimit,
   sanitizeAuthInput
 } from '../../utils/authValidation'
-import { LEGACY_ROLE_MAPPING, LEGACY_ROLE_DISPLAY_NAMES, type LegacyUserRole } from '../../types/auth'
 
 export default function SignUp() {
   // Hooks
   const { signUp } = useAuth()
   const navigate = useNavigate()
   
-  // State management
+  // State management - simplified without role selection
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: '' as LegacyUserRole | ''
+    confirmPassword: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +54,7 @@ export default function SignUp() {
   const handleInputChange = useCallback((field: keyof typeof formData) => (value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'role' ? value : sanitizeAuthInput(value)
+      [field]: sanitizeAuthInput(value)
     }))
     
     // Show password strength when user starts typing password
@@ -94,12 +90,6 @@ export default function SignUp() {
       return
     }
     
-    // Ensure role is valid before calling signUp
-    if (!formData.role || !Object.keys(LEGACY_ROLE_MAPPING).includes(formData.role)) {
-      setError('Rolul selectat nu este valid.')
-      return
-    }
-    
     setLoading(true)
     setError(null)
     
@@ -124,12 +114,6 @@ export default function SignUp() {
       setLoading(false)
     }
   }
-  
-  // Role options for medical professionals (using legacy names for UI familiarity)
-  const roleOptions = [
-    { value: 'doctor', label: LEGACY_ROLE_DISPLAY_NAMES.doctor },
-    { value: 'nurse', label: LEGACY_ROLE_DISPLAY_NAMES.nurse }
-  ]
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -227,7 +211,7 @@ export default function SignUp() {
             required
             disabled={loading || rateLimited}
             aiSuggestions={true}
-            ariaLabel="Introduceți numele complet pentru identificare profesională"
+            ariaLabel="Introduceți numele complet pentru cont"
           />
 
           {/* Email Input */}
@@ -238,29 +222,13 @@ export default function SignUp() {
             onChange={handleInputChange('email')}
             validateFn={validateEmail}
             label="Adresa de email"
-            placeholder="medic@cabinet.ro"
+            placeholder="exemplu@email.com"
             autoComplete="email"
             icon="email"
             required
             disabled={loading || rateLimited}
             aiSuggestions={true}
             ariaLabel="Introduceți adresa de email pentru autentificare"
-          />
-
-          {/* Professional Role Selection */}
-          <ValidatedInput
-            type="select"
-            name="role"
-            value={formData.role}
-            onChange={handleInputChange('role')}
-            validateFn={validateRole}
-            label="Calificarea profesională"
-            placeholder="Selectați calificarea dvs."
-            options={roleOptions}
-            icon="role"
-            required
-            disabled={loading || rateLimited}
-            ariaLabel="Selectați calificarea profesională medicală"
           />
 
           {/* Password Input */}
@@ -342,52 +310,40 @@ export default function SignUp() {
             type="submit"
             disabled={loading || rateLimited}
             className="w-full bg-medflow-accent hover:bg-medflow-accent-hover text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
-            whileHover={{ scale: loading ? 1 : 1.02 }}
-            whileTap={{ scale: loading ? 1 : 0.98 }}
+            aria-label="Creați contul MedFlow"
           >
             {loading ? (
-              <LoadingSpinner 
-                size="sm" 
-                text="Se creează contul..." 
-                className="text-white"
-              />
+              <>
+                <LoadingSpinner size="sm" />
+                <span>Se creează contul...</span>
+              </>
             ) : (
               <>
                 <UserPlus className="h-5 w-5" aria-hidden="true" />
-                <span>Creează cont MedFlow</span>
+                <span>Creați contul</span>
               </>
             )}
           </motion.button>
 
-          {/* Footer Links */}
-          <motion.div 
+          {/* Sign In Link */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-center text-sm border-t border-white/10 pt-4"
+            className="text-center"
           >
-                        <div className="flex items-center justify-center space-x-2 text-medflow-text-secondary">
-            <span>Aveți deja cont?</span>
-            <Link 
-              to="/signin" 
-              className="text-medflow-accent hover:text-medflow-accent-hover transition-colors duration-200 font-medium"
-            >
-              Autentificați-vă
-            </Link>
-          </div>
-        </motion.div>
-      </motion.form>
-
-      {/* Security Notice */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="mt-6 text-center text-xs text-medflow-text-muted"
-      >
-        <p>Datele sunt criptate și protejate conform standardelor medicale și GDPR</p>
-      </motion.div>
+            <p className="text-sm text-medflow-text-secondary">
+              Aveți deja un cont?{' '}
+              <Link 
+                to="/signin" 
+                className="text-medflow-primary hover:text-medflow-primary-hover font-medium transition-colors"
+              >
+                Autentificați-vă
+              </Link>
+            </p>
           </motion.div>
+        </motion.form>
+      </motion.div>
     </div>
   )
 }

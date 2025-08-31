@@ -34,7 +34,7 @@ interface BaseInputProps {
 }
 
 interface TextInputProps extends BaseInputProps {
-  type?: 'text' | 'email' | 'tel'
+  type?: 'text' | 'email' | 'tel' | 'number'
   maxLength?: number
   icon?: React.ReactNode
   autoComplete?: string
@@ -69,7 +69,7 @@ interface SelectInputProps extends BaseInputProps {
 }
 
 type FormInputProps = 
-  | (TextInputProps & { type?: 'text' | 'email' | 'tel' })
+  | (TextInputProps & { type?: 'text' | 'email' | 'tel' | 'number' })
   | (TextAreaProps & { rows: number })
   | (DateTimeInputProps & { type: 'date' | 'time' | 'datetime-local' })
   | (SelectInputProps & { options: { value: string; label: string; icon?: React.ReactNode }[] })

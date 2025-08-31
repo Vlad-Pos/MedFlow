@@ -19,7 +19,13 @@
  */
 
 // Base Components
-export * from './base'
+export { 
+  FormInput, 
+  FormValidation,
+  FormAI
+} from './base'
+
+export type { ValidationResult, FieldValidationResult } from './base'
 
 // Medical Components
 export * from './medical'
@@ -45,4 +51,12 @@ export {
   FormBuilder as AdvancedFormBuilder,
   AIFormField as SmartFormField,
   CardFormField as ProfessionalFormField
+} from './enhanced'
+
+// Export types from enhanced module
+export type {
+  FormFieldSchema,
+  FormSchema,
+  FormBuilderProps,
+  FormState
 } from './enhanced'
