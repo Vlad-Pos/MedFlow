@@ -66,7 +66,7 @@ const MyDesignComponent = () => {
 
 ```tsx
 // pages/Dashboard.tsx
-import DesignWorkWrapper from '../components/DesignWorkWrapper';
+import DesignWorkWrapper from '../../medflow/src/components/DesignWorkWrapper';
 
 const Dashboard = () => {
   return (
