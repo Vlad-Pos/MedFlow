@@ -8,8 +8,8 @@ This document contains all technical requirements, development standards, and de
 
 ## 🚀 **PROJECT OVERVIEW**
 
-For complete technical information, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
-For platform information, see **[PLATFORM_CORE.md](./CORE/PLATFORM_CORE.md)**.
+For complete technical information, see **[TECHNICAL_CORE.md](TECHNICAL_CORE.md)**.
+For platform information, see **[PLATFORM_CORE.md](PLATFORM_CORE.md)**.
 
 ### **Technology Stack**
 - **Frontend**: React 19, TypeScript, Tailwind CSS
@@ -20,7 +20,7 @@ For platform information, see **[PLATFORM_CORE.md](./CORE/PLATFORM_CORE.md)**.
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 
-For complete technical details and standards, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
+For complete technical details and standards, see **[TECHNICAL_CORE.md](TECHNICAL_CORE.md)**.
 
 ### **Architecture Principles**
 - **Component-Based**: Modular, reusable components
@@ -94,8 +94,8 @@ src/
 
 ## 🎨 **DESIGN SYSTEM & STYLING**
 
-For complete brand information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
-For complete technical information, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
+For complete brand information, see **[../BRAND_AND_DESIGN/BRAND_CORE.md](../BRAND_AND_DESIGN/BRAND_CORE.md)**.
+For complete technical information, see **[TECHNICAL_CORE.md](TECHNICAL_CORE.md)**.
 
 ### **Animation System Standards**
 - **Framer Motion**: Primary animation library for professional interfaces
