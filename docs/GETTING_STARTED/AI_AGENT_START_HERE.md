@@ -12,8 +12,8 @@
 3. **`../FEATURES_DOCUMENTATION.md`** - Feature implementation guides
 
 ### **⚡ Quick Access**
-- **`../QUICK_REFERENCE.md`** - Essential information at a glance
-- **`../WELCOME_AI_AGENTS.md`** - Complete onboarding guide
+- **`QUICK_REFERENCE.md`** - Essential information at a glance
+- **`WELCOME_AI_AGENTS.md`** - Complete onboarding guide
 
 ## 🎨 **CRITICAL: Sacred Brand Colors**
 

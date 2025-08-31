@@ -22,9 +22,11 @@
 
 **Start here if you're new to MedFlow development**
 
-- **AI Agent Onboarding** - Welcome and standards
-- **Main Development Guide** - Complete development overview
-- **Quick Reference** - Essential information at a glance
+- **[`WELCOME_AI_AGENTS.md`](GETTING_STARTED/WELCOME_AI_AGENTS.md)** - AI Agent onboarding and welcome
+- **[`MAIN_GUIDE.md`](GETTING_STARTED/MAIN_GUIDE.md)** - Complete development overview and roadmap
+- **[`QUICK_REFERENCE.md`](GETTING_STARTED/QUICK_REFERENCE.md)** - Essential information at a glance
+- **[`AI_AGENT_START_HERE.md`](GETTING_STARTED/AI_AGENT_START_HERE.md)** - AI Agent starting point
+- **[`AI_AGENT_STANDARDS.md`](GETTING_STARTED/AI_AGENT_STANDARDS.md)** - AI Agent standards and guidelines
 
 ---
 

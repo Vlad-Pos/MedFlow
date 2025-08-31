@@ -15,9 +15,9 @@ This document provides a friendly introduction to help you get started with MedF
 
 ### **2. Essential Reading (15-20 minutes)**
 - **🚀 `MAIN_GUIDE.md`** - Complete entry point and roadmap
-- **🎨 `BRAND_IDENTITY.md`** - Brand guidelines and sacred colors
-- **🔧 `DEVELOPMENT_GUIDE.md`** - Technical standards and architecture
-- **📚 `FEATURES_DOCUMENTATION.md`** - Feature guides and implementation
+- **🎨 `../BRAND_AND_DESIGN/BRAND_IDENTITY.md`** - Brand guidelines and sacred colors
+- **🔧 `../DEVELOPMENT/DEVELOPMENT_GUIDE.md`** - Technical standards and architecture
+- **📚 `../FEATURES/FEATURES_DOCUMENTATION.md`** - Feature guides and implementation
 
 ### **3. Optional but Recommended**
 - **🤖 `AI_AGENT_COMPLIANCE_REGISTRY.md`** - Track your understanding
@@ -44,7 +44,7 @@ For complete user information, see **[PLATFORM_CORE.md](./CORE/PLATFORM_CORE.md)
 - **Performance**: Fast, responsive, and accessible
 - **Security**: GDPR compliant with military-grade encryption
 
-For complete standards information, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)** and **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
+For complete standards information, see **[../DEVELOPMENT/TECHNICAL_CORE.md](../DEVELOPMENT/TECHNICAL_CORE.md)** and **[../BRAND_AND_DESIGN/BRAND_CORE.md](../BRAND_AND_DESIGN/BRAND_CORE.md)**.
 
 ---
 
@@ -100,17 +100,17 @@ Anthracite: #404040
 - **Medical-first** in all communications
 - **Romanian excellence** and pride
 
-For complete brand information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
+For complete brand information, see **[../BRAND_AND_DESIGN/BRAND_CORE.md](../BRAND_AND_DESIGN/BRAND_CORE.md)**.
 
 ---
 
 ## 🚀 **Getting Started with Development**
 
 ### **1. Choose Your Task**
-- **Bug fixes** - Start with `FEATURES_DOCUMENTATION.md`
-- **New features** - Review `DEVELOPMENT_GUIDE.md` first
-- **Design changes** - Read `BRAND_IDENTITY.md` thoroughly
-- **Performance improvements** - Check `DEVELOPMENT_GUIDE.md`
+- **Bug fixes** - Start with `../FEATURES/FEATURES_DOCUMENTATION.md`
+- **New features** - Review `../DEVELOPMENT/DEVELOPMENT_GUIDE.md` first
+- **Design changes** - Read `../BRAND_AND_DESIGN/BRAND_IDENTITY.md` thoroughly
+- **Performance improvements** - Check `../DEVELOPMENT/DEVELOPMENT_GUIDE.md`
 
 ### **2. Follow the Process**
 1. **Read relevant documentation** (5-15 minutes)
