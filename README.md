@@ -8,9 +8,12 @@ This repository has a complex branch structure that requires careful management 
 
 ### **📚 Required Reading (In Order):**
 
-1. **[`BRANCH_MERGE_QUICK_REFERENCE.md`](BRANCH_MERGE_QUICK_REFERENCE.md)** - Quick overview for AI agents
-2. **[`BRANCH_MANAGEMENT_SUMMARY.md`](BRANCH_MANAGEMENT_SUMMARY.md)** - Complete overview and workflow
-3. **[`BRANCH_MERGE_ANALYSIS_AND_STRATEGY.md`](BRANCH_MERGE_ANALYSIS_AND_STRATEGY.md)** - Detailed analysis and implementation guide
+**🚨 NEW: Documentation has been centralized for better organization!**
+
+1. **[`docs/README.md`](docs/README.md)** - **START HERE** - Master navigation index
+2. **[`docs/CRITICAL/BRANCH_MERGE_QUICK_REFERENCE.md`](docs/CRITICAL/BRANCH_MERGE_QUICK_REFERENCE.md)** - Quick overview for AI agents
+3. **[`docs/CRITICAL/BRANCH_MANAGEMENT_SUMMARY.md`](docs/CRITICAL/BRANCH_MANAGEMENT_SUMMARY.md)** - Complete overview and workflow
+4. **[`docs/CRITICAL/BRANCH_MERGE_ANALYSIS_AND_STRATEGY.md`](docs/CRITICAL/BRANCH_MERGE_ANALYSIS_AND_STRATEGY.md)** - Detailed analysis and implementation guide
 
 ### **🚫 CRITICAL WARNING:**
 
