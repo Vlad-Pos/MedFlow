@@ -91,8 +91,8 @@ const cacheEntry = {
 ```typescript
 // All routes now use lazy loading
 export const routeComponents = {
-  Dashboard: lazy(() => import('../pages/Dashboard')),
-  Appointments: lazy(() => import('../pages/Appointments')),
+  Dashboard: lazy(() => import('../../medflow/src/pages/Dashboard')),
+  Appointments: lazy(() => import('../../medflow/src/pages/Appointments')),
   // ... other routes
 }
 ```
@@ -246,7 +246,7 @@ const THRESHOLDS = {
 
 ### Implementing Performance Monitoring
 ```typescript
-import { usePerformanceMonitoring } from '../hooks/usePerformanceMonitoring'
+import { usePerformanceMonitoring } from '../../medflow/src/hooks/usePerformanceMonitoring'
 
 function Dashboard() {
   const performance = usePerformanceMonitoring('Dashboard')
@@ -265,7 +265,7 @@ function Dashboard() {
 
 ### Using Firebase Optimization
 ```typescript
-import { useFirebaseOptimization } from '../hooks/useFirebaseOptimization'
+import { useFirebaseOptimization } from '../../medflow/src/hooks/useFirebaseOptimization'
 
 function PatientList() {
   const { optimizedQuery, getPerformanceMetrics } = useFirebaseOptimization()
