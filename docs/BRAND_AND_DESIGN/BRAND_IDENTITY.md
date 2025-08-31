@@ -8,7 +8,7 @@ This document is the **single source of truth** for all MedFlow brand decisions,
 
 ## 🎯 **CORE BRAND IDENTITY**
 
-For complete brand information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
+For complete brand information, see **[BRAND_CORE.md](BRAND_CORE.md)**.
 
 ### **Company Name**
 **MedFlow**
@@ -34,7 +34,7 @@ Intelligent, Romanian, Professional, Innovative, Trustworthy, Medical-First
 
 ## 👥 **TARGET AUDIENCE**
 
-For complete audience information, see **[PLATFORM_CORE.md](./CORE/PLATFORM_CORE.md)**.
+For complete audience information, see **[../DEVELOPMENT/PLATFORM_CORE.md](../DEVELOPMENT/PLATFORM_CORE.md)**.
 
 ### **Primary Target**
 **Middle-aged doctors** (35-65 years old) looking to transform their workflow with automation and AI tools
@@ -72,8 +72,8 @@ For complete audience information, see **[PLATFORM_CORE.md](./CORE/PLATFORM_CORE
 
 ## 🎨 **BRAND VISUAL IDENTITY (CRITICAL)**
 
-For complete brand information, see **[BRAND_CORE.md](./CORE/BRAND_CORE.md)**.
-For technical implementation, see **[TECHNICAL_CORE.md](./CORE/TECHNICAL_CORE.md)**.
+For complete brand information, see **[BRAND_CORE.md](BRAND_CORE.md)**.
+For technical implementation, see **[../DEVELOPMENT/TECHNICAL_CORE.md](../DEVELOPMENT/TECHNICAL_CORE.md)**.
 
 ### **🎨 BRAND COLORS - THE 12 NEW TRANSFORMED COLORS**
 
