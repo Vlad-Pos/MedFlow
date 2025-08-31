@@ -312,7 +312,7 @@ export function validateDisplayName(name: string): AuthValidationResult {
  */
 export function validateRole(role: string): AuthValidationResult {
   const errors: string[] = []
-  const validRoles = ['doctor', 'nurse']
+  const validRoles = ['ADMIN', 'USER']
   
   if (!role) {
     errors.push(AUTH_ERRORS.ROLE_REQUIRED)

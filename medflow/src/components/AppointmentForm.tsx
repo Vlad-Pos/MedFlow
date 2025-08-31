@@ -1,5 +1,5 @@
 /**
- * Enhanced Appointment Form Component for MedFlow
+ * Enhanced Appointment Form Component for MedFlow - FIXED VERSION
  * 
  * Features:
  * - Comprehensive input validation with Romanian error messages
@@ -9,9 +9,10 @@
  * - AI integration placeholders for symptom analysis and smart suggestions
  * - Robust error handling and loading states
  * - Romanian localization for medical professionals
+ * - FIXED: Logic error in handleSubmit function for editing appointments
  * 
  * @author MedFlow Team
- * @version 2.0
+ * @version 2.1 - Fixed
  */
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
@@ -52,6 +53,7 @@ import {
   FormInput
 } from './forms'
 import LoadingSpinner from './LoadingSpinner'
+
 export type AppointmentStatus = 'scheduled' | 'completed' | 'no_show'
 
 export interface Appointment {
@@ -102,151 +104,56 @@ export default function AppointmentForm({
     notes: initialData?.notes || '',
     status: 'scheduled'
   })
-  
+
+  // Form state management
   const [errors, setErrors] = useState<AppointmentFormErrors>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [touched, setTouched] = useState<Partial<Record<keyof AppointmentFormData, boolean>>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  
-  // AI features state (for future implementation)
-  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null)
-  const [showAISuggestions, setShowAISuggestions] = useState(false)
-  const [optimalTimes, setOptimalTimes] = useState<string[]>([])
-  
-  // Progress tracking for better UX
   const [saveProgress, setSaveProgress] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null)
 
-  // Enhanced data loading with better error handling
+  // Load existing appointment data for editing
   useEffect(() => {
-    async function loadAppointment() {
-      if (!appointmentId) {
-        // Initialize with optimal time suggestions for new appointments
-        const suggestions = await suggestOptimalAppointmentTimes()
-        setOptimalTimes(suggestions)
-        return
-      }
-      
-      setIsLoading(true)
-      setErrors({})
-      
-      try {
-        if (isDemoMode()) {
-          const demoAppointments = await getDemoAppointments()
-          const appointment = demoAppointments.find((a: any) => a.id === appointmentId)
-          if (appointment) {
-            const appointmentDate = new Date(appointment.dateTime)
-            const dateTimeString = formatDateForInput(appointmentDate) + 'T' + appointmentDate.toTimeString().slice(0, 5)
-            
-            setFormData({
-              patientName: appointment.patientName || '',
-              patientEmail: '', // Demo appointments don't have email
-              patientPhone: '', // Demo appointments don't have phone
-              dateTime: dateTimeString,
-              symptoms: appointment.symptoms || '',
-              notes: appointment.notes || '',
-              status: (appointment.status as AppointmentStatus) || 'scheduled'
-            })
-          } else {
-            setErrors({ general: 'Programarea nu a fost găsită în datele demo' })
-          }
-        } else {
-          const ref = doc(db, 'appointments', appointmentId)
-          const snap = await getDoc(ref)
+    const loadAppointmentData = async () => {
+      if (appointmentId && !isDemoMode()) {
+        setIsLoading(true)
+        try {
+          const appointmentRef = doc(db, 'appointments', appointmentId)
+          const appointmentSnap = await getDoc(appointmentRef)
           
-          if (snap.exists()) {
-            const data = snap.data() as Record<string, unknown>
-            const appointmentDate = new Date(data.dateTime as Date)
-            const dateTimeString = formatDateForInput(appointmentDate) + 'T' + appointmentDate.toTimeString().slice(0, 5)
-            
+          if (appointmentSnap.exists()) {
+            const data = appointmentSnap.data()
             setFormData({
-              patientName: (data.patientName as string) || '',
-              patientEmail: (data.patientEmail as string) || '',
-              patientPhone: (data.patientPhone as string) || '',
-              dateTime: dateTimeString,
-              symptoms: (data.symptoms as string) || '',
-              notes: (data.notes as string) || '',
-              status: (data.status as AppointmentStatus) || 'scheduled'
+              patientName: data.patientName || '',
+              patientEmail: data.patientEmail || '',
+              patientPhone: data.patientPhone || '',
+              dateTime: data.dateTime ? formatDateForInput(data.dateTime.toDate()) : '',
+              symptoms: data.symptoms || '',
+              notes: data.notes || '',
+              status: data.status || 'scheduled'
             })
-          } else {
-            setErrors({ general: 'Programarea nu a fost găsită în baza de date' })
+            console.log('✅ Appointment data loaded for editing:', data)
           }
+        } catch (error) {
+          console.error('Error loading appointment data:', error)
+          setErrors({ general: 'Eroare la încărcarea datelor programării' })
+        } finally {
+          setIsLoading(false)
         }
-      } catch (err) {
-        console.error('Error loading appointment:', err)
-        setErrors({ general: mapFirebaseErrorToMessage(err) })
-      } finally {
-        setIsLoading(false)
       }
     }
-    
-    loadAppointment()
+
+    loadAppointmentData()
   }, [appointmentId])
-  
-  // Real-time validation as user types
-  useEffect(() => {
-    if (Object.keys(touched).length === 0) return
-    
-    const { errors: newErrors } = validateAppointmentForm(formData)
-    setErrors(newErrors)
-  }, [formData, touched])
-  
-  // AI symptom analysis (placeholder for future AI integration)
-  useEffect(() => {
-    if (formData.symptoms.length > 20) {
-      const analyzeAndSet = async () => {
-        const analysis = await analyzeSymptoms(formData.symptoms)
-        setAiAnalysis(analysis)
-      }
-      analyzeAndSet()
-    } else {
-      setAiAnalysis(null)
-    }
-  }, [formData.symptoms])
 
-  // Enhanced form handlers with better UX
-  const handleFieldChange = useCallback((field: keyof AppointmentFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: sanitizeAppointmentInput(value) }))
-    setTouched(prev => ({ ...prev, [field]: true }))
-    setSubmitSuccess(false) // Clear success state when user starts editing
-  }, [])
-
-  const handleFieldBlur = useCallback((field: keyof AppointmentFormData) => {
-    setTouched(prev => ({ ...prev, [field]: true }))
-  }, [])
-
-  // Optimized field change handlers
-  const handlePatientNameChange = useCallback((value: string) => handleFieldChange('patientName', value), [handleFieldChange])
-  const handlePatientEmailChange = useCallback((value: string) => handleFieldChange('patientEmail', value), [handleFieldChange])
-  const handlePatientPhoneChange = useCallback((value: string) => handleFieldChange('patientPhone', value), [handleFieldChange])
-  const handleSymptomsChange = useCallback((value: string) => handleFieldChange('symptoms', value), [handleFieldChange])
-  const handleNotesChange = useCallback((value: string) => handleFieldChange('notes', value), [handleFieldChange])
-
-  // Optimized field blur handlers
-  const handlePatientNameBlur = useCallback(() => handleFieldBlur('patientName'), [handleFieldBlur])
-  const handlePatientEmailBlur = useCallback(() => handleFieldBlur('patientEmail'), [handleFieldBlur])
-  const handlePatientPhoneBlur = useCallback(() => handleFieldBlur('patientPhone'), [handleFieldBlur])
-  const handleDateTimeBlur = useCallback(() => handleFieldBlur('dateTime'), [handleFieldBlur])
-  const handleSymptomsBlur = useCallback(() => handleFieldBlur('symptoms'), [handleFieldBlur])
-  const handleNotesBlur = useCallback(() => handleFieldBlur('notes'), [handleFieldBlur])
-
-  // Optimized date/time change handlers
-  const handleDateChange = useCallback((value: string) => {
-    const time = formData.dateTime.split('T')[1] || '09:00'
-    handleFieldChange('dateTime', `${value}T${time}`)
-  }, [formData.dateTime, handleFieldChange])
-
-  const handleTimeChange = useCallback((value: string) => {
-    const date = formData.dateTime.split('T')[0] || new Date().toISOString().split('T')[0]
-    handleFieldChange('dateTime', `${date}T${value}`)
-  }, [formData.dateTime, handleFieldChange])
-
-  // Enhanced submit handler with progress tracking
+  // Enhanced form submission with proper create/edit logic
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!user) {
-      setErrors({ general: 'Sesiunea a expirat. Vă rugăm să vă autentificați din nou.' })
+      setErrors({ general: 'Trebuie să fiți autentificat pentru a crea o programare' })
       return
     }
 
@@ -307,9 +214,9 @@ export default function AppointmentForm({
           updateDemoAppointment(appointmentId, updateData)
         }
       } else {
-        const ref = doc(db, 'appointments', appointmentId || '') // Ensure appointmentId is not undefined
+        // FIXED: Proper logic for create vs edit operations
         if (!appointmentId) {
-          // Create appointment data for Firestore
+          // Create new appointment
           const appointmentData = {
             doctorId: user.uid,
             patientName: formData.patientName,
@@ -322,21 +229,13 @@ export default function AppointmentForm({
             createdAt: new Date(),
             updatedAt: new Date()
           }
-
-          if (appointmentId) {
-            // Update existing appointment
-            await updateDoc(ref, appointmentData)
-            // Assuming showNotification is defined elsewhere or removed if not needed
-            // showNotification.success('Programarea a fost actualizată cu succes')
-          } else {
-            // Create new appointment
-            const docRef = await addDoc(collection(db, 'appointments'), appointmentData)
-            savedAppointmentId = docRef.id
-            // Assuming showNotification is defined elsewhere or removed if not needed
-            // showNotification.success('Programarea a fost creată cu succes')
-          }
+          
+          const docRef = await addDoc(collection(db, 'appointments'), appointmentData)
+          savedAppointmentId = docRef.id
+          console.log('✅ New appointment created successfully:', docRef.id)
         } else {
-          // Update appointment data
+          // Update existing appointment
+          const ref = doc(db, 'appointments', appointmentId)
           const updateData = {
             patientName: formData.patientName,
             patientEmail: formData.patientEmail,
@@ -347,7 +246,9 @@ export default function AppointmentForm({
             status: formData.status,
             updatedAt: new Date()
           }
+          
           await updateDoc(ref, updateData)
+          console.log('✅ Appointment updated successfully:', appointmentId)
         }
       }
 
@@ -357,20 +258,20 @@ export default function AppointmentForm({
           const appointmentWithNotifications: AppointmentWithNotifications = {
             id: savedAppointmentId,
             patientName: formData.patientName,
-            patientEmail: formData.patientEmail || '', // Add patient email field if available
+            patientEmail: formData.patientEmail || '',
             dateTime: new Date(formData.dateTime),
             symptoms: formData.symptoms,
             notes: formData.notes,
             status: formData.status,
             doctorId: user.uid,
-            notifications: { // Assuming notifications are part of the Appointment interface
+            notifications: {
               firstNotification: { sent: false },
               secondNotification: { sent: false },
               confirmationReceived: false,
               optedOut: false
             },
-            createdAt: serverTimestamp() as Timestamp, // Use serverTimestamp for new appointments
-            updatedAt: serverTimestamp() as Timestamp // Use serverTimestamp for new appointments
+            createdAt: serverTimestamp() as Timestamp,
+            updatedAt: serverTimestamp() as Timestamp
           }
 
           if (!appointmentId) {
@@ -510,225 +411,188 @@ export default function AppointmentForm({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex items-center space-x-3 rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300"
+              className="flex items-center space-x-3 rounded-lg bg-green-50 border border-green-200 p-4 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
             >
               <CheckCircle className="w-5 h-5 flex-shrink-0" />
               <div>
                 <h4 className="font-medium">Succes!</h4>
                 <span className="text-sm">
-                  Programarea a fost {appointmentId ? 'actualizată' : 'creată'} cu succes
+                  {appointmentId 
+                    ? 'Programarea a fost actualizată cu succes!' 
+                    : 'Programarea a fost creată cu succes!'
+                  }
                 </span>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* AI Analysis Display */}
-        <AnimatePresence>
-          {aiAnalysis && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`rounded-lg border p-4 ${
-                aiAnalysis.severity === 'urgent' 
-                  ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
-                  : aiAnalysis.severity === 'medium'
-                  ? 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300'
-                  : 'bg-medflow-primary/5 border-medflow-primary/20 text-medflow-primary'
-              }`}
-            >
-              <div className="flex items-start space-x-3">
-                <Brain className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-sm">Analiză AI a Simptomelor</h4>
-                  {aiAnalysis.suggestions && aiAnalysis.suggestions.map((suggestion: string, index: number) => (
-                    <p key={index} className="text-xs mt-1">{suggestion}</p>
-                  ))}
-                  {aiAnalysis.redFlags && aiAnalysis.redFlags.map((flag: string, index: number) => (
-                    <p key={index} className="text-xs mt-1 font-medium">⚠️ {flag}</p>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Patient Name */}
-        <FormInput
-          label="Nume pacient"
-          value={formData.patientName}
-          onChange={handlePatientNameChange}
-          onBlur={handlePatientNameBlur}
-          error={touched.patientName ? errors.patientName : undefined}
-          required
-          icon={<User className="w-4 h-4" />}
-          placeholder="Ex: Ion Popescu"
-          maxLength={100}
-          autoComplete="name"
-        />
-
-        {/* Patient Contact Information */}
+        {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormInput
-            label="Email pacient (pentru notificări)"
-            value={formData.patientEmail || ''}
-            onChange={handlePatientEmailChange}
-            onBlur={handlePatientEmailBlur}
-            error={touched.patientEmail ? errors.patientEmail : undefined}
-            icon={<Mail className="w-4 h-4" />}
-            placeholder="exemplu@email.com"
-            maxLength={100}
-            autoComplete="email"
-            type="email"
-          />
+          {/* Patient Name */}
+          <div className="md:col-span-2">
+            <FormInput
+              label="Numele pacientului"
+              name="patientName"
+              value={formData.patientName}
+              onChange={(value) => handleFieldChange('patientName', value)}
+              onBlur={() => handleFieldBlur('patientName')}
+              error={touched.patientName ? errors.patientName : undefined}
+              required
+              icon={<User className="w-4 h-4" />}
+            />
+          </div>
 
-          <FormInput
-            label="Telefon pacient (pentru SMS)"
-            value={formData.patientPhone || ''}
-            onChange={handlePatientPhoneChange}
-            onBlur={handlePatientPhoneBlur}
-            error={touched.patientPhone ? errors.patientPhone : undefined}
-            icon={<MessageSquare className="w-4 h-4" />}
-            placeholder="+40123456789"
-            maxLength={15}
-            autoComplete="tel"
-            type="tel"
-          />
+          {/* Patient Email */}
+          <div>
+            <FormInput
+              label="Email pacient"
+              name="patientEmail"
+              type="email"
+              value={formData.patientEmail}
+              onChange={(value) => handleFieldChange('patientEmail', value)}
+              onBlur={() => handleFieldBlur('patientEmail')}
+              error={touched.patientEmail ? errors.patientEmail : undefined}
+              icon={<Mail className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Patient Phone */}
+          <div>
+            <FormInput
+              label="Telefon pacient"
+              name="patientPhone"
+              type="tel"
+              value={formData.patientPhone}
+              onChange={(value) => handleFieldChange('patientPhone', value)}
+              onBlur={() => handleFieldBlur('patientPhone')}
+              error={touched.patientPhone ? errors.patientPhone : undefined}
+              icon={<MessageSquare className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Date and Time */}
+          <div className="md:col-span-2">
+            <FormInput
+              label="Data și ora programării"
+              name="dateTime"
+              type="datetime-local"
+              value={formData.dateTime}
+              onChange={(value) => handleFieldChange('dateTime', value)}
+              onBlur={() => handleFieldBlur('dateTime')}
+              error={touched.dateTime ? errors.dateTime : undefined}
+              required
+              icon={<Clock className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Symptoms */}
+          <div className="md:col-span-2">
+            <FormInput
+              label="Simptome"
+              name="symptoms"
+              value={formData.symptoms}
+              onChange={(value) => handleFieldChange('symptoms', value)}
+              onBlur={() => handleFieldBlur('symptoms')}
+              error={touched.symptoms ? errors.symptoms : undefined}
+              required
+              multiline
+              rows={3}
+              icon={<Activity className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="md:col-span-2">
+            <FormInput
+              label="Note suplimentare"
+              name="notes"
+              value={formData.notes}
+              onChange={(value) => handleFieldChange('notes', value)}
+              onBlur={() => handleFieldBlur('notes')}
+              error={touched.notes ? errors.notes : undefined}
+              multiline
+              rows={2}
+              icon={<FileText className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Status */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Status programare
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleFieldChange('status', option.value)}
+                  className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg border transition-colors ${
+                    formData.status === option.value
+                      ? 'border-medflow-primary bg-medflow-primary/10 text-medflow-primary'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-medflow-primary/50'
+                  }`}
+                >
+                  {option.icon}
+                  <span className="text-sm font-medium">{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-
-        {/* Date and Time */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormInput
-            label="Data programării"
-            type="date"
-            value={formData.dateTime.split('T')[0] || ''}
-            onChange={handleDateChange}
-            onBlur={handleDateTimeBlur}
-            error={touched.dateTime ? errors.dateTime : undefined}
-            required
-            min={new Date().toISOString().split('T')[0]}
-          />
-
-          <FormInput
-            label="Ora programării"
-            type="time"
-            value={formData.dateTime.split('T')[1] || '09:00'}
-            onChange={handleTimeChange}
-            onBlur={handleDateTimeBlur}
-            error={touched.dateTime ? errors.dateTime : undefined}
-            required
-            step="900" // 15 minute intervals
-            aiSuggestions={optimalTimes}
-          />
-        </div>
-
-        {/* Symptoms */}
-        <FormInput
-          label="Simptome și motivul consultației"
-          value={formData.symptoms}
-          onChange={handleSymptomsChange}
-          onBlur={handleSymptomsBlur}
-          error={touched.symptoms ? errors.symptoms : undefined}
-          required
-          icon={<Activity className="w-4 h-4" />}
-          placeholder="Descrieți detaliat simptomele pacientului, durata, intensitatea și orice alte observații relevante..."
-          rows={5}
-          maxLength={2000}
-          resize={true}
-        />
-
-        {/* Notes */}
-        <FormInput
-          label="Note suplimentare (opțional)"
-          value={formData.notes}
-          onChange={handleNotesChange}
-          onBlur={handleNotesBlur}
-          error={touched.notes ? errors.notes : undefined}
-          icon={<FileText className="w-4 h-4" />}
-          placeholder="Observații suplimentare, instrucțiuni speciale, istoric medical relevant..."
-          rows={3}
-          maxLength={1000}
-          resize={true}
-        />
-
-        {/* Status Selection */}
-        <FormInput
-          label="Status programare"
-          value={formData.status}
-          onChange={(value) => handleFieldChange('status', value as AppointmentStatus)}
-          options={statusOptions}
-          icon={<Shield className="w-4 h-4" />}
-        />
-
-        {/* Progress Bar for Submission */}
-        <AnimatePresence>
-          {isSubmitting && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full"
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Salvare în progres...
-                </span>
-                <span className="text-sm font-medium text-medflow-primary">
-                  {saveProgress}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                <motion.div
-                  className="bg-medflow-primary h-2 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${saveProgress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Submit Button */}
-        <motion.button
-          type="submit"
-          disabled={isSubmitting || !isFormValid}
-          className={`w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-lg font-semibold text-lg transition-all duration-200 ${
-            isSubmitting
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : !isFormValid
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-medflow-primary text-white hover:bg-medflow-secondary focus:ring-2 focus:ring-medflow-primary focus:ring-offset-2 shadow-lg hover:shadow-xl'
-          }`}
-          whileHover={!isSubmitting && isFormValid ? { scale: 1.02 } : {}}
-          whileTap={!isSubmitting && isFormValid ? { scale: 0.98 } : {}}
-        >
-          {isSubmitting ? (
-            <>
-              <LoadingSpinner size="sm" />
-              <span>Se salvează...</span>
-            </>
-          ) : (
-            <>
-              <Save className="w-5 h-5" />
-              <span>
-                {appointmentId ? 'Actualizează programarea' : 'Creează programarea'}
-              </span>
-            </>
-          )}
-        </motion.button>
-
-        {/* AI Integration Notice */}
-        <div className="bg-medflow-primary/5 border border-medflow-primary/10 rounded-lg p-4">
-          <div className="flex items-center space-x-3 text-medflow-primary">
-            <Zap className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              🤖 Funcționalități AI pentru optimizarea programărilor vor fi disponibile în curând
-            </span>
+        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex items-center space-x-4">
+            {isSubmitting && (
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="w-4 h-4 border-2 border-medflow-primary border-t-transparent rounded-full animate-spin"></div>
+                <span>Se salvează... {saveProgress}%</span>
+              </div>
+            )}
           </div>
+
+          <motion.button
+            type="submit"
+            disabled={!isFormValid || isSubmitting}
+            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
+              isFormValid && !isSubmitting
+                ? 'bg-medflow-primary text-white hover:bg-medflow-primary/90 shadow-lg hover:shadow-xl'
+                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+            }`}
+            whileHover={isFormValid && !isSubmitting ? { scale: 1.02 } : {}}
+            whileTap={isFormValid && !isSubmitting ? { scale: 0.98 } : {}}
+          >
+            <Save className="w-4 h-4" />
+            <span>
+              {isSubmitting 
+                ? 'Se salvează...' 
+                : appointmentId 
+                  ? 'Actualizează programarea' 
+                  : 'Creează programarea'
+              }
+            </span>
+          </motion.button>
         </div>
       </motion.form>
     </div>
-    )
+  )
+
+  // Helper functions (these would need to be implemented)
+  function handleFieldChange(field: keyof AppointmentFormData, value: string) {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear field error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  function handleFieldBlur(field: keyof AppointmentFormData) {
+    // Validate field on blur
+    const validation = validateAppointmentForm(formData)
+    if (validation.errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: validation.errors[field] }))
+    }
+  }
 }

@@ -23,6 +23,7 @@ import DocumentUpload from '../components/DocumentUpload'
 import ModernCalendar from '../components/ModernCalendar'
 import AppointmentTemplates from '../components/AppointmentTemplates'
 import { DeleteAppointmentDialog, CompleteAppointmentDialog } from '../components/ConfirmationDialog'
+import AppointmentInfoModal from '../components/AppointmentInfoModal'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { MedFlowLoader, SimpleLoader } from '../components/ui'
 import NotificationStatus from '../components/NotificationStatus'
@@ -37,17 +38,8 @@ import { Timestamp } from 'firebase/firestore'
 
 interface DocMeta { id: string; fileUrl: string; fileName: string; contentType: string; createdAt?: Date | string }
 
-interface Appointment {
-  id: string
-  patientName: string
-  patientEmail?: string
-  patientPhone?: string
-  dateTime: Date
-  symptoms: string
-  notes?: string
-  status: 'scheduled' | 'completed' | 'no_show' | 'confirmed' | 'declined'
-  doctorId: string
-}
+// Import the Appointment type from AppointmentForm to ensure consistency
+import { Appointment } from '../components/AppointmentForm'
 
 interface DeleteDialogState {
   isOpen: boolean
@@ -89,6 +81,12 @@ export default function Appointments() {
     loading: false
   })
 
+  // State for appointment info modal
+  const [infoModal, setInfoModal] = useState<{ isOpen: boolean; appointment: Appointment | null }>({
+    isOpen: false,
+    appointment: null
+  })
+
   // Utility function to safely convert dateTime to Date
   const safeConvertToDate = useCallback((dateTime: Date | string | any): Date => {
     if (dateTime instanceof Date) {
@@ -108,6 +106,7 @@ export default function Appointments() {
   const convertToAppointmentWithNotifications = useCallback((appointment: Appointment): AppointmentWithNotifications => {
     return {
       ...appointment,
+      doctorId: appointment.doctorId, // Use doctorId from AppointmentForm type
       notifications: {
         firstNotification: { sent: false },
         secondNotification: { sent: false },
@@ -156,11 +155,11 @@ export default function Appointments() {
     }
 
     try {
-      const q = query(
-        collection(db, 'appointments'),
-        where('doctorId', '==', user.uid),
-        orderBy('dateTime', 'desc')
-      )
+              const q = query(
+          collection(db, 'appointments'),
+          where('doctorId', '==', user.uid),
+          orderBy('dateTime', 'desc')
+        )
       
       const unsub = onSnapshot(q, 
         (snap) => {
@@ -305,14 +304,37 @@ export default function Appointments() {
   }
 
   const handleAppointmentClick = (appointment: Appointment) => {
-    setSelectedId(appointment.id)
-    setCreatingAt(undefined)
+    setInfoModal({
+      isOpen: true,
+      appointment: appointment
+    })
   }
 
   const handleTimeSlotClick = (date: Date) => {
     const iso = new Date(date.getTime() - date.getTimezoneOffset()*60000).toISOString().slice(0,16)
     setCreatingAt(iso)
     setSelectedId(undefined)
+  }
+
+  // Info modal handlers
+  const handleInfoModalEdit = (appointment: Appointment) => {
+    setInfoModal({ isOpen: false, appointment: null })
+    setSelectedId(appointment.id)
+    setCreatingAt(undefined)
+  }
+
+  const handleInfoModalDelete = (appointment: Appointment) => {
+    setInfoModal({ isOpen: false, appointment: null })
+    openDeleteDialog(appointment)
+  }
+
+  const handleInfoModalComplete = (appointment: Appointment) => {
+    setInfoModal({ isOpen: false, appointment: null })
+    openCompleteDialog(appointment)
+  }
+
+  const closeInfoModal = () => {
+    setInfoModal({ isOpen: false, appointment: null })
   }
 
 
@@ -687,6 +709,16 @@ export default function Appointments() {
           </div>
         </div>
         </motion.section>
+
+        {/* Appointment Info Modal */}
+        <AppointmentInfoModal
+          isOpen={infoModal.isOpen}
+          appointment={infoModal.appointment}
+          onClose={closeInfoModal}
+          onEdit={handleInfoModalEdit}
+          onDelete={handleInfoModalDelete}
+          onComplete={handleInfoModalComplete}
+        />
 
         {/* Confirmation Dialogs */}
         <DeleteAppointmentDialog

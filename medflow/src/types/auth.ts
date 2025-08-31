@@ -1,7 +1,7 @@
 import type { User } from 'firebase/auth'
 
 // Role hierarchy for MedFlow
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'USER'
+export type UserRole = 'ADMIN' | 'USER'
 
 // Legacy role types for backward compatibility (DEPRECATED - will be removed)
 export type LegacyUserRole = 'doctor' | 'nurse' | 'admin' | 'patient'
@@ -16,7 +16,6 @@ export const LEGACY_ROLE_MAPPING: Record<LegacyUserRole, UserRole> = {
 
 // Reverse mapping for display purposes
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
-  'SUPER_ADMIN': 'Super Administrator',
   'ADMIN': 'Administrator',
   'USER': 'Medical Professional'
 }
@@ -56,23 +55,12 @@ export interface AppUser extends User {
 
 // Role-based permissions mapping
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  SUPER_ADMIN: [
-    // Full system control
+  ADMIN: [
+    // Full admin access (replaces SUPER_ADMIN functionality)
     { resource: 'users', action: 'manage', scope: 'all' },
     { resource: 'analytics', action: 'manage', scope: 'all' },
     { resource: 'settings', action: 'manage', scope: 'all' },
     { resource: 'reports', action: 'manage', scope: 'all' },
-    { resource: 'appointments', action: 'manage', scope: 'all' },
-    { resource: 'patients', action: 'manage', scope: 'all' },
-  ],
-  ADMIN: [
-    // Limited admin access
-    { resource: 'users', action: 'read', scope: 'all' },
-    { resource: 'users', action: 'write', scope: 'all' },
-    { resource: 'analytics', action: 'read', scope: 'all' },
-    { resource: 'settings', action: 'read', scope: 'all' },
-    { resource: 'reports', action: 'read', scope: 'all' },
-    { resource: 'reports', action: 'write', scope: 'all' },
     { resource: 'appointments', action: 'manage', scope: 'all' },
     { resource: 'patients', action: 'manage', scope: 'all' },
   ],
