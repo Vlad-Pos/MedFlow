@@ -58,8 +58,7 @@ export default defineConfig({
           ],
           'dashboard-features': [
             './src/pages/Dashboard.tsx',
-            './src/pages/Profile.tsx',
-            './src/components/ModernCalendar.tsx'
+            './src/pages/Profile.tsx'
           ],
           'appointment-features': [
             './src/pages/Appointments.tsx',

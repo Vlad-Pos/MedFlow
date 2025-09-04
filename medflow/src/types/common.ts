@@ -115,15 +115,50 @@ export type AppointmentType = 'consultation' | 'follow-up' | 'emergency' | 'rout
 
 // Patient types
 export interface Patient {
-  id: string
-  name: string
-  dateOfBirth: Date
-  gender: 'male' | 'female' | 'other' | 'prefer-not-to-say'
+  // Core Identity
+  id: string                    // Unique Firebase document ID
+  patientNumber: string         // Human-readable patient number (e.g., "P-2024-001")
+  
+  // Personal Information
+  personalInfo: {
+    firstName: string
+    lastName: string
+    fullName: string           // Computed: firstName + lastName
+    dateOfBirth: Date
+    gender: 'male' | 'female' | 'other' | 'prefer-not-to-say'
+    cnp?: string              // Romanian CNP (if available)
+  }
+  
+  // Contact Information
   contactInfo: ContactInfo
+  
+  // Medical Information
+  medicalInfo: {
+    bloodType?: string
+    allergies: Allergy[]
+    chronicConditions: MedicalCondition[]
+    currentMedications: Medication[]
+    lastConsultation?: Date
+    nextAppointment?: Date
+  }
+  
+  // System Information
+  systemInfo: {
+    createdBy: string          // userId who created the patient record
+    lastModifiedBy: string     // userId who last modified the record
+    createdAt: Date
+    updatedAt: Date
+    isActive: boolean          // Soft delete flag
+  }
+  
+  // Legacy fields for backward compatibility
+  name: string                 // Deprecated: use personalInfo.fullName
+  dateOfBirth: Date           // Deprecated: use personalInfo.dateOfBirth
+  gender: 'male' | 'female' | 'other' | 'prefer-not-to-say' // Deprecated: use personalInfo.gender
+  
+  // Extended Information
   medicalHistory?: MedicalHistory
   flags?: PatientFlag[]
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface ContactInfo {

@@ -64,6 +64,13 @@ MedFlow este o aplicație web **enterprise-grade** pentru gestionarea cabinetelo
 - **Utilities**: 60+ funcții specializate medicale
 - **Calendar Integration**: Sistem calendar cu UI enhancements
 
+### **📚 Documentație Sistem Calendar**
+- **Documentație completă**: [CALENDAR_SYSTEM_DOCUMENTATION.md](./CALENDAR_SYSTEM_DOCUMENTATION.md)
+- **Status**: Production Ready & Legacy-Free ✅
+- **Funcționalități**: Firebase integration, drag & drop, accessibility, unified system
+- **Pentru dezvoltatori**: Ghid complet pentru modificări și extinderi
+- **Cleanup Status**: ModernCalendar component completely removed ✅
+
 ## 📦 Instalare
 
 ```bash

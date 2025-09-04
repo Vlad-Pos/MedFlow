@@ -20,7 +20,7 @@ import { isDemoMode, subscribeToDemoAppointments, deleteDemoAppointment } from '
 import { useAuth } from '../providers/AuthProvider'
 import AppointmentForm from '../components/AppointmentForm'
 import DocumentUpload from '../components/DocumentUpload'
-import ModernCalendar from '../components/ModernCalendar'
+
 import AppointmentTemplates from '../components/AppointmentTemplates'
 import { DeleteAppointmentDialog, CompleteAppointmentDialog } from '../components/ConfirmationDialog'
 import AppointmentInfoModal from '../components/AppointmentInfoModal'
@@ -61,7 +61,7 @@ export default function Appointments() {
   const [creatingAt, setCreatingAt] = useState<string | undefined>(new Date().toISOString().slice(0,16))
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [docs, setDocs] = useState<Record<string, DocMeta[]>>({})
-  const [view, setView] = useState<'calendar' | 'list' | 'templates'>('calendar')
+  const [view, setView] = useState<'list' | 'templates'>('list')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const location = useLocation()
@@ -394,45 +394,38 @@ export default function Appointments() {
               <h2 className="text-3xl font-bold text-medflow-text-primary">
                 Gestionare Programări
               </h2>
-              <div className="flex items-center space-x-2 bg-medflow-surface/60 backdrop-blur-sm rounded-lg p-1">
-                <button
-                  onClick={() => setView('calendar')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    view === 'calendar'
-                      ? 'bg-medflow-accent text-white'
-                      : 'text-medflow-text-secondary hover:text-medflow-text-primary'
-                  }`}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 bg-medflow-surface/60 backdrop-blur-sm rounded-lg p-1">
+                  <button
+                    onClick={() => setView('list')}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      view === 'list'
+                        ? 'bg-medflow-accent text-white'
+                        : 'text-medflow-text-secondary hover:text-medflow-text-primary'
+                    }`}
+                  >
+                    <List className="w-4 h-4" />
+                    <span>Listă</span>
+                  </button>
+                  <button
+                    onClick={() => setView('templates')}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      view === 'templates'
+                        ? 'bg-medflow-accent text-white'
+                        : 'text-medflow-text-secondary hover:text-medflow-text-primary'
+                    }`}
+                  >
+                    <Files className="w-4 h-4" />
+                    <span>Template</span>
+                  </button>
+                </div>
+                <Link
+                  to="/calendar"
+                  className="inline-flex items-center px-4 py-2 bg-[var(--medflow-brand-1)] hover:bg-[var(--medflow-brand-2)] text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
                 >
-                  <Calendar className="w-4 h-4" />
-                  <span>Calendar</span>
-                </button>
-                <button
-                  onClick={() => setView('list')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    view === 'list'
-                      ? 'bg-medflow-accent text-white'
-                      : 'text-medflow-text-secondary hover:text-medflow-text-primary'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                  <span>Listă</span>
-                </button>
-                <button
-                  key={view}
-                  onClick={() => setView(view)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                    view === 'calendar'
-                      ? 'bg-[var(--medflow-brand-1)] text-[var(--medflow-text-primary)]'
-                      : view === 'list'
-                      ? 'bg-[var(--medflow-brand-2)] text-[var(--medflow-text-primary)]'
-                      : view === 'templates'
-                      ? 'bg-[var(--medflow-brand-3)] text-[var(--medflow-text-primary)]'
-                      : 'text-[var(--medflow-text-secondary)] hover:text-[var(--medflow-text-primary)]'
-                  }`}
-                >
-                  <Files className="w-4 h-4" />
-                  <span>Template</span>
-                </button>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Vezi Calendar Complet
+                </Link>
               </div>
             </div>
             
@@ -490,16 +483,11 @@ export default function Appointments() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Calendar/List View */}
           <div className="lg:col-span-2">
-            {view === 'calendar' ? (
-              <ModernCalendar
-                onAppointmentClick={handleAppointmentClick}
-                onTimeSlotClick={handleTimeSlotClick}
-              />
-            ) : view === 'templates' ? (
+            {view === 'templates' ? (
               <AppointmentTemplates
                 onSelectTemplate={(template) => {
-                  // When template is selected, switch to calendar view and open appointment form
-                  setView('calendar')
+                  // When template is selected, switch to list view and open appointment form
+                  setView('list')
                   setSelectedId(undefined)
                   setCreatingAt(new Date().toISOString().slice(0,16))
                   // TODO: Pre-fill form with template data

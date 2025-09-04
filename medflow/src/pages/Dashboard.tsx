@@ -19,7 +19,7 @@ import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestor
 import { db } from '../services/firebase'
 import { isDemoMode, subscribeToDemoAppointments } from '../utils/demo'
 import { useAuth } from '../providers/AuthProvider'
-import ModernCalendar from '../components/ModernCalendar'
+
 import LoadingSpinner from '../components/LoadingSpinner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FastStatsCard, MedFlowLoader, SimpleLoader } from '../components/ui'
@@ -511,19 +511,32 @@ export default function Dashboard() {
              </div>
            </div>
            
-           {/* Modern Calendar */}
+           {/* Calendar Navigation */}
            <div className="lg:col-span-2">
              <div className="bg-[var(--medflow-surface-elevated)]/60 backdrop-blur-sm rounded-xl shadow-sm border border-[var(--medflow-border)] overflow-hidden">
                <div className="p-6 border-b border-[var(--medflow-border)]">
-                 <h2 className="text-xl font-semibold text-[var(--medflow-text-primary)]">
+                 <h2 className="text-xl font-semibold text-[var(--medflow-text-primary)] flex items-center">
+                   <Calendar className="w-5 h-5 mr-2 text-[var(--medflow-brand-1)]" />
                    Calendar Programări
                  </h2>
                </div>
                <div className="p-6">
-                 <ModernCalendar
-                   onAppointmentClick={handleAppointmentClick}
-                   onTimeSlotClick={handleTimeSlotClick}
-                 />
+                 <div className="text-center py-8">
+                   <Calendar className="w-16 h-16 text-[var(--medflow-brand-1)]/60 mx-auto mb-4" />
+                   <h3 className="text-lg font-medium text-[var(--medflow-text-primary)] mb-2">
+                     Accesați Calendarul Complet
+                   </h3>
+                   <p className="text-sm text-[var(--medflow-text-secondary)] mb-6 max-w-md mx-auto">
+                     Vizualizați și gestionați toate programările într-o interfață calendar dedicată și optimizată
+                   </p>
+                   <Link
+                     to="/calendar"
+                     className="inline-flex items-center px-6 py-3 bg-[var(--medflow-brand-1)] hover:bg-[var(--medflow-brand-2)] text-white font-medium rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                   >
+                     <Calendar className="w-4 h-4 mr-2" />
+                     Deschide Calendarul
+                   </Link>
+                 </div>
                </div>
              </div>
            </div>

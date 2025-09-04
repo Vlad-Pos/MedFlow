@@ -153,7 +153,7 @@ export function extractBirthDateFromCNP(cnp: string): Date | null {
     const monthCode = parseInt(cleanCNP.substring(3, 5))
     const dayCode = parseInt(cleanCNP.substring(5, 7))
     
-    // Determine century based on first digit
+    // Determine century based on first digit and realistic age
     let century = 1900 // Default to 20th century
     
     if (firstDigit === 9) {
@@ -165,8 +165,11 @@ export function extractBirthDateFromCNP(cnp: string): Date | null {
       const ageIn21st = currentYear - (2000 + yearCode)
       
       // Choose century that results in more realistic age (0-100 years)
-      if (ageIn21st >= 0 && ageIn21st <= 100 && ageIn21st < ageIn20th) {
-        century = 2000
+      // If 20th century would result in age > 100, use 21st century
+      if (ageIn20th > 100) {
+        century = 2000 // Use 21st century for very old dates
+      } else if (ageIn21st >= 0 && ageIn21st <= 100 && ageIn21st < ageIn20th) {
+        century = 2000 // Use 21st century for recent dates
       }
     }
     

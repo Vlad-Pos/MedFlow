@@ -5,7 +5,7 @@
  * and complete Romanian localization support.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek } from 'date-fns'
 import { ro } from 'date-fns/locale'
@@ -26,10 +26,14 @@ import {
 import { LoadingSpinner } from '../../ui/feedback/LoadingSpinner'
 import { AnimatedButton, IconButton } from '../../ui/buttons/AnimatedButton'
 import { ErrorBoundary } from '../../ui/feedback/ErrorBoundary'
+import FadeContent from '../../ui/animations/FadeContent'
+import EventCard from './EventCard'
+
 
 // Firebase and appointment utilities
-import { auth } from '../../../services/firebase'
+import { auth, db } from '../../../services/firebase'
 import { getAppointmentsForDateRange, createAppointment, updateAppointment, deleteAppointment } from '../../../utils/appointmentUtils'
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore'
 
 // Validation utilities
 import { validateCNP, extractBirthDateFromCNP } from '../../../utils/cnpValidation'
@@ -37,7 +41,8 @@ import { COUNTRIES, DEFAULT_COUNTRY } from '../../../utils/phoneValidation'
 
 // Types for calendar events
 export interface CalendarEvent {
-  id: number
+  id: number                    // Display ID (preserved for backward compatibility)
+  firebaseId?: string          // NEW: Firebase document ID for CRUD operations
   title: string
   startTime: string
   endTime: string
@@ -97,6 +102,22 @@ export function SchedulingCalendar() {
     return `${day} ${capitalizedMonth} ${year}`
   }
 
+  // NEW: Batch state update function for performance optimization
+  const batchUpdateEvents = useCallback((updates: Array<{ id: number; updates: Partial<CalendarEvent> }>) => {
+    setEvents(prevEvents => {
+      const eventMap = new Map(prevEvents.map(event => [event.id, event]))
+      
+      updates.forEach(({ id, updates: eventUpdates }) => {
+        const existingEvent = eventMap.get(id)
+        if (existingEvent) {
+          eventMap.set(id, { ...existingEvent, ...eventUpdates })
+        }
+      })
+      
+      return Array.from(eventMap.values())
+    })
+  }, [])
+
   // Romanian medical appointment statuses and categories
   const APPOINTMENT_STATUS = {
     SCHEDULED: 'Programat',
@@ -139,6 +160,12 @@ export function SchedulingCalendar() {
   const [controlsVisible, setControlsVisible] = useState(false)
   const [isEditingEvent, setIsEditingEvent] = useState(false)
   
+  // NEW: Loading states for Firebase operations
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false)
+  const [isUpdatingEvent, setIsUpdatingEvent] = useState(false)
+  const [isDeletingEvent, setIsDeletingEvent] = useState(false)
+  const [isReschedulingEvent, setIsReschedulingEvent] = useState(false)
+  
   // Helper function to set current date with proper capitalization
   const setCurrentDateWithCapitalization = useCallback((date: Date) => {
     setCurrentDate(forceCapitalizeMonth(date))
@@ -156,6 +183,17 @@ export function SchedulingCalendar() {
   // Performance optimization: respect user's motion preferences
   const prefersReducedMotion = useReducedMotion()
   
+  // NEW: Focus management for accessibility
+  const mainCalendarRef = useRef<HTMLDivElement>(null)
+  const createEventButtonRef = useRef<HTMLButtonElement>(null)
+  
+  // Focus management when view changes
+  useEffect(() => {
+    if (mainCalendarRef.current) {
+      mainCalendarRef.current.focus()
+    }
+  }, [currentView])
+  
   // Initialize current date and month on component mount
   useEffect(() => {
     const now = new Date()
@@ -169,10 +207,10 @@ export function SchedulingCalendar() {
   }, [])
 
   // Function to fetch appointments from Firebase and convert to calendar events
-  const fetchAppointmentsFromFirebase = useCallback(async () => {
+  const fetchAppointmentsFromFirebase = useCallback(() => {
     if (!auth.currentUser?.uid) {
       console.log('No authenticated user, using demo events')
-      // Fallback to demo events if no user is authenticated
+      // Fallback to demo events if no user is authenticated (PRESERVED)
       setEvents([
         {
           id: 1,
@@ -266,27 +304,96 @@ export function SchedulingCalendar() {
           endDate.setHours(23, 59, 59, 999);
       }
 
-      // Fetch appointments from Firebase
-      const appointments = await getAppointmentsForDateRange(startDate, endDate, auth.currentUser.uid)
-      
-      // Convert appointments to calendar events
-      const calendarEvents: CalendarEvent[] = appointments.map((appointment: any, index: number) => ({
-        id: index + 1, // Use index for demo purposes, in production use appointment.id
-        title: appointment.patientName,
-        startTime: appointment.dateTime.toTimeString().slice(0, 5), // Extract HH:MM
-        endTime: new Date(appointment.dateTime.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5), // Add 1 hour
-        color: getEventColor(index + 1),
-        day: appointment.dateTime.getDay() === 0 ? 7 : appointment.dateTime.getDay(), // Keep for backward compatibility
-        description: appointment.symptoms || `Programare pentru ${appointment.patientName}`,
-        location: "Cabinet principal",
-        attendees: [appointment.patientName],
-        organizer: "Medicul curant"
-      }))
+      // Create real-time listener (NEW: Enhanced with ModernCalendar approach)
+      const q = query(
+        collection(db, 'appointments'),
+        where('userId', '==', auth.currentUser.uid),
+        where('dateTime', '>=', startDate),
+        where('dateTime', '<=', endDate),
+        orderBy('dateTime', 'asc')
+      )
 
-      setEvents(calendarEvents);
+      // Return unsubscribe function for cleanup (NEW: Real-time listener)
+      return onSnapshot(q, 
+        (snapshot) => {
+          try {
+            const appointments = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              dateTime: doc.data().dateTime.toDate(),
+              createdAt: doc.data().createdAt?.toDate(),
+              updatedAt: doc.data().updatedAt?.toDate(),
+              patientBirthDate: doc.data().patientBirthDate ? doc.data().patientBirthDate.toDate() : undefined
+            }))
+
+                          // Transform to CalendarEvent format (PRESERVED LOGIC)
+              const calendarEvents: CalendarEvent[] = appointments.map((appointment: any, index: number) => {
+                // NEW: Calculate end time based on actual duration
+                const duration = appointment.duration || 60; // Default to 60 minutes if no duration
+                const endTime = new Date(appointment.dateTime.getTime() + duration * 60 * 1000).toTimeString().slice(0, 5);
+                
+                return {
+                  id: index + 1, // Generate unique ID for display
+                  firebaseId: appointment.id, // NEW: Store Firebase document ID
+                  title: appointment.patientName,
+                  startTime: appointment.dateTime.toTimeString().slice(0, 5), // Extract HH:MM
+                  endTime: endTime, // Use calculated end time based on duration
+                  color: getEventColor(index + 1),
+                  day: appointment.dateTime.getDay() === 0 ? 7 : appointment.dateTime.getDay(), // Keep for backward compatibility
+                  description: appointment.symptoms || `Programare pentru ${appointment.patientName}`,
+                  location: "Cabinet principal",
+                  attendees: [appointment.patientName],
+                  organizer: "Medicul curant",
+                  // NEW: Enhanced patient information fields (PRESERVED)
+                  patientCNP: appointment.patientCNP,
+                  patientEmail: appointment.patientEmail,
+                  patientPhone: appointment.patientPhone,
+                  patientBirthDate: appointment.patientBirthDate,
+                                 }
+               })
+
+            setEvents(calendarEvents);
+          } catch (error) {
+            console.error('Error processing appointment data:', error);
+            // Fallback to demo events on error (PRESERVED)
+            setEvents([
+              {
+                id: 1,
+                title: "Consultație Demo",
+                startTime: "09:00",
+                endTime: "10:00",
+                color: getEventColor(1),
+                day: 1,
+                description: "Programare demonstrativă",
+                location: "Cabinet demo",
+                attendees: ["Pacient Demo"],
+                organizer: "Dr. Demo",
+              }
+            ]);
+          }
+        },
+        (error) => {
+          console.error('Firebase listener error:', error);
+          // Fallback to demo events on error (PRESERVED)
+          setEvents([
+            {
+              id: 1,
+              title: "Consultație Demo",
+              startTime: "09:00",
+              endTime: "10:00",
+              color: getEventColor(1),
+              day: 1,
+              description: "Programare demonstrativă",
+              location: "Cabinet demo",
+              attendees: ["Pacient Demo"],
+              organizer: "Dr. Demo",
+            }
+          ]);
+        }
+      )
     } catch (error) {
-      console.error('Error fetching appointments from Firebase:', error);
-      // Fallback to demo events on error
+      console.error('Error setting up Firebase query:', error);
+      // Fallback to demo events on error (PRESERVED)
       setEvents([
         {
           id: 1,
@@ -302,12 +409,18 @@ export function SchedulingCalendar() {
         }
       ]);
     }
-  }, [currentView, currentDateObj]);
+  }, [currentView, currentDateObj, auth.currentUser?.uid]);
 
   // Refetch appointments when date or view changes
   useEffect(() => {
     if (isLoaded) {
-      fetchAppointmentsFromFirebase()
+      const unsubscribe = fetchAppointmentsFromFirebase()
+      // Cleanup function to unsubscribe from Firebase listener
+      return () => {
+        if (unsubscribe && typeof unsubscribe === 'function') {
+          unsubscribe()
+        }
+      }
     }
   }, [currentDateObj, currentView, isLoaded, fetchAppointmentsFromFirebase])
 
@@ -392,7 +505,8 @@ export function SchedulingCalendar() {
   const [newEventTitle, setNewEventTitle] = useState('')
   const [newEventDate, setNewEventDate] = useState(new Date().toISOString().split('T')[0])
   const [newEventStartTime, setNewEventStartTime] = useState('09:00')
-  const [newEventEndTime, setNewEventEndTime] = useState('10:00')
+  const [newEventDuration, setNewEventDuration] = useState('30') // NEW: Duration state
+  const [newEventEndTime, setNewEventEndTime] = useState('09:30') // Updated default
   const [newEventDescription, setNewEventDescription] = useState('')
   
   // New fields for patient information
@@ -400,6 +514,14 @@ export function SchedulingCalendar() {
   const [newEventEmail, setNewEventEmail] = useState('')
   const [newEventPhone, setNewEventPhone] = useState('')
   const [newEventCountryCode, setNewEventCountryCode] = useState('RO')
+
+  // NEW: Update end time when duration or start time changes
+  useEffect(() => {
+    if (newEventStartTime && newEventDuration) {
+      const endTime = calculateEndTimeFromDuration(newEventStartTime, parseInt(newEventDuration))
+      setNewEventEndTime(endTime)
+    }
+  }, [newEventStartTime, newEventDuration])
   
   // Form state for editing existing events
   const [editEventTitle, setEditEventTitle] = useState('')
@@ -522,6 +644,121 @@ export function SchedulingCalendar() {
     })
   }
 
+  // Helper function to calculate end time from duration
+  const calculateEndTimeFromDuration = (startTime: string, duration: number) => {
+    const start = new Date(`2000-01-01T${startTime}:00`)
+    const end = new Date(start.getTime() + duration * 60000)
+    return end.toTimeString().slice(0, 5)
+  }
+
+  // NEW: Helper function to check if event is perfectly aligned with grid
+  const isEventAlignedWithGrid = (startTime: string, endTime: string) => {
+    const start = Number.parseInt(startTime.split(":")[0]) + Number.parseInt(startTime.split(":")[1]) / 60
+    const end = Number.parseInt(endTime.split(":")[0]) + Number.parseInt(endTime.split(":")[1]) / 60
+    const duration = end - start
+    
+    // Check if duration aligns with 15-minute intervals (0.25 hours)
+    const durationInQuarters = duration * 4 // Convert to 15-minute units
+    return Number.isInteger(durationInQuarters)
+  }
+
+  // NEW: Helper function to get enhanced event card classes based on alignment
+  const getEnhancedEventCardClasses = (event: CalendarEvent) => {
+    const start = Number.parseInt(event.startTime.split(":")[0]) + Number.parseInt(event.startTime.split(":")[1]) / 60
+    const end = Number.parseInt(event.endTime.split(":")[0]) + Number.parseInt(event.endTime.split(":")[1]) / 60
+    const duration = end - start
+    
+    // Responsive padding based on card size
+    let paddingClass = "p-2"
+    if (duration <= 0.25) { // 15 minutes or less
+      paddingClass = "p-1"
+    } else if (duration <= 0.34) { // 20 minutes (slightly more tolerance)
+      paddingClass = "pt-0 pb-2 px-1.5" // Removed top padding completely for perfect centering
+    }
+    
+    const baseClasses = `${event.color} rounded-md ${paddingClass} text-white text-xs shadow-md cursor-pointer`
+    const isAligned = isEventAlignedWithGrid(event.startTime, event.endTime)
+    
+    if (isAligned) {
+      // Aligned events: solid border with brand color
+      return `${baseClasses} border-2 border-white/20`
+    } else {
+      // Non-aligned events: dotted border with brand color
+      return `${baseClasses} border-2 border-dashed border-white/30`
+    }
+  }
+
+  // NEW: Helper function to get responsive text classes based on event duration
+  const getResponsiveTextClasses = (event: CalendarEvent) => {
+    const start = Number.parseInt(event.startTime.split(":")[0]) + Number.parseInt(event.startTime.split(":")[1]) / 60
+    const end = Number.parseInt(event.endTime.split(":")[0]) + Number.parseInt(event.endTime.split(":")[1]) / 60
+    const duration = end - start
+    
+
+    
+    if (duration <= 0.25) { // 15 minutes or less
+      return {
+        container: "flex justify-between items-center min-h-0",
+        nameContainer: "flex flex-col justify-center flex-1 min-w-0",
+        textClass: "font-medium text-[8px] leading-tight truncate text-white",
+        timeClass: "font-medium text-[8px] leading-tight text-right flex-shrink-0 ml-1 text-white self-start"
+      }
+    } else if (duration <= 0.34) { // 20 minutes (slightly more tolerance)
+      return {
+        container: "flex justify-between items-start min-h-0",
+        nameContainer: "flex flex-col justify-center flex-1 min-w-0",
+        textClass: "font-medium text-[9px] leading-tight truncate text-white",
+        timeClass: "font-medium text-[9px] leading-tight text-right flex-shrink-0 ml-1 text-white self-start"
+      }
+    } else if (duration <= 0.5) { // 30 minutes
+      return {
+        container: "flex justify-between items-start min-h-0",
+        nameContainer: "flex flex-col justify-center flex-1 min-w-0",
+        textClass: "font-medium text-[10px] leading-tight truncate text-white",
+        timeClass: "font-medium text-[10px] leading-tight text-right flex-shrink-0 ml-1 text-white"
+      }
+    } else { // 45+ minutes
+      return {
+        container: "flex justify-between items-start",
+        nameContainer: "flex flex-col justify-center flex-1 min-w-0",
+        textClass: "font-medium text-xs leading-tight truncate text-white",
+        timeClass: "font-medium text-xs leading-tight text-right flex-shrink-0 ml-1 text-white"
+      }
+    }
+  }
+
+  // NEW: Helper function to format time for display
+  const formatTimeForDisplay = (time: string) => {
+    // Remove leading zeros for cleaner display
+    const [hours, minutes] = time.split(':')
+    return `${parseInt(hours)}:${minutes}`
+  }
+
+  // NEW: Helper function to parse and format patient names
+  const parsePatientName = (fullName: string) => {
+    const names = fullName.trim().split(/\s+/)
+    
+    if (names.length === 1) {
+      return {
+        firstName: names[0],
+        lastName: null,
+        isSingleName: true
+      }
+    } else if (names.length >= 2) {
+      return {
+        firstName: names[0],
+        lastName: names.slice(1).join(' '), // Handle multiple last names
+        isSingleName: false
+      }
+    } else {
+      return {
+        firstName: fullName,
+        lastName: null,
+        isSingleName: true
+      }
+    }
+  }
+
   // Helper function to calculate event position and height
   const calculateEventStyle = (startTime: string, endTime: string) => {
     const start = Number.parseInt(startTime.split(":")[0]) + Number.parseInt(startTime.split(":")[1]) / 60
@@ -529,6 +766,35 @@ export function SchedulingCalendar() {
     const top = (start - 8) * 80 // 80px per hour
     const height = (end - start) * 80
     return { top: `${top}px`, height: `${height}px` }
+  }
+
+  // NEW: Helper function to calculate new time from drag position
+  const calculateNewTimeFromDrag = (dragY: number, dayIndex: number) => {
+    // Calculate new hour and minute from drag position
+    const newHour = Math.floor(dragY / 80) + 8 // 80px per hour, starting at 8 AM
+    const newMinute = Math.floor((dragY % 80) / 80 * 60)
+    
+    // Ensure time is within valid range (8:00 - 22:00)
+    if (newHour < 8 || newHour >= 22) {
+      return null
+    }
+    
+    // Calculate new date if dragged to different day
+    const newDay = dayIndex + 1
+    const newDate = new Date(currentDateObj)
+    newDate.setDate(newDate.getDate() + (newDay - newDate.getDay()))
+    newDate.setHours(newHour, newMinute, 0, 0)
+    
+    // Format new time strings
+    const newStartTime = `${newHour.toString().padStart(2, '0')}:${newMinute.toString().padStart(2, '0')}`
+    const newEndTime = new Date(newDate.getTime() + 60 * 60 * 1000).toTimeString().slice(0, 5)
+    
+    return {
+      newStartTime,
+      newEndTime,
+      newDay,
+      newDate
+    }
   }
 
   // Sample my calendars with Romanian medical categories
@@ -586,7 +852,8 @@ export function SchedulingCalendar() {
     const day = String(currentDateObj.getDate()).padStart(2, '0')
     setNewEventDate(`${year}-${month}-${day}`)
     setNewEventStartTime('09:00')
-    setNewEventEndTime('10:00')
+    setNewEventDuration('30') // Reset to default duration
+    setNewEventEndTime('09:30') // Reset to match default duration
     setNewEventDescription('')
     // Reset new patient information fields
     setNewEventCNP('')
@@ -597,76 +864,82 @@ export function SchedulingCalendar() {
 
   const createEvent = async () => {
     if (!newEventTitle || !newEventDate || !newEventStartTime || !newEventEndTime) {
-      return // Don't create event without required fields
+      return // Don't create event without required fields (PRESERVED)
     }
 
-    // Check if user is authenticated
+    // Check if user is authenticated (PRESERVED)
     if (!auth.currentUser) {
       alert('Trebuie să fiți autentificat pentru a crea o programare')
       return
     }
+    
+    // NEW: Set loading state
+    setIsCreatingEvent(true)
 
     try {
-      // Parse the selected date and time
+      // Parse the selected date and time (PRESERVED LOGIC)
       const selectedDate = new Date(newEventDate)
       const [hours, minutes] = newEventStartTime.split(':').map(Number)
       const appointmentDateTime = new Date(selectedDate)
       appointmentDateTime.setHours(hours, minutes, 0, 0)
 
-      // Extract birth date from CNP if provided
+      // Extract birth date from CNP if provided (PRESERVED LOGIC)
       const birthDate = newEventCNP ? extractBirthDateFromCNP(newEventCNP) : null
 
-      // Format phone number with country code if provided
+      // Format phone number with country code if provided (PRESERVED LOGIC)
       const formattedPhone = newEventPhone ? `${newEventCountryCode}${newEventPhone}` : undefined
 
-             // Create appointment data for Firebase
-       const appointmentData = {
-         patientName: newEventTitle,
-         patientEmail: newEventEmail || undefined,
-         patientPhone: formattedPhone,
-         patientCNP: newEventCNP || undefined,
-         patientBirthDate: birthDate || undefined,
-         dateTime: appointmentDateTime,
-         symptoms: newEventDescription || `Programare pentru ${newEventTitle}`,
-         notes: newEventDescription || undefined,
-         status: 'scheduled' as const,
-         userId: auth.currentUser.uid,
-         createdBy: auth.currentUser.uid, // Add required createdBy field
-       }
+      // Create appointment data for Firebase (PRESERVED LOGIC)
+      const appointmentData = {
+        patientName: newEventTitle,
+        patientEmail: newEventEmail || undefined,
+        patientPhone: formattedPhone,
+        patientCNP: newEventCNP || undefined,
+        patientBirthDate: birthDate || undefined,
+        dateTime: appointmentDateTime,
+        duration: parseInt(newEventDuration), // NEW: Add duration to Firebase
+        symptoms: newEventDescription || `Programare pentru ${newEventTitle}`,
+        notes: newEventDescription || undefined,
+        status: 'scheduled' as const,
+        userId: auth.currentUser.uid,
+        createdBy: auth.currentUser.uid,
+      }
 
-      // Create appointment in Firebase
+      // Create appointment in Firebase (ENHANCED ERROR HANDLING)
       const appointmentId = await createAppointment(appointmentData)
 
-      // Create local event for display
-      const dayOfWeek = selectedDate.getDay() // 0 = Sunday, 1 = Monday, etc.
-      const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek // Convert to 1-7 (Monday-Sunday)
+      // Create local event for display (PRESERVED LOGIC)
+      const dayOfWeek = selectedDate.getDay()
+      const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek
 
       const newEvent: CalendarEvent = {
-        id: Math.max(...events.map(e => e.id)) + 1, // Generate unique ID for display
+        id: Math.max(...events.map(e => e.id)) + 1,
+        firebaseId: appointmentId,  // NEW: Store Firebase document ID
         title: newEventTitle,
         startTime: newEventStartTime,
         endTime: newEventEndTime,
-        color: getEventColor(Math.max(...events.map(e => e.id)) + 1), // Use enhanced color system
-        day: adjustedDay, // Use the selected date's day of week
+        color: getEventColor(Math.max(...events.map(e => e.id)) + 1),
+        day: adjustedDay,
         description: newEventDescription || `Programare pentru ${newEventTitle}`,
         location: "Cabinet principal",
         attendees: [],
         organizer: "Medicul curant",
-        // New patient information fields
         patientCNP: newEventCNP || undefined,
         patientEmail: newEventEmail || undefined,
         patientPhone: formattedPhone,
         patientBirthDate: birthDate || undefined,
       }
 
+      // Update local state (PRESERVED)
       setEvents(prevEvents => [...prevEvents, newEvent])
       
-      // Close modal and reset form
+      // Close modal and reset form (PRESERVED)
       setShowCreateEvent(false)
       setNewEventTitle('')
       setNewEventDate('')
       setNewEventStartTime('09:00')
-      setNewEventEndTime('10:00')
+      setNewEventDuration('30') // Reset to default duration
+      setNewEventEndTime('09:30') // Reset to match default duration
       setNewEventDescription('')
       // Reset new fields
       setNewEventCNP('')
@@ -674,19 +947,72 @@ export function SchedulingCalendar() {
       setNewEventPhone('')
       setNewEventCountryCode('RO')
 
-      // Show success message
+      // Show success message (PRESERVED)
       alert('Programarea a fost creată cu succes!')
     } catch (error) {
       console.error('Error creating appointment:', error)
-      alert('Eroare la crearea programării. Vă rugăm să încercați din nou.')
+      
+      // Enhanced error handling (NEW: Better user feedback)
+      let errorMessage = 'Eroare la crearea programării. Vă rugăm să încercați din nou.'
+      
+      if (error && typeof error === 'object' && 'message' in error) {
+        const firebaseError = error as any
+        if (firebaseError.code === 'permission-denied') {
+          errorMessage = 'Nu aveți permisiunea de a crea programări. Contactați administratorul.'
+        } else if (firebaseError.code === 'unavailable') {
+          errorMessage = 'Serviciul este temporar indisponibil. Încercați din nou în câteva minute.'
+        }
+      }
+      
+      alert(errorMessage)
+    } finally {
+      // NEW: Reset loading state
+      setIsCreatingEvent(false)
     }
   }
 
-  const deleteEvent = () => {
+  const deleteEvent = async () => {
     if (selectedEvent) {
-      setEvents(prevEvents => prevEvents.filter(event => event.id !== selectedEvent.id))
-      setSelectedEvent(null)
-      setIsEditingEvent(false)
+      // NEW: Set loading state
+      setIsDeletingEvent(true)
+      
+      try {
+        // Delete from Firebase (NEW: Full Firebase integration)
+        if (selectedEvent.firebaseId) {
+          // Delete from Firebase
+          await deleteAppointment(selectedEvent.firebaseId)
+          console.log('Appointment deleted from Firebase successfully')
+        } else {
+          console.warn('No Firebase ID found for event, deleting from local state only')
+        }
+        
+        // Update local state (PRESERVED)
+        setEvents(prevEvents => prevEvents.filter(event => event.id !== selectedEvent.id))
+        setSelectedEvent(null)
+        setIsEditingEvent(false)
+        
+        // Show success message (NEW: Better user feedback)
+        console.log('Event deleted successfully')
+      } catch (error) {
+        console.error('Error deleting event:', error)
+        
+        // Enhanced error handling (NEW: Better user feedback)
+        let errorMessage = 'Eroare la ștergerea programării. Vă rugăm să încercați din nou.'
+        
+        if (error && typeof error === 'object' && 'message' in error) {
+          const firebaseError = error as any
+          if (firebaseError.code === 'permission-denied') {
+            errorMessage = 'Nu aveți permisiunea de a șterge programări. Contactați administratorul.'
+          } else if (firebaseError.code === 'unavailable') {
+            errorMessage = 'Serviciul este temporar indisponibil. Încercați din nou în câteva minute.'
+          }
+        }
+        
+        alert(errorMessage)
+      } finally {
+        // NEW: Reset loading state
+        setIsDeletingEvent(false)
+      }
     }
   }
 
@@ -708,31 +1034,92 @@ export function SchedulingCalendar() {
     }
   }
 
-  const saveEventChanges = () => {
+  const saveEventChanges = async () => {
     if (selectedEvent && editEventTitle && editEventStartTime && editEventEndTime) {
-      const updatedEvent: CalendarEvent = {
-        ...selectedEvent,
-        title: editEventTitle,
-        startTime: editEventStartTime,
-        endTime: editEventEndTime,
-        description: editEventDescription,
-        location: editEventLocation,
+      // Store original event for rollback
+      const originalEvent = { ...selectedEvent }
+      
+      // NEW: Set loading state
+      setIsUpdatingEvent(true)
+      
+      try {
+        // Create updated event data (PRESERVED LOGIC)
+        const updatedEvent: CalendarEvent = {
+          ...selectedEvent,
+          title: editEventTitle,
+          startTime: editEventStartTime,
+          endTime: editEventEndTime,
+          description: editEventDescription,
+          location: editEventLocation,
+          
+          // Enhanced patient information fields (PRESERVED)
+          patientCNP: editEventCNP || undefined,
+          patientEmail: editEventEmail || undefined,
+          patientPhone: editEventPhone || undefined,
+          patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
+        }
+
+        // Update Firebase (NEW: Full Firebase integration)
+        if (selectedEvent.firebaseId) {
+          // Prepare appointment data for Firebase update
+          const updatedAppointmentData = {
+            patientName: editEventTitle,
+            patientEmail: editEventEmail || undefined,
+            patientPhone: editEventPhone || undefined,
+            patientCNP: editEventCNP || undefined,
+            patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
+            symptoms: editEventDescription || `Programare pentru ${editEventTitle}`,
+            notes: editEventDescription || undefined,
+            updatedAt: new Date()
+          }
+          
+          // Update in Firebase
+          await updateAppointment(selectedEvent.firebaseId, updatedAppointmentData)
+          console.log('Appointment updated in Firebase successfully')
+        } else {
+          console.warn('No Firebase ID found for event, updating local state only')
+        }
         
-        // Enhanced patient information fields
-        patientCNP: editEventCNP || undefined,
-        patientEmail: editEventEmail || undefined,
-        patientPhone: editEventPhone || undefined,
-        patientBirthDate: editEventBirthDate ? new Date(editEventBirthDate) : undefined,
-      }
-
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.id === selectedEvent.id ? updatedEvent : event
+        // Update local state (PRESERVED)
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.id === selectedEvent.id ? updatedEvent : event
+          )
         )
-      )
 
-      setSelectedEvent(updatedEvent)
-      setIsEditingEvent(false)
+        setSelectedEvent(updatedEvent)
+        setIsEditingEvent(false)
+        
+        // Show success message (NEW: Better user feedback)
+        console.log('Event updated successfully')
+      } catch (error) {
+        console.error('Error updating event:', error)
+        
+        // NEW: Rollback to original state on error
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.id === selectedEvent.id ? originalEvent : event
+          )
+        )
+        setSelectedEvent(originalEvent)
+        
+        // Enhanced error handling (NEW: Better user feedback)
+        let errorMessage = 'Eroare la actualizarea programării. Vă rugăm să încercați din nou.'
+        
+        if (error && typeof error === 'object' && 'message' in error) {
+          const firebaseError = error as any
+          if (firebaseError.code === 'permission-denied') {
+            errorMessage = 'Nu aveți permisiunea de a actualiza programări. Contactați administratorul.'
+          } else if (firebaseError.code === 'unavailable') {
+            errorMessage = 'Serviciul este temporar indisponibil. Încercați din nou în câteva minute.'
+          }
+        }
+        
+        alert(errorMessage)
+      } finally {
+        // NEW: Reset loading state
+        setIsUpdatingEvent(false)
+      }
     }
   }
 
@@ -964,7 +1351,13 @@ export function SchedulingCalendar() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white" style={{ height: 'calc(100vh - 83px)' }}>
+    <div 
+      ref={mainCalendarRef}
+      className="bg-gradient-to-br from-black via-[#100B1A] to-[#1A0B2E] text-white" 
+      style={{ height: 'calc(100vh - 83px)' }}
+      tabIndex={-1}
+      aria-label="Calendar principal MedFlow"
+    >
       <ErrorBoundary>
         <main className="flex h-full min-h-full">
           {/* Sidebar */}
@@ -983,9 +1376,21 @@ export function SchedulingCalendar() {
           >
             {/* Programare Nouă Button - Above mini calendar, aligned with top bar */}
             <motion.button 
+              ref={createEventButtonRef}
               onClick={handleCreateEvent}
-              className="mb-8 -mt-1 flex items-center justify-center gap-2 rounded-lg bg-[#7A48BF] hover:bg-[#804AC8] px-4 py-2.5 text-white transition-colors duration-200 w-full"
+              disabled={isCreatingEvent}
+              className="mb-8 -mt-1 flex items-center justify-center gap-2 rounded-lg bg-[#7A48BF] hover:bg-[#804AC8] px-4 py-2.5 text-white transition-colors duration-200 w-full disabled:opacity-50 disabled:cursor-not-allowed"
               title="Programare Nouă"
+              aria-label="Creează o programare nouă"
+              aria-describedby="create-appointment-help"
+              
+              // NEW: Keyboard navigation
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleCreateEvent()
+                }
+              }}
               whileHover={{ 
                 scale: 1.02,
                 boxShadow: "0 8px 25px rgba(122, 72, 191, 0.4)"
@@ -997,20 +1402,44 @@ export function SchedulingCalendar() {
                 damping: 17 
               }}
             >
-              <Plus className="h-4 w-4" />
-              <span className="text-sm font-medium">Programare Nouă</span>
+              {isCreatingEvent ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span className="text-sm font-medium">Se creează...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span className="text-sm font-medium">Programare Nouă</span>
+                </>
+              )}
             </motion.button>
+            
+            {/* NEW: Context help for screen readers */}
+            <div id="create-appointment-help" className="sr-only">
+              Buton pentru crearea unei noi programări medicale
+            </div>
 
             {/* Mini Calendar */}
-            <div className="mb-8">
+            <div className="mb-8" role="region" aria-label="Mini calendar pentru navigare rapidă">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-medium">{currentMonth}</h3>
-                <div className="flex gap-1">
+                <h3 className="text-white font-medium" aria-live="polite">{currentMonth}</h3>
+                <div className="flex gap-1" role="group" aria-label="Navigare în luni">
                   <motion.button
                     className="p-1 text-white/70 hover:text-white transition-colors"
                     onClick={goToPreviousMonth}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    aria-label="Luna anterioară"
+                    aria-describedby="month-navigation-help"
+                    
+                    // NEW: Keyboard navigation
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        goToPreviousMonth()
+                      }
+                    }}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </motion.button>
@@ -1019,23 +1448,38 @@ export function SchedulingCalendar() {
                     onClick={goToNextMonth}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    aria-label="Luna următoare"
+                    aria-describedby="month-navigation-help"
+                    
+                    // NEW: Keyboard navigation
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        goToNextMonth()
+                      }
+                    }}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </motion.button>
                 </div>
+                
+                {/* NEW: Context help for month navigation */}
+                <div id="month-navigation-help" className="sr-only">
+                  Navigare în luni: folosiți săgețile pentru a merge la luna anterioară sau următoare
+                </div>
               </div>
               
               {/* Week Day Headers */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-1 mb-2" role="row" aria-label="Zilele săptămânii">
                 {weekDays.map((day, i) => (
-                  <div key={i} className="text-center text-white/50 text-xs py-1">
+                  <div key={i} className="text-center text-white/50 text-xs py-1" role="columnheader">
                     {day}
                   </div>
                 ))}
               </div>
               
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1" key={`mini-calendar-${currentDateObj.toDateString()}`}>
+              <div className="grid grid-cols-7 gap-1" key={`mini-calendar-${currentDateObj.toDateString()}`} role="grid" aria-label="Calendar pentru luna curentă">
                 {/* Generate proper calendar days for current month */}
                 {(() => {
                   const firstDay = startOfMonth(currentDateObj)
@@ -1067,12 +1511,51 @@ export function SchedulingCalendar() {
                           damping: 17 
                         }}
                         onClick={() => setCurrentDateHandler(date)}
+                        role="gridcell"
+                        tabIndex={0}
+                        aria-label={`${date.getDate()} ${date.toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' })}`}
+                        aria-selected={isSelected}
+                        aria-current={isToday ? 'date' : undefined}
+                        aria-describedby="mini-calendar-help"
+                        
+                        // NEW: Keyboard navigation
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            setCurrentDateHandler(date)
+                          } else if (e.key === 'ArrowLeft' && i > 0) {
+                            e.preventDefault()
+                            const prevDate = new Date(date)
+                            prevDate.setDate(date.getDate() - 1)
+                            setCurrentDateHandler(prevDate)
+                          } else if (e.key === 'ArrowRight' && i < days.length - 1) {
+                            e.preventDefault()
+                            const nextDate = new Date(date)
+                            nextDate.setDate(date.getDate() + 1)
+                            setCurrentDateHandler(nextDate)
+                          } else if (e.key === 'ArrowUp' && i >= 7) {
+                            e.preventDefault()
+                            const upDate = new Date(date)
+                            upDate.setDate(date.getDate() - 7)
+                            setCurrentDateHandler(upDate)
+                          } else if (e.key === 'ArrowDown' && i < days.length - 7) {
+                            e.preventDefault()
+                            const downDate = new Date(date)
+                            downDate.setDate(date.getDate() + 7)
+                            setCurrentDateHandler(downDate)
+                          }
+                        }}
                       >
                         {date.getDate()}
                       </motion.div>
                     )
                   })
                 })()}
+                
+                {/* NEW: Context help for mini calendar */}
+                <div id="mini-calendar-help" className="sr-only">
+                  Calendar mini: selectați o dată pentru a naviga rapid în calendar
+                </div>
               </div>
             </div>
 
@@ -1212,10 +1695,26 @@ export function SchedulingCalendar() {
                     stiffness: 400, 
                     damping: 17 
                   }}
+                  aria-label="Mergi la data de astăzi"
+                  aria-describedby="today-button-help"
+                  
+                  // NEW: Keyboard navigation
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      goToToday()
+                    }
+                  }}
                 >
                   Astăzi
                 </motion.button>
-                <div className="flex">
+                
+                {/* NEW: Context help for today button */}
+                <div id="today-button-help" className="sr-only">
+                  Buton pentru a reveni la data curentă
+                </div>
+                
+                <div className="flex" role="group" aria-label="Navigare în calendar">
                   <IconButton
                     icon={<ChevronLeft className="h-5 w-5" />}
                     variant="ghost"
@@ -1223,6 +1722,15 @@ export function SchedulingCalendar() {
                     className="text-white hover:bg-white/10 rounded-l-md"
                     onClick={goToPrevious}
                     aria-label="Anterior"
+                    aria-describedby="navigation-help"
+                    
+                    // NEW: Keyboard navigation
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        goToPrevious()
+                      }
+                    }}
                   />
                   <IconButton
                     icon={<ChevronRight className="h-5 w-5" />}
@@ -1231,12 +1739,27 @@ export function SchedulingCalendar() {
                     className="text-white hover:bg-white/10 rounded-r-md"
                     onClick={goToNext}
                     aria-label="Următor"
+                    aria-describedby="navigation-help"
+                    
+                    // NEW: Keyboard navigation
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        goToNext()
+                      }
+                    }}
                   />
                 </div>
-                <h2 className="text-xl font-semibold text-white">{currentDate}</h2>
+                
+                {/* NEW: Context help for navigation */}
+                <div id="navigation-help" className="sr-only">
+                  Navigare în calendar: folosiți butoanele pentru a merge la data anterioară sau următoare
+                </div>
+                
+                <h2 className="text-xl font-semibold text-white" aria-live="polite">{currentDate}</h2>
               </div>
 
-              <div className="flex items-center gap-2 rounded-md p-1 bg-[#100B1A]/50">
+              <div className="flex items-center gap-2 rounded-md p-1 bg-[#100B1A]/50" role="group" aria-label="Selectare vizualizare calendar">
                 <motion.button
                   onClick={() => setCurrentView("day")}
                   className={`px-3 py-1 rounded transition-colors ${currentView === "day" ? "bg-[#7A48BF] text-white" : "text-white hover:bg-white/10"}`}
@@ -1249,6 +1772,17 @@ export function SchedulingCalendar() {
                     type: "spring", 
                     stiffness: 400, 
                     damping: 17 
+                  }}
+                  aria-label="Vizualizare zi"
+                  aria-pressed={currentView === "day"}
+                  aria-describedby="view-toggle-help"
+                  
+                  // NEW: Keyboard navigation
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setCurrentView("day")
+                    }
                   }}
                 >
                   Zi
@@ -1266,6 +1800,17 @@ export function SchedulingCalendar() {
                     stiffness: 400, 
                     damping: 17 
                   }}
+                  aria-label="Vizualizare săptămână"
+                  aria-pressed={currentView === "week"}
+                  aria-describedby="view-toggle-help"
+                  
+                  // NEW: Keyboard navigation
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setCurrentView("week")
+                    }
+                  }}
                 >
                   Săptămână
                 </motion.button>
@@ -1282,9 +1827,25 @@ export function SchedulingCalendar() {
                     stiffness: 400, 
                     damping: 17 
                   }}
+                  aria-label="Vizualizare lună"
+                  aria-pressed={currentView === "month"}
+                  aria-describedby="view-toggle-help"
+                  
+                  // NEW: Keyboard navigation
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setCurrentView("month")
+                    }
+                  }}
                 >
                   Lună
                 </motion.button>
+                
+                {/* NEW: Context help for view toggle */}
+                <div id="view-toggle-help" className="sr-only">
+                  Selectați tipul de vizualizare calendar: zi, săptămână sau lună
+                </div>
               </div>
             </motion.div>
 
@@ -1332,6 +1893,13 @@ export function SchedulingCalendar() {
                       </motion.div>
                     ))}
                   </div>
+                  
+                  {/* NEW: Drag & Drop Instructions */}
+                  <div className="p-2 bg-[#7A48BF]/10 border-b border-[#7A48BF]/20">
+                    <div className="text-xs text-white/70 text-center">
+                      💡 Drag & Drop: Mutați programările pentru a le reprograma
+                    </div>
+                  </div>
 
                   {/* Time Grid - Now properly contained within the purple container */}
                   <div className="grid grid-cols-8">
@@ -1360,50 +1928,147 @@ export function SchedulingCalendar() {
                     {Array.from({ length: 7 }).map((_, dayIndex) => (
                       <div key={dayIndex} className="border-l border-[#7A48BF]/20 relative">
                         {timeSlots.map((_, timeIndex) => (
-                          <div key={timeIndex} className="h-20 border-b border-[#7A48BF]/10"></div>
+                          <div key={timeIndex} className="relative">
+                            {/* Main hour line */}
+                            <div className="h-20 border-b border-[#7A48BF]/10"></div>
+                            {/* NEW: Sub-grid line for 30-minute intervals */}
+                            <div className="absolute top-10 left-0 right-0 border-b border-[#7A48BF]/5 border-dashed"></div>
+                          </div>
                         ))}
 
-                        {/* Events */}
+                                                {/* Events */}
                         {events
                           .filter((event) => event.day === dayIndex + 1)
                           .map((event, i) => {
                             const eventStyle = calculateEventStyle(event.startTime, event.endTime)
                             return (
-                              <motion.div
+                              <div
                                 key={event.id}
-                                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                                transition={{ 
-                                  duration: 0.3, 
-                                  ease: "easeOut",
-                                  delay: dayIndex * 0.08 + i * 0.03, // Optimized staggered timing
-                                  type: "spring",
-                                  stiffness: 300,
-                                  damping: 25
-                                }}
-                                whileHover={{ 
-                                  scale: 1.02, 
-                                  y: -4, 
-                                  boxShadow: "0 16px 32px rgba(122, 72, 191, 0.25)",
-                                  transition: { duration: 0.15, ease: "easeOut" } 
-                                }}
-                                whileTap={{ scale: 0.98 }}
-                                layout
-                                layoutId={`event-${event.id}`}
-                                className={`absolute ${event.color} rounded-md p-2 text-white text-xs shadow-md cursor-pointer`}
+                                className="absolute"
                                 style={{
                                   ...eventStyle,
                                   left: "4px",
                                   right: "4px",
                                 }}
-                                onClick={() => handleEventClick(event)}
                               >
-                                <div className="font-medium">{event.title}</div>
-                                <div className="opacity-80 text-[10px] mt-1">{`${event.startTime} - ${event.endTime}`}</div>
-                              </motion.div>
-                            )
-                          })}
+                                <FadeContent
+                                  duration={600}
+                                  delay={100}
+                                  threshold={0.3}
+                                >
+                                <motion.div
+                                  className={`w-full h-full ${getEnhancedEventCardClasses(event)}`}
+                                  drag
+                                  dragMomentum={false}
+                                  dragElastic={0.1}
+                                  dragConstraints={{
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0
+                                  }}
+                                  onDragEnd={async (_, info) => {
+                                    try {
+                                      // Calculate new time based on drag position using helper function
+                                      const newTimeData = calculateNewTimeFromDrag(info.point.y, dayIndex)
+                                      
+                                      if (!newTimeData) {
+                                        console.log('Drag outside valid time range, reverting position')
+                                        return
+                                      }
+                                      
+                                      const { newStartTime, newEndTime, newDay } = newTimeData
+                                      
+                                      // Update Firebase (NEW: Full Firebase integration)
+                                      if (event.firebaseId) {
+                                        // Prepare appointment data for Firebase update
+                                        const updatedAppointmentData = {
+                                          dateTime: newTimeData.newDate,
+                                          updatedAt: new Date()
+                                        }
+                                        
+                                        // Update Firebase
+                                        await updateAppointment(event.firebaseId, updatedAppointmentData)
+                                        console.log('Appointment rescheduled in Firebase successfully')
+                                      } else {
+                                        console.warn('No Firebase ID found for event, updating local state only')
+                                      }
+                                      
+                                      // Update local state using batch update for performance
+                                      batchUpdateEvents([{
+                                        id: event.id,
+                                        updates: {
+                                          startTime: newStartTime,
+                                          endTime: newEndTime,
+                                          day: newDay
+                                        }
+                                      }])
+                                      
+                                      // Show success feedback
+                                      console.log('Appointment rescheduled successfully via drag & drop')
+                                    } catch (error) {
+                                      console.error('Failed to reschedule appointment via drag & drop:', error)
+                                      // The motion.div will automatically animate back to original position
+                                    }
+                                  }}
+                                  whileHover={{
+                                    scale: 1.02,
+                                    y: -4,
+                                    boxShadow: "0 16px 32px rgba(122, 72, 191, 0.25)",
+                                    transition: { duration: 0.15, ease: "easeOut" }
+                                  }}
+                                  whileTap={{ scale: 0.98 }}
+                                  layout
+                                  layoutId={`event-${event.id}`}
+                                  onClick={() => handleEventClick(event)}
+                                  aria-label={`Programare ${event.title}, poate fi mutată prin drag & drop`}
+                                  title={`${event.title} - Click pentru detalii, drag pentru a muta`}
+                                  whileDrag={{
+                                    scale: 1.05,
+                                    boxShadow: "0 20px 40px rgba(122, 72, 191, 0.4)",
+                                    zIndex: 1000
+                                  }}
+                                >
+                                  {/* Event content with responsive text layout */}
+                                  {(() => {
+                                    const textClasses = getResponsiveTextClasses(event)
+                                    const nameData = parsePatientName(event.title)
+                                    
+                                    return (
+                                      <>
+                                        {/* Two-column responsive text layout */}
+                                        <div className={textClasses.container}>
+                                          {/* Left side: Patient names */}
+                                          <div className={textClasses.nameContainer}>
+                                            <div className={textClasses.textClass} title={event.title}>
+                                              {nameData.firstName}
+                                            </div>
+                                            {!nameData.isSingleName && nameData.lastName && (
+                                              <div className={textClasses.textClass} title={event.title}>
+                                                {nameData.lastName}
+                                              </div>
+                                            )}
+                                          </div>
+                                          
+                                          {/* Right side: Time */}
+                                          <div className={textClasses.timeClass}>
+                                            {`${formatTimeForDisplay(event.startTime)}-${formatTimeForDisplay(event.endTime)}`}
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Visual indicator for drag & drop */}
+                                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <div className="w-2 h-2 bg-white/30 rounded-full"></div>
+                                        </div>
+                                      </>
+                                    )
+                                  })()}
+                                                                 </motion.div>
+                               </FadeContent>
+                               </div>
+                             )
+                           })}
+
                       </div>
                     ))}
                   </div>
@@ -1801,8 +2466,8 @@ export function SchedulingCalendar() {
                     <label htmlFor="duration-input" className="block text-white text-sm font-medium mb-2">Durată</label>
                     <select
                       id="duration-input"
-                      value={newEventEndTime}
-                      onChange={(e) => setNewEventEndTime(e.target.value)}
+                      value={newEventDuration}
+                      onChange={(e) => setNewEventDuration(e.target.value)}
                       className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
                     >
                       <option value="">Selectați durata</option>
@@ -1886,6 +2551,30 @@ export function SchedulingCalendar() {
             </div>
           </div>
         )}
+        
+        {/* NEW: Comprehensive Accessibility Summary */}
+        <div className="sr-only" aria-live="polite">
+          <div id="accessibility-summary">
+            Calendar medical MedFlow cu funcționalități avansate:
+            - Vizualizări: zi, săptămână, lună
+            - Navigare prin săgeți și butoane
+            - Creare programări noi
+            - Drag & drop pentru reprogramare
+            - Sincronizare în timp real cu Firebase
+            - Mod demo pentru testare
+            - Suport complet pentru navigare cu tastatura
+            - Etichete ARIA pentru screen readers
+          </div>
+        </div>
+        
+        {/* NEW: Keyboard shortcuts help */}
+        <div className="sr-only" id="keyboard-help">
+          Scurtături tastatură:
+          - Tab: navigare între elemente
+          - Enter/Space: activare butoane
+          - Săgeți: navigare în mini calendar
+          - Escape: închidere modale
+        </div>
       </ErrorBoundary>
     </div>
   )
