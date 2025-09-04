@@ -8,27 +8,103 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Appointments collection - DIRECT AUTH RULES
+    function isOwner(userId) {
+      return isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'ADMIN';
+    }
+    
+    function isUser() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'USER';
+    }
+    
+    // Appointments collection - Enhanced with patient integration
     match /appointments/{appointmentId} {
-      // Create: Allow creation for authenticated users (this works)
-      allow create: if isAuthenticated();
+      // Create: Allow creation for authenticated users
+      allow create: if isAuthenticated() && 
+                       request.resource.data.doctorId == request.auth.uid;
       
       // Read: Users can read their own appointments
       allow read: if isAuthenticated() && 
-                     resource.data.userId == request.auth.uid;
+                     resource.data.doctorId == request.auth.uid;
       
       // Update: Users can update their own appointments
       allow update: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid;
+                      resource.data.doctorId == request.auth.uid &&
+                      request.resource.data.doctorId == request.auth.uid;
       
       // Delete: Users can delete their own appointments
       allow delete: if isAuthenticated() && 
-                      resource.data.userId == request.auth.uid;
+                      resource.data.doctorId == request.auth.uid;
+    }
+    
+    // Patients collection - New patient management system
+    match /patients/{patientId} {
+      // Create: Allow creation for authenticated users
+      allow create: if isAuthenticated() && 
+                       request.resource.data.systemInfo.createdBy == request.auth.uid;
+      
+      // Read: Users can read patients they created or have access to
+      allow read: if isAuthenticated() && (
+        resource.data.systemInfo.createdBy == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Update: Users can update patients they created
+      allow update: if isAuthenticated() && 
+                      resource.data.systemInfo.createdBy == request.auth.uid &&
+                      request.resource.data.systemInfo.createdBy == request.auth.uid;
+      
+      // Delete: Soft delete only - users can mark patients as inactive
+      allow delete: if isAuthenticated() && 
+                      resource.data.systemInfo.createdBy == request.auth.uid;
     }
     
     // Users collection
     match /users/{userId} {
       allow read, write: if isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // Patient reports collection (for future consultation system)
+    match /patientReports/{reportId} {
+      // Create: Allow creation for authenticated users
+      allow create: if isAuthenticated() && 
+                       request.resource.data.createdBy == request.auth.uid;
+      
+      // Read: Users can read reports they created
+      allow read: if isAuthenticated() && 
+                     resource.data.createdBy == request.auth.uid;
+      
+      // Update: Users can update reports they created
+      allow update: if isAuthenticated() && 
+                      resource.data.createdBy == request.auth.uid;
+      
+      // Delete: Users can delete reports they created
+      allow delete: if isAuthenticated() && 
+                      resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Medical documents collection (for future document management)
+    match /medicalDocuments/{documentId} {
+      // Create: Allow creation for authenticated users
+      allow create: if isAuthenticated() && 
+                       request.resource.data.uploadedBy == request.auth.uid;
+      
+      // Read: Users can read documents they uploaded
+      allow read: if isAuthenticated() && 
+                     resource.data.uploadedBy == request.auth.uid;
+      
+      // Update: Users can update documents they uploaded
+      allow update: if isAuthenticated() && 
+                      resource.data.uploadedBy == request.auth.uid;
+      
+      // Delete: Users can delete documents they uploaded
+      allow delete: if isAuthenticated() && 
+                      resource.data.uploadedBy == request.auth.uid;
     }
     
     // All other collections - deny by default
