@@ -1,227 +1,375 @@
-import { useState, useMemo } from 'react'
+/**
+ * Patient Search Component
+ * 
+ * Advanced patient search and selection component for appointment forms.
+ * Integrates with the unified patient management system.
+ * 
+ * @author MedFlow Team
+ * @version 2.0
+ */
+
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Phone, Mail, Calendar, MapPin } from 'lucide-react'
-interface Patient {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  dateOfBirth?: string
-  lastVisit?: Date
-  totalAppointments: number
-  notes?: string
-  address?: string
-}
+import { 
+  Search, 
+  User, 
+  Phone, 
+  Mail, 
+  Calendar, 
+  AlertCircle, 
+  CheckCircle, 
+  Plus,
+  Loader2,
+  X
+} from 'lucide-react'
+import { patientService } from '../services/patientService'
+import { Patient, PatientSearchQuery } from '../types/patient'
+import { extractGenderFromCNP, extractBirthDateFromCNP } from '../utils/cnpValidation'
 
 interface PatientSearchProps {
-  onPatientSelect: (patient: Patient) => void
+  onPatientSelect: (patient: Patient | null) => void
+  selectedPatient: Patient | null
   placeholder?: string
   className?: string
+  disabled?: boolean
+}
+
+interface SearchResultItemProps {
+  patient: Patient
+  isSelected: boolean
+  onSelect: () => void
+  onHighlight: () => void
+}
+
+const SearchResultItem: React.FC<SearchResultItemProps> = ({ 
+  patient, 
+  isSelected, 
+  onSelect, 
+  onHighlight 
+}) => {
+  const age = useMemo(() => {
+    if (!patient.personalInfo.dateOfBirth) return null
+    const today = new Date()
+    const birthDate = new Date(patient.personalInfo.dateOfBirth)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    return age
+  }, [patient.personalInfo.dateOfBirth])
+
+  const genderIcon = useMemo(() => {
+    switch (patient.personalInfo.gender) {
+      case 'male': return '♂'
+      case 'female': return '♀'
+      default: return '⚥'
+    }
+  }, [patient.personalInfo.gender])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className={`
+        p-4 border rounded-lg cursor-pointer transition-all duration-200
+        ${isSelected 
+          ? 'border-medflow-primary bg-medflow-primary/5' 
+          : 'border-gray-200 hover:border-medflow-primary/50 hover:bg-gray-50'
+        }
+      `}
+      onClick={onSelect}
+      onMouseEnter={onHighlight}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">{genderIcon}</span>
+            <h3 className="font-semibold text-gray-900">
+              {patient.personalInfo.fullName}
+            </h3>
+            {age && (
+              <span className="text-sm text-gray-500">
+                ({age} ani)
+              </span>
+            )}
+            {patient.personalInfo.cnp && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                CNP: {patient.personalInfo.cnp}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            {patient.contactInfo.phone && (
+              <div className="flex items-center gap-1">
+                <Phone className="w-4 h-4" />
+                <span>{patient.contactInfo.phone}</span>
+              </div>
+            )}
+            {patient.contactInfo.email && (
+              <div className="flex items-center gap-1">
+                <Mail className="w-4 h-4" />
+                <span>{patient.contactInfo.email}</span>
+              </div>
+            )}
+          </div>
+          
+          {patient.medicalInfo.allergies.length > 0 && (
+            <div className="mt-2 flex items-center gap-1 text-sm text-orange-600">
+              <AlertCircle className="w-4 h-4" />
+              <span>Alergii: {patient.medicalInfo.allergies.map(a => a.allergen).join(', ')}</span>
+            </div>
+          )}
+          
+          {patient.medicalInfo.chronicConditions.length > 0 && (
+            <div className="mt-1 flex items-center gap-1 text-sm text-red-600">
+              <AlertCircle className="w-4 h-4" />
+              <span>Condiții cronice: {patient.medicalInfo.chronicConditions.map(c => c.name).join(', ')}</span>
+            </div>
+          )}
+        </div>
+        
+        {isSelected && (
+          <CheckCircle className="w-5 h-5 text-medflow-primary" />
+        )}
+      </div>
+    </motion.div>
+  )
 }
 
 export default function PatientSearch({ 
   onPatientSelect, 
-  placeholder = "Caută pacient după nume, email sau telefon...",
-  className = ""
+  selectedPatient, 
+  placeholder = "Căutați pacient după nume, CNP, email sau telefon...",
+  className = "",
+  disabled = false
 }: PatientSearchProps) {
-  const [query, setQuery] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Patient[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
-  // Demo patients data - replace with real API call
-  const demoPatients: Patient[] = [
-    {
-      id: '1',
-      name: 'Ana Popescu',
-      email: 'ana.popescu@email.com',
-      phone: '0740123456',
-      dateOfBirth: '1985-03-15',
-      lastVisit: new Date('2024-01-15'),
-      totalAppointments: 8,
-      notes: 'Controale regulate',
-      address: 'București, Sector 1'
-    },
-    {
-      id: '2',
-      name: 'Ion Marinescu',
-      email: 'ion.marinescu@email.com',
-      phone: '0741234567',
-      dateOfBirth: '1978-07-22',
-      lastVisit: new Date('2024-01-12'),
-      totalAppointments: 15,
-      notes: 'Hipertensiune arterială',
-      address: 'Cluj-Napoca'
-    },
-    {
-      id: '3',
-      name: 'Maria Ionescu',
-      phone: '0742345678',
-      dateOfBirth: '1990-11-10',
-      lastVisit: new Date('2024-01-08'),
-      totalAppointments: 3,
-      address: 'Timișoara'
-    },
-    {
-      id: '4',
-      name: 'Gheorghe Dumitrescu',
-      email: 'gheorghe.d@email.com',
-      phone: '0743456789',
-      dateOfBirth: '1965-05-30',
-      lastVisit: new Date('2024-01-05'),
-      totalAppointments: 22,
-      notes: 'Diabet zaharat tip 2',
-      address: 'Iași'
-    }
-  ]
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
+      if (!query.trim()) {
+        setSearchResults([])
+        setShowResults(false)
+        return
+      }
 
-  const filteredPatients = useMemo(() => {
-    if (!query.trim() || query.length < 2) return []
-    
-    const searchTerm = query.toLowerCase().trim()
-    return demoPatients.filter(patient =>
-      patient.name.toLowerCase().includes(searchTerm) ||
-      patient.email?.toLowerCase().includes(searchTerm) ||
-      patient.phone?.includes(searchTerm) ||
-      patient.address?.toLowerCase().includes(searchTerm)
-    ).slice(0, 5)
-  }, [query])
+      setIsSearching(true)
+      setSearchError(null)
 
-  const handleSearch = async (value: string) => {
-    setQuery(value)
-    if (value.length >= 2) {
-      setIsLoading(true)
-      setIsOpen(true)
-      
-      // Simulate API delay
-      setTimeout(() => {
-        setIsLoading(false)
-      }, 300)
-    } else {
-      setIsOpen(false)
-    }
+      try {
+        const searchQuery: PatientSearchQuery = {
+          query: query.trim(),
+          filters: {
+            isActive: true
+          },
+          limit: 10
+        }
+
+        const result = await patientService.searchPatients(searchQuery)
+        setSearchResults(result.patients)
+        setShowResults(true)
+        setHighlightedIndex(-1)
+      } catch (error) {
+        console.error('Error searching patients:', error)
+        setSearchError('Eroare la căutarea pacienților')
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300),
+    []
+  )
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value
+    setSearchQuery(query)
+    debouncedSearch(query)
   }
 
+  // Handle patient selection
   const handlePatientSelect = (patient: Patient) => {
     onPatientSelect(patient)
-    setQuery(patient.name)
-    setIsOpen(false)
+    setSearchQuery(patient.personalInfo.fullName)
+    setShowResults(false)
+    setHighlightedIndex(-1)
   }
 
-  const formatLastVisit = (date: Date) => {
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 1) return 'ieri'
-    if (diffDays < 7) return `acum ${diffDays} zile`
-    if (diffDays < 30) return `acum ${Math.floor(diffDays / 7)} săptămâni`
-    return date.toLocaleDateString('ro-RO')
+  // Handle clear selection
+  const handleClearSelection = () => {
+    onPatientSelect(null)
+    setSearchQuery('')
+    setShowResults(false)
+    setHighlightedIndex(-1)
+  }
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showResults || searchResults.length === 0) return
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setHighlightedIndex(prev => 
+          prev < searchResults.length - 1 ? prev + 1 : 0
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : searchResults.length - 1
+        )
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (highlightedIndex >= 0 && highlightedIndex < searchResults.length) {
+          handlePatientSelect(searchResults[highlightedIndex])
+        }
+        break
+      case 'Escape':
+        setShowResults(false)
+        setHighlightedIndex(-1)
+        break
+    }
+  }
+
+  // Handle input focus
+  const handleInputFocus = () => {
+    if (searchResults.length > 0) {
+      setShowResults(true)
+    }
+  }
+
+  // Handle input blur (with delay to allow clicks)
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      setShowResults(false)
+      setHighlightedIndex(-1)
+    }, 200)
   }
 
   return (
     <div className={`relative ${className}`}>
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-medflow-text-muted w-5 h-5" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => query.length >= 2 && setIsOpen(true)}
-            onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-            placeholder={placeholder}
-            className="w-full bg-medflow-surface/80 border border-white/20 text-medflow-text-primary placeholder-medflow-text-muted rounded-lg pl-12 pr-4 py-3 focus:border-medflow-accent focus:ring-2 focus:ring-medflow-accent/30 transition-all"
-            style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}
-          />
-          {isLoading && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-medflow-accent border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
+      {/* Search Input */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
         </div>
-
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute z-50 w-full mt-2 bg-medflow-surface-elevated/95 backdrop-blur-sm border border-white/25 rounded-lg shadow-xl max-h-80 overflow-y-auto"
+        
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onKeyDown={handleKeyDown}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`
+            block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg
+            focus:ring-2 focus:ring-medflow-primary focus:border-medflow-primary
+            disabled:bg-gray-100 disabled:cursor-not-allowed
+            ${selectedPatient ? 'bg-green-50 border-green-300' : ''}
+          `}
+        />
+        
+        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+          {isSearching ? (
+            <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+          ) : selectedPatient ? (
+            <button
+              type="button"
+              onClick={handleClearSelection}
+              className="text-gray-400 hover:text-gray-600"
             >
-              {isLoading ? (
-                <div className="p-4 text-center text-medflow-text-muted">
-                  Se caută pacienți...
-                </div>
-              ) : filteredPatients.length > 0 ? (
-                <>
-                  {filteredPatients.map((patient, index) => (
-                    <motion.button
-                      key={patient.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handlePatientSelect(patient)}
-                      className="w-full text-left p-4 hover:bg-white/5 transition-colors border-b border-white/10 last:border-b-0 focus:outline-none focus:bg-white/5"
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-medflow-accent/20 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-medflow-accent" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-medflow-text-primary truncate" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>{patient.name}</p>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1 text-xs text-medflow-text-muted">
-                            {patient.email && (
-                              <span className="flex items-center space-x-1 truncate">
-                                <Mail className="w-3 h-3 flex-shrink-0" />
-                                <span className="truncate">{patient.email}</span>
-                              </span>
-                            )}
-                            {patient.phone && (
-                              <span className="flex items-center space-x-1">
-                                <Phone className="w-3 h-3 flex-shrink-0" />
-                                <span>{patient.phone}</span>
-                              </span>
-                            )}
-                            {patient.address && (
-                              <span className="flex items-center space-x-1 truncate">
-                                <MapPin className="w-3 h-3 flex-shrink-0" />
-                                <span className="truncate">{patient.address}</span>
-                              </span>
-                            )}
-                            <span className="flex items-center space-x-1">
-                              <Calendar className="w-3 h-3 flex-shrink-0" />
-                              <span>Ultima vizită: {formatLastVisit(patient.lastVisit!)}</span>
-                            </span>
-                          </div>
-                          
-                          {patient.notes && (
-                            <div className="mt-2 p-2 bg-white/5 rounded text-xs text-medflow-text-muted truncate">
-                              <strong>Note:</strong> {patient.notes}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="text-right text-xs text-medflow-text-muted">
-                          <span className="font-medium">{patient.totalAppointments}</span>
-                          <div>programări</div>
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                  <div className="p-3 border-t border-white/10 text-center text-xs text-medflow-text-muted">
-                    {filteredPatients.length === 5 ? 'Primele 5 rezultate' : `${filteredPatients.length} rezultate găsite`}
-                  </div>
-                </>
-              ) : query.length >= 2 ? (
-                <div className="p-4 text-center text-medflow-text-muted">
-                  <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>Nu s-au găsit pacienți pentru "<span className="font-medium">{query}</span>"</p>
-                  <p className="text-xs mt-1">Încercați să căutați după nume, email sau telefon</p>
-                </div>
-              ) : null}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <X className="h-5 w-5" />
+            </button>
+          ) : null}
+        </div>
       </div>
-    )
+
+      {/* Selected Patient Display */}
+      {selectedPatient && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="font-medium text-green-800">
+                Pacient selectat: {selectedPatient.personalInfo.fullName}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleClearSelection}
+              className="text-green-600 hover:text-green-800"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Search Results */}
+      <AnimatePresence>
+        {showResults && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+          >
+            {searchError ? (
+              <div className="p-4 text-center text-red-600">
+                <AlertCircle className="w-5 h-5 mx-auto mb-2" />
+                <p>{searchError}</p>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">
+                <User className="w-5 h-5 mx-auto mb-2" />
+                <p>Nu s-au găsit pacienți</p>
+                <p className="text-sm">Încercați o altă căutare</p>
+              </div>
+            ) : (
+              <div className="p-2">
+                {searchResults.map((patient, index) => (
+                  <SearchResultItem
+                    key={patient.id}
+                    patient={patient}
+                    isSelected={index === highlightedIndex}
+                    onSelect={() => handlePatientSelect(patient)}
+                    onHighlight={() => setHighlightedIndex(index)}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// Utility function for debouncing
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }
 }
