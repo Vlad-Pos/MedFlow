@@ -1,56 +1,1000 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Base styles and CSS variables for MedFlow */
+/* Core visual style inspired by n8n.io */
 :root {
-  --medflow-blue: #3B82F6; /* blue-500 */
-  --medflow-green: #10B981; /* emerald-500 */
+  /* NEW MedFlow Brand Colors - 12-Color Transformed Scheme */
+  --medflow-brand-1: #8A7A9F;  /* Logo Color (Neutral Purple) */
+  --medflow-brand-2: #7A48BF;  /* Secondary Floating Button (Basic Purple V1) */
+  --medflow-brand-3: #804AC8;  /* Secondary Normal Button (Basic Purple V2) */
+  --medflow-brand-4: #25153A;  /* Gradient (Dark Purple) */
+  --medflow-brand-5: #231A2F;  /* Extra Color 1 (Plum Purple) */
+  --medflow-brand-6: #100B1A;  /* Secondary Background (Really Deep Purple) */
+  --medflow-brand-7: #000000;  /* Main Background (Pure Black) */
+  
+  /* Enhanced contrast gradients using NEW brand colors */
+  --medflow-gradient-primary: linear-gradient(135deg, var(--medflow-brand-7), var(--medflow-brand-6));
+  --medflow-gradient-secondary: linear-gradient(135deg, var(--medflow-brand-6), var(--medflow-brand-5));
+  --medflow-gradient-accent: linear-gradient(135deg, var(--medflow-brand-1), var(--medflow-brand-2));
+  --medflow-gradient-surface: linear-gradient(135deg, var(--medflow-brand-5), var(--medflow-brand-4));
+  
+  /* Dark theme backgrounds with NEW brand colors */
+  --medflow-dark-bg: #000000;  /* Updated to Main Background */
+  --medflow-surface-dark: var(--medflow-brand-6);
+  --medflow-surface-elevated: var(--medflow-brand-5);
+  
+  /* High contrast text colors for dark backgrounds */
+  --medflow-text-primary: #FFFFFF;      /* Pure white for maximum contrast */
+  --medflow-text-secondary: #F8FAFC;    /* Very light gray for secondary text */
+  --medflow-text-tertiary: #E2E8F0;    /* Light gray for tertiary text */
+  --medflow-text-muted: #CCCCCC;       /* Updated to Subsection Text (Toned Grey) */
+  
+  /* Brand accent colors for interactive elements - UPDATED */
+  --medflow-accent: 138 122 159;       /* RGB values for brand-1 (#8A7A9F) */
+  --medflow-accent-hover: 122 72 191;  /* RGB values for brand-2 (#7A48BF) */
+  --medflow-accent-dark: 128 74 200;   /* RGB values for brand-3 (#804AC8) */
+  
+  /* Legacy variables maintained for compatibility - UPDATED */
+  --medflow-background: var(--medflow-brand-6);
+  --medflow-primary: var(--medflow-brand-1);
+  --medflow-secondary: var(--medflow-brand-2);
+  
+  /* Legacy compatibility - UPDATED TO NEW SCHEME */
+  --medflow-blue: #25153A;    /* Now uses Gradient color */
+  --medflow-green: #7A48BF;   /* Now uses Secondary Floating Button color */
   --medflow-white: #FFFFFF;
+  
+  /* Enhanced MedFlow gradients - UPDATED */
+  --medflow-gradient: var(--medflow-gradient-primary);
+  --medflow-gradient-subtle: linear-gradient(135deg, rgba(138, 122, 159, 0.1) 0%, rgba(122, 72, 191, 0.1) 100%);
+  --medflow-gradient-dark: var(--medflow-gradient-primary);
+  
+  /* Dark theme base colors with NEW brand integration */
+  --medflow-bg-primary: rgba(0, 0, 0, 0.95);      /* brand-7 with transparency */
+  --medflow-bg-secondary: rgba(16, 11, 26, 0.9);   /* brand-6 with transparency */
+  --medflow-bg-tertiary: rgba(37, 21, 58, 0.8);   /* brand-4 with transparency */
+  
+  /* High contrast borders using NEW brand colors */
+  --medflow-border: rgba(138, 122, 159, 0.25);     /* brand-1 with transparency */
+  --medflow-border-hover: var(--medflow-brand-1);
+  
+  /* Responsive spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+  
+  /* Touch targets */
+  --touch-target-min: 44px;
+  --touch-spacing-min: 8px;
+  
+  /* Safe area insets for mobile */
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+  
+  /* Shadows and effects with NEW brand colors */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(138, 122, 159, 0.1);
+  --medflow-shadow: 0 4px 6px -1px rgba(138, 122, 159, 0.15), 0 2px 4px -1px rgba(138, 122, 159, 0.1);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(138, 122, 159, 0.15), 0 4px 6px -2px rgba(138, 122, 159, 0.1);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(138, 122, 159, 0.15), 0 10px 10px -5px rgba(138, 122, 159, 0.1);
+  
+  /* Animation timing */
+  --medflow-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --medflow-transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode MedFlow theme - UPDATED */
+.dark {
+  --medflow-bg-primary: #000000;    /* Updated to Main Background */
+  --medflow-bg-secondary: #100B1A;  /* Updated to Secondary Background */
+  --medflow-bg-tertiary: #25153A;   /* Updated to Gradient */
+  --medflow-text-primary: #FFFFFF;
+  --medflow-text-secondary: #F8FAFC;
+  --medflow-text-tertiary: #E2E8F0;
+  --medflow-border: #25153A;        /* Updated to Gradient */
+  --medflow-border-hover: var(--medflow-primary);
+  
+  /* Dark mode shadows with MedFlow colors - UPDATED */
+  --medflow-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --medflow-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --medflow-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --medflow-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 
 html, body, #root {
-  height: 100%;
+  /* Ensure the app can grow naturally and avoid trapping content off-screen */
+  min-height: 100%;
+  height: auto;
+  overflow-x: hidden;
 }
 
 body {
-  @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  background: var(--medflow-gradient-primary);
+  background-attachment: fixed;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+  transition: background 0.5s ease;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dark mode body styling with MedFlow theme */
+.dark body {
+  background: var(--medflow-gradient-primary);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1025px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Prevent zoom on input focus (mobile) */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--medflow-surface-elevated);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: var(--medflow-surface-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--medflow-surface-elevated);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: var(--medflow-surface-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--medflow-surface-elevated);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--medflow-surface-dark);
 }
 
 /******** Utilities ********/
 .btn {
-  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
 }
+
+/* Mobile-first button styles */
+@media (max-width: 768px) {
+  .btn {
+    @apply px-6 py-3 text-base;
+    min-height: 48px;
+  }
+}
+
+/* Modern button styles */
 .btn-primary {
-  @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600;
+  @apply bg-[var(--medflow-brand-1)] text-white px-4 py-2 rounded-md hover:bg-[var(--medflow-brand-2)] transition-colors duration-200 font-medium;
 }
+
 .btn-secondary {
-  @apply btn bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-600;
+  @apply bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)] px-4 py-2 rounded-full hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 font-medium;
 }
+
 .btn-ghost {
-  @apply btn bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply bg-[var(--medflow-surface-elevated)] text-[var(--medflow-text-primary)] px-4 py-2 rounded-md hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 font-medium;
 }
+
+/* Dark mode overrides for buttons */
+.dark .btn-secondary {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-secondary:hover {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-ghost {
+  background-color: var(--medflow-surface-dark);
+}
+
+.dark .btn-ghost:hover {
+  background-color: var(--medflow-surface-dark);
+}
+
 .input {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700;
+  @apply bg-medflow-surface/80 border border-white/20 text-medflow-text-primary placeholder-medflow-text-muted focus:border-medflow-accent focus:ring-2 focus:ring-medflow-accent/30 w-full rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none transition-all duration-200;
+  min-height: var(--touch-target-min);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-.textarea {
-  @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700;
+
+/* Mobile-first input styles */
+@media (max-width: 768px) {
+  .input {
+    @apply px-4 py-3 text-base;
+    min-height: 48px;
+  }
 }
+
+/* Modern input styles */
+.input-primary {
+  @apply w-full rounded-md border border-[var(--medflow-border)] bg-white px-3 py-2 text-sm shadow-sm focus:border-medflow-primary focus:outline-none focus:ring-2 focus:ring-medflow-primary transition-all duration-200;
+}
+
+.dark .input-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
+/* Modern textarea styles */
+.textarea-primary {
+  @apply w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+.dark .textarea-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
 .card {
-  @apply rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:bg-gray-900 dark:border-gray-800;
+  @apply bg-medflow-surface/80 backdrop-blur-sm border border-white/10 text-medflow-text-primary rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+
 .label {
-  @apply mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300;
+  margin-bottom: 0.25rem;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--medflow-text-secondary);
 }
+
+.dark .label {
+  color: var(--medflow-text-secondary);
+}
+
 .link {
-  @apply text-blue-600 hover:underline dark:text-blue-400;
+  @apply text-medflow-primary hover:underline hover:text-medflow-secondary transition-colors duration-200;
+}
+
+/* Modern gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-blue {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+}
+
+.gradient-bg-green {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.gradient-bg-purple {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+/* Glass morphism effect */
+.glass {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .glass {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
+}
+
+/* Modern animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Modern calendar styles */
+.calendar-grid {
+  @apply grid gap-1;
+}
+
+.calendar-day {
+  @apply relative p-2 text-center border border-[var(--medflow-border)] hover:bg-[var(--medflow-surface-elevated)] transition-colors duration-200 cursor-pointer;
+}
+
+.dark .calendar-day {
+  border-color: var(--medflow-border);
+}
+
+.dark .calendar-day:hover {
+  background-color: rgba(var(--medflow-brand-6), 0.5);
+}
+
+.calendar-day.today {
+  @apply bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700;
+}
+
+.calendar-day.selected {
+  @apply bg-blue-100 dark:bg-blue-900/50 border-blue-500 dark:border-blue-400;
+}
+
+.calendar-event {
+  @apply absolute inset-1 rounded-md p-1 text-xs text-white font-medium overflow-hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.calendar-event:hover {
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+/* Modern form styles */
+.form-group {
+  @apply space-y-2;
+}
+
+/* Form label styles */
+.form-label {
+  @apply mb-1 block text-sm font-medium text-[var(--medflow-text-secondary)];
+}
+
+.dark .form-label {
+  color: var(--medflow-text-secondary);
+}
+
+/* Form group styles */
+.form-group {
+  @apply space-y-2;
+}
+
+/* Form actions styles */
+.form-actions {
+  @apply flex items-center space-x-2 text-sm font-medium text-[var(--medflow-text-secondary)];
+}
+
+.dark .form-actions {
+  color: var(--medflow-text-secondary);
+}
+
+/* Form input styles */
+.form-input {
+  @apply w-full px-3 py-2 border border-[var(--medflow-border)] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.dark .form-input {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
+.form-input:focus {
+  @apply shadow-md;
+}
+
+/* Modern button styles */
+.btn-modern {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-modern:active {
+  transform: scale(0.98);
+}
+
+/* Status badges */
+.status-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-scheduled {
+  @apply bg-blue-500/25 text-blue-200 border-blue-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.status-completed {
+  @apply bg-green-500/25 text-green-200 border-green-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.status-no-show {
+  @apply bg-red-500/25 text-red-200 border-red-400/40;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full border-2 border-[var(--medflow-border)] border-t-blue-600;
+}
+
+/* Advanced Grid-Based Loader Animation - MedFlow Brand Compliant */
+.loader {
+  display: grid;
+  padding: 0;
+  background: transparent;
+  /* Smooth appearance for polished feel */
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+  /* Simple center positioning - let parent handle centering */
+  margin: 0 auto;
+  width: 120px;
+  height: 40px;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  height: 40px;
+  width: 120px;
+  background:
+    radial-gradient(35% 146% at 50% 159%, transparent 64%, #6F6280 66% 98%, transparent 101%) 0 0,
+    radial-gradient(35% 146% at 50% -59%, transparent 64%, #6F6280 66% 98%, transparent 101%) 100% 100%;
+  background-size: calc(200%/3) 50%;
+  background-repeat: repeat-x;
+  clip-path: inset(0 100% 0 0);
+  animation: l15 1.5s infinite linear;
+}
+.loader:after {
+  scale: -1 1;
+}
+@keyframes l15{
+  50% {clip-path: inset(0)}
+  to {clip-path: inset(0 0 0 100%)}
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Enhanced Loading Animation - MedFlow Brand */
+.loading-animation-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-animation-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(138, 122, 159, 0.1),
+    transparent
+  );
+  animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Loading Background Pulse */
+.loading-bg-pulse {
+  animation: loading-pulse 2s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+  0%, 100% {
+    background-color: rgba(138, 122, 159, 0.05);
+  }
+  50% {
+    background-color: rgba(138, 122, 159, 0.15);
+  }
+}
+
+/* Loading Text Fade */
+.loading-text-fade {
+  animation: loading-text-fade 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-text-fade {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* React Big Calendar tweak for dark mode */
 .rbc-calendar {
-  @apply bg-white dark:bg-gray-900;
+  background-color: white;
 }
+
+.dark .rbc-calendar {
+  background-color: var(--medflow-surface-dark);
+}
+
 .rbc-time-slot, .rbc-time-header {
-  @apply dark:border-gray-800;
+  border-color: transparent;
 }
+
+.dark .rbc-time-slot, .dark .rbc-time-header {
+  border-color: var(--medflow-border);
+}
+
 .rbc-today {
-  @apply bg-blue-50 dark:bg-blue-950/30;
+  background-color: rgb(239 246 255);
+}
+
+.dark .rbc-today {
+  background-color: rgba(30 58 138 / 0.3);
+}
+
+/* Modern card hover effects */
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Glass morphism cards */
+.card-glass {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .card-glass {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
+}
+
+/* Modern shadows */
+.shadow-modern {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-modern-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive text */
+.text-responsive {
+  @apply text-sm sm:text-base lg:text-lg;
+}
+
+/* Modern focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-medflow-primary focus:ring-offset-2;
+}
+
+/* Responsive grid utilities */
+.grid-responsive {
+  display: grid;
+  gap: var(--spacing-sm);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    gap: var(--spacing-lg);
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-responsive {
+    gap: var(--spacing-xl);
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Responsive container */
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-sm);
+  padding-right: var(--spacing-sm);
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    max-width: 640px;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: 1024px;
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-responsive {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container-responsive {
+    max-width: 1536px;
+  }
+}
+
+/* Mobile-first spacing utilities */
+.space-responsive {
+  gap: var(--spacing-sm);
+}
+
+@media (min-width: 640px) {
+  .space-responsive {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .space-responsive {
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Touch-friendly spacing */
+.touch-spacing > * + * {
+  margin-top: var(--touch-spacing-min);
+}
+
+@media (min-width: 640px) {
+  .touch-spacing > * + * {
+    margin-top: var(--spacing-sm);
+  }
+}
+
+/* Enhanced accessibility and contrast styles */
+.high-contrast {
+  filter: contrast(150%) brightness(110%);
+}
+
+.high-contrast * {
+  border-width: 2px !important;
+}
+
+/* High contrast text utilities */
+.text-high-contrast {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.text-high-contrast-secondary {
+  color: #F8FAFC !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.text-high-contrast-muted {
+  color: #E5E7EB !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Enhanced surface contrasts */
+.surface-high-contrast {
+  background-color: rgba(30, 36, 58, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(8px);
+}
+
+.surface-elevated-high-contrast {
+  background-color: rgba(45, 51, 73, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(12px);
+}
+
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for accessibility */
+.focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* High contrast focus styles */
+.high-contrast .focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+}
+
+/* Reduced motion focus styles */
+.reduced-motion .focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Large text support */
+@media (min-width: 768px) {
+  .text-large {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-large {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+
+/* n8n.io-inspired section styling */
+.section {
+  padding: 80px 10%;
+  transition: background 0.5s ease;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+button {
+  border-radius: 12px;
+  padding: 14px 28px;
+  background: var(--medflow-accent-gradient);
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+}
+
+/* Fade-in animation classes */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero title animation support */
+.hero-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced mobile responsiveness for n8n.io style */
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 5%;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.1;
+  }
+  
+  .fade-in {
+    transform: translateY(15px);
+  }
+  
+  /* Optimize animations for mobile */
+  button {
+    transform: none !important;
+  }
+  
+  button:active {
+    transform: scale(0.95) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 40px 4%;
+  }
+  
+  .hero-title {
+    font-size: 2rem !important;
+  }
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  button:hover {
+    transform: none;
+  }
+  
+  .fade-in:hover {
+    transform: translateY(0);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Modern card styles */
+.card-primary {
+  @apply bg-white rounded-xl shadow-lg border border-[var(--medflow-border)] p-6;
+}
+
+.dark .card-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+}
+
+/* Modern modal styles */
+.modal-backdrop {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .modal-backdrop {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
+}
+
+/* Modern select styles */
+.select-primary {
+  @apply bg-white rounded-lg border border-[var(--medflow-border)] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.dark .select-primary {
+  background-color: var(--medflow-surface-dark);
+  border-color: var(--medflow-border);
+  color: var(--medflow-text-primary);
+}
+
+/* Modern border styles */
+.border-primary {
+  @apply border-[var(--medflow-border)];
+}
+
+.dark .border-primary {
+  border-color: var(--medflow-border);
+}
+
+/* Modern backdrop styles */
+.backdrop-primary {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20;
+}
+
+.dark .backdrop-primary {
+  background-color: rgba(var(--medflow-brand-6), 0.8);
+  border-color: rgba(var(--medflow-border), 0.2);
 }

@@ -1,0 +1,283 @@
+/**
+ * Firebase Firestore Security Rules for MedFlow
+ * 
+ * Simplified rules for basic functionality
+ * 
+ * @author MedFlow Team
+ * @version 3.0
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Get authenticated user ID
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Check if user owns the resource
+    function isOwner(resourceUserId) {
+      return getUserId() == resourceUserId;
+    }
+    
+    // Check if user is ADMIN role
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+    
+    // Validate appointment data structure
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['patientName', 'dateTime', 'status', 'userId']) &&
+             data.userId is string &&
+             data.patientName is string &&
+             data.dateTime is timestamp &&
+             data.status in ['scheduled', 'completed', 'no_show', 'confirmed', 'declined'];
+    }
+    
+    // Validate patient report data structure
+    function isValidPatientReport(data) {
+      return data.keys().hasAll(['patientName', 'userId', 'status']) &&
+             data.userId is string &&
+             data.patientName is string &&
+             data.status in ['draft', 'final', 'archived', 'submitted', 'under_review', 'ready_for_submission'];
+    }
+    
+    // Validate createdBy field - must be current user or system
+    function isValidCreatedBy(data) {
+      return data.createdBy == getUserId() || data.createdBy == 'system';
+    }
+    
+    // ==========================================
+    // APPOINTMENTS MANAGEMENT
+    // ==========================================
+    
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      // Read access rules - users can read their own appointments, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create appointment rules - users can only create appointments for themselves
+      allow create: if isAuthenticated() && 
+                       request.data.userId == getUserId() &&
+                       // Validate required fields exist
+                       request.data.keys().hasAll(['patientName', 'dateTime', 'status']) &&
+                       // Validate userId is a string
+                       request.data.userId is string &&
+                       // Validate status is valid
+                       request.data.status in ['scheduled', 'completed', 'no_show', 'confirmed', 'declined'] &&
+                       // Allow createdBy to be set to current user or system
+                       (request.data.createdBy == getUserId() || request.data.createdBy == 'system');
+      
+      // Update appointment rules - users can update their own appointments, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        (resource.data.userId == getUserId() && request.data.userId == resource.data.userId) || isAdmin()
+      );
+      
+      // Delete appointment rules - users can delete their own appointments, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+    }
+    
+    // ==========================================
+    // USER MANAGEMENT
+    // ==========================================
+    
+    // Users collection - profile data
+    match /users/{userId} {
+      // Allow read access to own profile, ADMIN can read all profiles
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Allow create during registration
+      allow create: if isAuthenticated() && isOwner(userId);
+      
+      // Allow update of own profile, ADMIN can update any profile
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // No delete allowed
+      allow delete: if false;
+    }
+    
+    // ==========================================
+    // DOCUMENTS MANAGEMENT
+    // ==========================================
+    
+    // Documents collection
+    match /documents/{documentId} {
+      // Read access rules - users can read their own documents, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.uploaderId == getUserId() || isAdmin()
+      );
+      
+      // Create document rules
+      allow create: if isAuthenticated() && 
+                       request.data.uploaderId == getUserId();
+      
+      // Update document rules - users can update their own documents, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        resource.data.uploaderId == getUserId() || isAdmin()
+      );
+      
+      // Delete document rules - users can delete their own documents, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        resource.data.uploaderId == getUserId() || isAdmin()
+      );
+    }
+    
+    // ==========================================
+    // PATIENT REPORTS MANAGEMENT
+    // ==========================================
+    
+    // Patient reports collection - for medical reports with new fields
+    match /reports/{reportId} {
+      // Read access - users can read their own reports, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create reports - users can create reports for themselves
+      allow create: if isAuthenticated() && 
+                       request.data.userId == getUserId() &&
+                       isValidPatientReport(request.data) &&
+                       isValidCreatedBy(request.data);
+      
+      // Update reports - users can update their own reports, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        (resource.data.userId == getUserId() && request.data.userId == resource.data.userId) || isAdmin()
+      );
+      
+      // Delete reports - only draft reports can be deleted, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        (resource.data.userId == getUserId() && resource.data.status == 'draft') || isAdmin()
+      );
+    }
+    
+    // Patient reports collection (alternative name used by services)
+    match /patientReports/{reportId} {
+      // Read access - users can read their own reports, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create reports - users can create reports for themselves
+      allow create: if isAuthenticated() && 
+                       request.data.userId == getUserId() &&
+                       isValidPatientReport(request.data) &&
+                       isValidCreatedBy(request.data);
+      
+      // Update reports - users can update their own reports, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        (resource.data.userId == getUserId() && request.data.userId == resource.data.userId) || isAdmin()
+      );
+      
+      // Delete reports - only draft reports can be deleted, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        (resource.data.userId == getUserId() && resource.data.status == 'draft') || isAdmin()
+      );
+    }
+    
+    // ==========================================
+    // PATIENT FLAGGING SYSTEM
+    // ==========================================
+    
+    // Patient flags collection
+    match /patientFlags/{flagId} {
+      // Read access - users can read flags they created, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create flags - users can create flags
+      allow create: if isAuthenticated() && 
+                       request.data.userId == getUserId();
+      
+      // Update flags - users can update their own flags, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Delete flags - users can delete their own flags, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+    }
+    
+    // Doctor alerts collection
+    match /doctorAlerts/{alertId} {
+      // Read access - users can read alerts for themselves, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create alerts - system can create alerts
+      allow create: if isAuthenticated() && 
+                       request.data.userId == getUserId();
+      
+      // Update alerts - users can update their own alerts, ADMIN can update any
+      allow update: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Delete alerts - users can delete their own alerts, ADMIN can delete any
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+    }
+    
+    // ==========================================
+    // MONTHLY REPORTS & ANALYTICS
+    // ==========================================
+    
+    // Monthly report summaries collection
+    match /monthlySummaries/{summaryId} {
+      // Read access - users can read their own summaries, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        summaryId.matches('.*_' + getUserId() + '.*') || isAdmin()
+      );
+      
+      // Create/update summaries - users can manage their own summaries, ADMIN can manage all
+      allow write: if isAuthenticated() && (
+        summaryId.matches('.*_' + getUserId() + '.*') || isAdmin()
+      );
+    }
+    
+    // Monthly reports collection (used by monthlyReports service)
+    match /monthlyReports/{reportId} {
+      // Read access - users can read their own monthly reports, ADMIN can read all
+      allow read: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+      
+      // Create/update monthly reports - users can manage their own reports, ADMIN can manage all
+      allow write: if isAuthenticated() && (
+        resource.data.userId == getUserId() || isAdmin()
+      );
+    }
+    
+    // Report templates collection
+    match /templates/{templateId} {
+      // Read access - all authenticated users can read public templates
+      allow read: if isAuthenticated();
+      
+      // Create/update templates - only system, admin users, or template creator
+      allow write: if isAuthenticated() && (
+        request.data.isPublic == true || 
+        request.data.createdBy == getUserId() || 
+        isAdmin()
+      );
+    }
+  }
+}
