@@ -39,6 +39,12 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { validateCNP, extractBirthDateFromCNP } from '../../../utils/cnpValidation'
 import { COUNTRIES, DEFAULT_COUNTRY } from '../../../utils/phoneValidation'
 
+// Phone number input library
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
+import { isValidPhoneNumber, getCountries, getCountryCallingCode } from 'react-phone-number-input'
+import SimpleCountrySelect from '../../../../simple-country-select'
+
 // Types for calendar events
 export interface CalendarEvent {
   id: number                    // Display ID (preserved for backward compatibility)
@@ -859,7 +865,6 @@ export function SchedulingCalendar() {
     setNewEventCNP('')
     setNewEventEmail('')
     setNewEventPhone('')
-    setNewEventCountryCode('RO')
   }
 
   const createEvent = async () => {
@@ -870,6 +875,12 @@ export function SchedulingCalendar() {
     // Check if user is authenticated (PRESERVED)
     if (!auth.currentUser) {
       alert('Trebuie să fiți autentificat pentru a crea o programare')
+      return
+    }
+
+    // Validate phone number if provided (NEW)
+    if (newEventPhone && !isValidPhoneNumber(newEventPhone)) {
+      alert('Numărul de telefon introdus nu este valid')
       return
     }
     
@@ -886,7 +897,7 @@ export function SchedulingCalendar() {
       // Extract birth date from CNP if provided (PRESERVED LOGIC)
       const birthDate = newEventCNP ? extractBirthDateFromCNP(newEventCNP) : null
 
-      // Format phone number with country code if provided (PRESERVED LOGIC)
+      // Format phone number with country code
       const formattedPhone = newEventPhone ? `${newEventCountryCode}${newEventPhone}` : undefined
 
       // Create appointment data for Firebase (PRESERVED LOGIC)
@@ -2409,7 +2420,7 @@ export function SchedulingCalendar() {
                     type="text"
                     value={newEventTitle}
                     onChange={(e) => setNewEventTitle(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
                     placeholder="Ex: Ion Popescu"
                   />
                 </div>
@@ -2422,7 +2433,7 @@ export function SchedulingCalendar() {
                     type="text"
                     value={newEventCNP}
                     onChange={(e) => setNewEventCNP(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
                     placeholder="1234567890123"
                     maxLength={13}
                   />
@@ -2436,7 +2447,7 @@ export function SchedulingCalendar() {
                     type="date"
                     value={newEventDate}
                     onChange={(e) => setNewEventDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
                     min={new Date().toISOString().split('T')[0]}
                   />
                 </div>
@@ -2449,16 +2460,23 @@ export function SchedulingCalendar() {
                       id="start-time-input"
                       value={newEventStartTime}
                       onChange={(e) => setNewEventStartTime(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
+                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF] time-select appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 8px center',
+                        backgroundSize: '12px',
+                        paddingRight: '24px'
+                      }}
                     >
                       <option value="">Selectați ora</option>
-                      {Array.from({ length: 13 }, (_, i) => i + 8).map(hour => [
+                      {Array.from({ length: 15 }, (_, i) => i + 8).map(hour => [
                         <option key={`${hour}-00`} value={`${hour.toString().padStart(2, '0')}:00`}>
                           {hour.toString().padStart(2, '0')}:00
                         </option>,
-                        <option key={`${hour}-30`} value={`${hour.toString().padStart(2, '0')}:30`}>
+                        ...(hour < 22 ? [<option key={`${hour}-30`} value={`${hour.toString().padStart(2, '0')}:30`}>
                           {hour.toString().padStart(2, '0')}:30
-                        </option>
+                        </option>] : [])
                       ]).flat()}
                     </select>
                   </div>
@@ -2468,15 +2486,22 @@ export function SchedulingCalendar() {
                       id="duration-input"
                       value={newEventDuration}
                       onChange={(e) => setNewEventDuration(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF] time-select"
+                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF] time-select appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 8px center',
+                        backgroundSize: '12px',
+                        paddingRight: '24px'
+                      }}
                     >
                       <option value="">Selectați durata</option>
                       <option value="15">15 Min</option>
                       <option value="20">20 Min</option>
                       <option value="30">30 Min</option>
                       <option value="45">45 Min</option>
-                      <option value="60">1 Ora</option>
-                      <option value="90">1 Ora 30 Min</option>
+                      <option value="60">1 Orǎ</option>
+                      <option value="90">1 Orǎ 30 Min</option>
                     </select>
                   </div>
                 </div>
@@ -2490,30 +2515,23 @@ export function SchedulingCalendar() {
                       type="email"
                       value={newEventEmail}
                       onChange={(e) => setNewEventEmail(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                      className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
                       placeholder="exemplu@email.com"
                     />
                   </div>
                   <div>
                     <label htmlFor="phone-input" className="block text-white text-sm font-medium mb-2">Telefon pacient (pentru SMS)</label>
-                    <div className="flex gap-2">
-                      <select
+                    <div className="flex gap-1 w-full">
+                      <SimpleCountrySelect
                         value={newEventCountryCode}
-                        onChange={(e) => setNewEventCountryCode(e.target.value)}
-                        className="px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                      >
-                        {COUNTRIES.map(country => (
-                          <option key={country.code} value={country.code}>
-                            {country.flag} {country.dialCode}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(value) => setNewEventCountryCode(value || 'RO')}
+                      />
                       <input
                         id="phone-input"
                         type="tel"
                         value={newEventPhone}
                         onChange={(e) => setNewEventPhone(e.target.value)}
-                        className="flex-1 px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
+                        className="flex-1 px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
                         placeholder="7XX XXX XXX"
                       />
                     </div>
@@ -2527,26 +2545,27 @@ export function SchedulingCalendar() {
                     id="description-input"
                     value={newEventDescription}
                     onChange={(e) => setNewEventDescription(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#7A48BF]"
-                    rows={2}
+                    className="w-full px-3 py-2 bg-[#100B1A] border border-[#7A48BF]/30 rounded-md text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#7A48BF]"
+                    rows={1}
                     placeholder="Introduceți descrierea programării"
                   />
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-between items-center">
-                <button
-                  onClick={() => setShowCreateEvent(false)}
-                  className="px-4 py-2 text-white/70 hover:text-white transition-colors"
-                >
-                  Anulează
-                </button>
-                <button 
-                  onClick={createEvent}
-                  className="px-4 py-2 bg-[#7A48BF] hover:bg-[#804AC8] text-white rounded-md transition-colors"
-                >
-                  Creează Programarea
-                </button>
+                
+                {/* Buttons moved inside scrollable container */}
+                <div className="mt-6 flex justify-between items-center">
+                  <button
+                    onClick={() => setShowCreateEvent(false)}
+                    className="px-4 py-2 text-white/70 hover:text-white transition-colors"
+                  >
+                    Anulează
+                  </button>
+                  <button 
+                    onClick={createEvent}
+                    className="px-4 py-2 bg-[#7A48BF] hover:bg-[#804AC8] text-white rounded-md transition-colors"
+                  >
+                    Creează Programarea
+                  </button>
+                </div>
               </div>
             </div>
           </div>

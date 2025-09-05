@@ -154,3 +154,4 @@ console.log('💡 If you get Firebase instances working, the tests will run auto
 console.log('💡 Check the console above for instructions on how to access Firebase.')
 
 
+
